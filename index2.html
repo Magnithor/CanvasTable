@@ -1,0 +1,80 @@
+﻿<!DOCTYPE html lang="en">
+<html>
+<head>
+    <link href="style.css" rel="stylesheet" />
+    <meta charset="utf-8" />
+    <title>CanvasTable</title>
+    <script src="data.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="Description" content="Author: Magni Þór Birgisson">
+</head>
+<body>
+    <table id="table"> </table>
+    <script type="text/javascript">
+        const col = [
+            {
+                header: "Id",
+                field: "__rownum__",
+                width: 80,
+                align: "center"
+            },
+            {
+                header: "Country",
+                field: "country",
+                width: 100
+            },
+            {
+                header: "Id",
+                field: "__rownum__",
+                width: 30,
+                align: "right"
+            },
+            {
+                header: "Name",
+                field: "name",
+                width: 200
+            },
+            {
+                header: "Subcountry",
+                field: "subcountry",
+                width: 200
+            },
+            {
+                header: "geonameid",
+                field: "geonameid",
+                width: 100,
+                align: "right"
+            }
+        ];
+        var d,tr, td, table = document.getElementById("table");
+        tr = document.createElement('tr');
+        for (var i = 0; i < col.length;i++) {
+            td = document.createElement('td');
+            td.style.width = col[i].width + 'px';
+            td.style.wordWrap = "none";
+            td.innerText = col[i].header;
+            tr.appendChild(td);
+        }
+        table.appendChild(tr);
+        for (var r = 0; r < data.length; r++) {
+        tr = document.createElement('tr');
+            for (var i = 0; i < col.length;i++) {
+            td = document.createElement('td');
+            switch (col[i].field) {
+                case "__rownum__":
+                    d = r;
+                    break;
+                default:
+                    d = data[r][col[i].field];
+                    break;
+            }
+            td.innerText = d;
+            td.style.width = col[i].width + 'px';
+            tr.appendChild(td);
+        }
+        table.appendChild(tr);
+
+        }
+    </script>
+</body>
+</html>

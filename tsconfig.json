@@ -1,0 +1,14 @@
+﻿{
+    "compilerOptions": {
+        "allowUnreachableCode": false,
+        "strictNullChecks": true,
+        "outDir": "./dist/",
+        "noImplicitAny": true,
+        "module": "amd",
+        "target": "es2015",
+        "jsx": "react",
+        "allowJs": true,
+        "sourceMap": true,
+        "lib": ["es5", "es6", "dom", "webworker"]
+    }
+}
