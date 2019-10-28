@@ -3,6 +3,8 @@ import { CircularBuffer } from '../node_modules/mthb-circular-buffer/lib/Circula
 import { CanvasContext2D } from "./CanvasContext2D";
 import { CanvasTableTouchEvent } from './CanvasTableTouchEvent';
 
+declare function setTimeout(callback: (...args: any[]) => void, ms: number, ...args: any[]): number;
+
 interface MouseMove {
     x: number;
     y: number;
