@@ -1,13 +1,11 @@
-﻿{
+{
     "compilerOptions": {
-        "allowUnreachableCode": false,
-        "strictNullChecks": true,
-        "outDir": "./dist/",
-        "noImplicitAny": true,
-        "module": "commonjs",
-        "target": "es2015",        
-        "allowJs": true,
-        "sourceMap": true,
-        "lib": ["es5", "es6", "dom", "webworker"]
-    }
-}
+      "target": "es2015",
+      "module": "commonjs",
+      "declaration": true,
+      "outDir": "./share",
+      "strict": true
+    },
+    "include": ["share"],
+    "exclude": ["node_modules", "**/__tests__/*"]
+  }

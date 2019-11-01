@@ -1,0 +1,13 @@
+﻿{
+    "compilerOptions": {
+        "allowUnreachableCode": false,
+        "strictNullChecks": true,
+        "outDir": "./dist/",
+        "noImplicitAny": true,
+        "module": "commonjs",
+        "target": "es2015",        
+        "allowJs": true,
+        "sourceMap": true,
+        "lib": ["es5", "es6", "dom", "webworker"]
+    }
+}
