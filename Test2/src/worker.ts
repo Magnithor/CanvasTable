@@ -1,7 +1,7 @@
-import { OffscreenCanvasTableWorker } from '../OffscreenCanvasTableWorker/src/OffscreenCanvasTableWorker';
-import { CanvasTableColumnConf, Align, CustomCanvasTable, Sort } from '../share/CustomCanvasTable';
 
-function customDraw(canvasTable: CustomCanvasTable, context: CanvasRenderingContext2D, rowIndex: number, col: CanvasTableColumnConf, left: number, top: number, right: number, bottom: number, width: number, height: number, r: number, dataValue: any, row: any, data: any): void {
+import { OffscreenCanvasTableWorker, CanvasTableColumnConf, Align, CustomCanvasTable, Sort, CanvasContext2D } from 'mthb-offscreen-canvas-table-worker';
+
+function customDraw(canvasTable: CustomCanvasTable, context: CanvasContext2D, rowIndex: number, col: CanvasTableColumnConf, left: number, top: number, right: number, bottom: number, width: number, height: number, r: number, dataValue: any, row: any, data: any): void {
     context.fillStyle = "lightgreen";
     context.fillRect(left, top, width, height);
     context.strokeStyle = "red";

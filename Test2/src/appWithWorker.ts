@@ -1,5 +1,5 @@
 
-import {OffscreenCanvasTable} from '../OffscreenCanvasTable/src/OffscreenCanvasTable';
+import {OffscreenCanvasTable} from 'mthb-offscreen-canvas-table';
 
 const worker = new Worker('dist/worker.js');
 const canvasTable = new OffscreenCanvasTable(1, worker, "canvas");
