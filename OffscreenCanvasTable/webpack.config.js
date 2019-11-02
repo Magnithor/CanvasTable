@@ -9,7 +9,7 @@ module.exports = {
 	},
 
 	output: {
-		filename: 'CanvasTable.js',
+		filename: 'OffscreenCanvasTable.js',
 		path: path.resolve(__dirname, './lib'),
 		libraryTarget: 'commonjs2',
 	},    

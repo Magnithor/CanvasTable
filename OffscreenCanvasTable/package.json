@@ -20,7 +20,8 @@
     "webworker"
   ],
   "files": [
-    "lib/OffscreenCanvasTable.js", "lib/OffscreenCanvasTable.d.ts"
+    "lib/OffscreenCanvasTable.js",
+    "lib/OffscreenCanvasTable.d.ts"
   ],
   "bugs": {
     "url": "https://github.com/Magnithor/CanvasTable/issues"
@@ -36,6 +37,5 @@
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.9"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }
