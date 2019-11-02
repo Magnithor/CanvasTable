@@ -1,9 +1,9 @@
 {
-  "name": "mthb-canvas-table",
-  "version": "0.0.6",
-  "description": "Canvas Table",
-  "main": "lib/CanvasTable.js",
-  "types": "lib/CanvasTable.d.ts",
+  "name": "mthb-offscreen-canvas-table",
+  "version": "0.0.5",
+  "description": "Canvas Table Webworker offscreencanvas",
+  "main": "lib/OffscreenCanvasTable.js",
+  "types": "lib/OffscreenCanvasTable.d.ts",
   "scripts": {
     "build": "webpack",
     "prepare": "npm run build"
@@ -15,10 +15,12 @@
   "keywords": [
     "canvastable",
     "canvas",
-    "table"
+    "table",
+    "offscreencanvas",
+    "webworker"
   ],
   "files": [
-    "lib/CanvasTable.js", "lib/CanvasTable.d.ts"
+    "lib/OffscreenCanvasTable.js", "lib/OffscreenCanvasTable.d.ts"
   ],
   "bugs": {
     "url": "https://github.com/Magnithor/CanvasTable/issues"

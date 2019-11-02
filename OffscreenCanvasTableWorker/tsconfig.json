@@ -4,8 +4,7 @@
     "module": "commonjs",
     "declaration": true,
     "outDir": "./lib",
-    "strict": true,
-    "lib": ["es5", "es6", "dom", "webworker"]
+    "strict": true
   },
   "include": ["../share", "src"],
   "exclude": ["node_modules", "**/__tests__/*"]
