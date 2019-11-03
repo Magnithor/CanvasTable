@@ -59,7 +59,7 @@ const col: CanvasTableColumnConf[] = [
 ];
 const offscreenCanvasTableWorker = new OffscreenCanvasTableWorker(1, col);
 offscreenCanvasTableWorker.setSort([{ col: col[2], sort: Sort.ascending }, {col:col[5], sort:Sort.ascending}]);
-offscreenCanvasTableWorker.setGroupBy(["country", "subcountry"]);
+
 
 
 const httpRequest = new XMLHttpRequest();

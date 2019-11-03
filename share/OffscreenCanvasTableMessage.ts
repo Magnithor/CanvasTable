@@ -3,7 +3,7 @@ import { CanvasTableTouchEvent } from "./CanvasTableTouchEvent";
 export enum OffscreenCanvasMesssageType { 
     create = 0, 
     resize = 1,
-    expendedAll = 2, collapseAll = 3,
+    expendedAll = 2, collapseAll = 3, setGroupBy = 4,
     scroll = 10, 
     mouseDown = 20, mouseMove = 21, mouseUp = 22, mouseLeave = 23, mouseMoveExtended = 24, mouseUpExtended = 25,
     TouchStart = 30, TouchMove = 31, TouchEnd = 32,
@@ -69,12 +69,17 @@ interface OffscreenCanvasMesssageTouch extends OffscreenCanvasMesssageParnet {
     offsetTop: number
 }
 
+interface OffscreenCanvasMessageGroupBy extends OffscreenCanvasMesssageParnet {
+    type: OffscreenCanvasMesssageType.setGroupBy,
+    groupBy?: string[]
+}
 
 export type OffscreenCanvasMesssage = 
       OffscreenCanvasMessageScroll 
     | OffscreenCanvasMessageCreate
     | OffscreenCanvasMessageResize
     | OffscreenCanvasMessageFunctions
+    | OffscreenCanvasMessageGroupBy
     | OffscreenCanvasMessageMouse
     | OffscreenCanvasMessageMouseLeave
     | OffscreenCanvasMessageKeyDown

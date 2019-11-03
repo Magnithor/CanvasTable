@@ -8,6 +8,7 @@
         "target": "es2015",        
         "allowJs": true,
         "sourceMap": true,
+        
         "lib": ["es5", "es6", "dom", "webworker"]
     }
 }

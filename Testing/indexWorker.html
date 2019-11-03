@@ -9,8 +9,9 @@
 </head>
 <body>
     <div>
-        <button onclick="canvasTable.expendedAll()">expendedAll</button>
-        <button onclick="canvasTable.collapseAll()">collapseAll</button>
+        <button id="group" onclick="group()">Group</button>
+        <button id="expendedAll" onclick="canvasTable.expendedAll()">expendedAll</button>
+        <button id="collapseAll" onclick="canvasTable.collapseAll()">collapseAll</button>
     </div>
     <canvas id="canvas" tabindex="0"> </canvas>
     <script type="text/javascript" src="dist/appWithWorker.js"></script>

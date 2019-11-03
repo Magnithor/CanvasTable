@@ -47,7 +47,13 @@ export class OffscreenCanvasTable {
             mthbCanvasTable: this.offscreenCanvasTableId, 
             type: OffscreenCanvasMesssageType.collapseAll
         });
-
+    }
+    public setGroupBy(col?:string[]) {
+        this.postMessage({
+            mthbCanvasTable: this.offscreenCanvasTableId, 
+            type: OffscreenCanvasMesssageType.setGroupBy,
+            groupBy: col
+        });
     }
     private resize() {
         this.postMessage({
