@@ -1,6 +1,6 @@
 import { Drawable } from "./Drawable";
-import { ScrollView } from "./ScrollView";
-import { CanvasContext2D } from "./CanvasContext2D";
+import { ScrollView, ScrollViewConfig } from "./ScrollView";
+import { CanvasContext2D, CanvasColor } from "./CanvasContext2D";
 import { CanvasTableTouchEvent } from "./CanvasTableTouchEvent";
 import { Align, RenderValue, CustomData, CanvasTableColumnConf, CustomFilter, CustomSort, CanvasTableColumnSort } from "./CanvasTableColum";
 import { IndexType, ItemIndexType, GroupItem, GroupItems, Index } from "./CustomCanvasIndex";
@@ -9,7 +9,26 @@ export interface DrawConfig {
 }
 
 declare function setTimeout(callback: (...args: any[]) => void, ms: number, ...args: any[]): number;
+export interface CanvasTableConfig {
+    scrollView?: ScrollViewConfig,
+    font?: string,
+    fontSize?: number,
+    fontColor?: CanvasColor,
+    lineColor?:  CanvasColor,
+    howerBackgroundColor ?: CanvasColor,
+    sepraBackgroundColor?: CanvasColor
+}
 
+interface CanvasTableConf {
+    scrollView?: ScrollViewConfig,
+    font: string
+    fontSize: number,
+    fontColor: CanvasColor,
+    backgroundColor: CanvasColor,
+    lineColor: CanvasColor,
+    howerBackgroundColor:CanvasColor,
+    sepraBackgroundColor: CanvasColor
+}
 
 interface CanvasTableColumn {
     header: string;
@@ -35,7 +54,6 @@ export abstract class CustomCanvasTable implements Drawable {
 
     protected scrollView?: ScrollView;
 
-    protected font = "arial";
     protected cellHeight = 20;
     protected dataIndex?: IndexType = undefined;
     private column: CanvasTableColumn[] = [];
@@ -49,6 +67,19 @@ export abstract class CustomCanvasTable implements Drawable {
 
     private canvasHeight: number = 0;
     private canvasWidth: number = 0;
+    protected config: CanvasTableConf;
+    constructor (config: CanvasTableConfig | undefined) {
+        this.config = {
+             ...{
+                font: "arial",
+                fontSize: 14,
+                fontColor: "black",
+                lineColor: "black",
+                backgroundColor: "white",
+                howerBackgroundColor: "#DCDCDC",
+                sepraBackgroundColor: '#ECECEC'
+            }, ...config };
+    }
 
     public isPlanToRedraw(): boolean {
         if (!this.requestAnimationFrame) {
@@ -542,7 +573,7 @@ export abstract class CustomCanvasTable implements Drawable {
             this.calcColum();
         }
         if (this.needToCalcFont) {
-            this.context.font = 14 * this.r + "px " + this.font;
+            this.context.font = this.config.fontSize * this.r + "px " + this.config.font;
             this.minFontWidth = this.context.measureText('i').width;
             this.maxFontWidth = this.context.measureText('Æ').width;    
         }
@@ -563,9 +594,9 @@ export abstract class CustomCanvasTable implements Drawable {
         if (drawConf === undefined) {
             this.context.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
         }
-        this.context.font = 14 * this.r + "px " + this.font;
-        this.context.fillStyle = 'black';
-        this.context.strokeStyle = 'black';
+        this.context.font = this.config.fontSize * this.r + "px " + this.config.font;
+        this.context.fillStyle = this.config.fontColor;
+        this.context.strokeStyle = this.config.lineColor;
         const colStart  = 0;
         const colEnd  = this.column.length;
 
@@ -656,7 +687,7 @@ export abstract class CustomCanvasTable implements Drawable {
                         pos += i * height;
                     }
                     if (drawConf === undefined) {
-                        this.context.strokeStyle = 'black';
+                        this.context.strokeStyle = this.config.lineColor;
                         this.context.beginPath();            
                         this.context.moveTo(0, pos+ 4*this.r+1 -height);
                         this.context.lineTo(this.column[this.column.length-1].leftPos + this.column[this.column.length-1].width*this.r, pos+ 4*this.r+1-height);
@@ -772,9 +803,9 @@ export abstract class CustomCanvasTable implements Drawable {
             }
 
             if (this.overRowValue === indexId) {
-                this.context.fillStyle = '#DCDCDC';
+                this.context.fillStyle = this.config.howerBackgroundColor;
             } else {
-                this.context.fillStyle = i % 2 === 0 ?  '#ECECEC' : 'white' ;
+                this.context.fillStyle = i % 2 === 0 ?  this.config.sepraBackgroundColor : this.config.backgroundColor ;
             }
 
             if (needClip) {
@@ -783,12 +814,12 @@ export abstract class CustomCanvasTable implements Drawable {
                 this.context.beginPath();
                 this.context.rect( -this.scrollView.posX + colItem.leftPos + offsetLeft, pos - height, colItem.width * this.r - offsetLeft * 2, height);
                 this.context.clip();
-                this.context.fillStyle = 'black';
+                this.context.fillStyle = this.config.fontColor;
                 this.context.fillText(data,  -this.scrollView.posX + x, pos);
                 this.context.restore();
             } else {
                 this.context.fillRect( -this.scrollView.posX + colItem.leftPos + 1, pos - height+4*this.r+1, colItem.width * this.r - 1 * 2, height-3);
-                this.context.fillStyle = 'black';
+                this.context.fillStyle = this.config.fontColor;
                 this.context.fillText(data,  -this.scrollView.posX + x, pos);
             }
 
@@ -805,5 +836,4 @@ export abstract class CustomCanvasTable implements Drawable {
             this.context.stroke();
         }
     }
-
 }

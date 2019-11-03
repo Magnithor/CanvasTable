@@ -15,3 +15,5 @@ export interface CanvasContext2D extends
     CanvasTextDrawingStyles, 
     CanvasPath
 {};
+
+export type CanvasColor = string;// | CanvasGradient | CanvasPattern;

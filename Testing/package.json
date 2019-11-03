@@ -19,7 +19,9 @@
     "offscreencanvas",
     "webworker"
   ],
-  "author": { "name": "Magni Þór Birgisson" },
+  "author": {
+    "name": "Magni Þór Birgisson"
+  },
   "license": "MIT",
   "homepage": "https://github.com/Magnithor/CanvasTable/blob/master/README.md",
   "devDependencies": {

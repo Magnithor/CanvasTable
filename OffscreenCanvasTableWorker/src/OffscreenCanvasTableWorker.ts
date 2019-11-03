@@ -1,4 +1,4 @@
-import { CustomCanvasTable } from "../../share/CustomCanvasTable";
+import { CustomCanvasTable, CanvasTableConfig } from "../../share/CustomCanvasTable";
 import { ScrollView } from "../../share/ScrollView";
 import { OffscreenCanvasMesssage, OffscreenCanvasMesssageType } from "../../share/OffscreenCanvasTableMessage";
 import { CanvasTableColumnConf } from "../../share/CanvasTableColum";
@@ -24,8 +24,8 @@ export class OffscreenCanvasTableWorker extends CustomCanvasTable {
     private id: number;
     private canvas?: OffscreenCanvas;
 
-    constructor (offscreenCanvasTableId: number, col: CanvasTableColumnConf[]){
-        super();
+    constructor (offscreenCanvasTableId: number, col: CanvasTableColumnConf[], config?: CanvasTableConfig){
+        super(config);
         this.id = offscreenCanvasTableId;
         this.UpdateColumns(col);
     }
@@ -39,7 +39,7 @@ export class OffscreenCanvasTableWorker extends CustomCanvasTable {
                 this.setR(data.r);
                 const context = this.canvas.getContext('2d');
                 if (context === null) { return; }
-                this.scrollView = new ScrollView(context, this, this.askForExtentedMouseMoveAndMaouseUp, this.askForNormalMouseMoveAndMaouseUp);
+                this.scrollView = new ScrollView(context, this, this.config ? this.config.scrollView : undefined, this.askForExtentedMouseMoveAndMaouseUp, this.askForNormalMouseMoveAndMaouseUp);
 
                 this.context = context; 
                 this.doReize(data.width, data.height);                   

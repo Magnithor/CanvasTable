@@ -1,13 +1,13 @@
 ﻿import { ScrollView } from './../../share/ScrollView';
-import { CustomCanvasTable } from './../../share/CustomCanvasTable';
+import { CustomCanvasTable, CanvasTableConfig } from './../../share/CustomCanvasTable';
 import { TouchEventToCanvasTableTouchEvent } from './../../share/CanvasTableTouchEvent';
 import { CanvasTableColumnConf } from '../../share/CanvasTableColum';
 
 export class CanvasTable extends CustomCanvasTable {
     private canvas: HTMLCanvasElement;
    
-    constructor(htmlId: string, data: any[], col: CanvasTableColumnConf[]) {
-        super();
+    constructor(htmlId: string, data: any[], col: CanvasTableColumnConf[], config?: CanvasTableConfig) {
+        super(config);
         this.data = data;
         this.canvas = <HTMLCanvasElement>document.getElementById(htmlId);
         const context = this.canvas.getContext("2d");
@@ -15,7 +15,8 @@ export class CanvasTable extends CustomCanvasTable {
         this.setR(window.devicePixelRatio);
         this.doReize(this.canvas.clientWidth, this.canvas.clientHeight);
         this.context = context;
-        this.scrollView = new ScrollView(this.context, this, this.askForExtentedMouseMoveAndMaouseUp, this.askForNormalMouseMoveAndMaouseUp);
+        
+        this.scrollView = new ScrollView(this.context, this, config ? config.scrollView : undefined, this.askForExtentedMouseMoveAndMaouseUp, this.askForNormalMouseMoveAndMaouseUp);
         this.calcIndex();
         
         this.canvas.addEventListener("wheel", this.canvasWheel);
