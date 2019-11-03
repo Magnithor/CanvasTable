@@ -2,53 +2,14 @@ import { Drawable } from "./Drawable";
 import { ScrollView } from "./ScrollView";
 import { CanvasContext2D } from "./CanvasContext2D";
 import { CanvasTableTouchEvent } from "./CanvasTableTouchEvent";
+import { Align, RenderValue, CustomData, CanvasTableColumnConf, CustomFilter, CustomSort, CanvasTableColumnSort } from "./CanvasTableColum";
+import { IndexType, ItemIndexType, GroupItem, GroupItems, Index } from "./CustomCanvasIndex";
 export interface DrawConfig {
     drawOnly?: number[]
 }
 
 declare function setTimeout(callback: (...args: any[]) => void, ms: number, ...args: any[]): number;
 
-type CustomData = (canvasTable: CustomCanvasTable, dataValue: any, row: any, data: any, rowIndex: number, col: CanvasTableColumnConf) => string;
-type RenderValue = (canvasTable: CustomCanvasTable, context: CanvasContext2D, rowIndex: number, col: CanvasTableColumnConf, left: number, top: number, right: number, bottom: number, width: number, height: number, r: number, dataValue: any, row: any, data: any) => void;
-export type CustomFilter = (data: any, row: any, col: CanvasTableColumnConf[]) => boolean;
-export type CustomSort = (data: any, rowA: any, rowB: any) => number;
-
-
-export interface CanvasTableColumnConf {
-    header: string;
-    field: string;
-    width?: number;
-    align?: Align;
-    visible?: boolean;
-    renderer?: RenderValue;
-    customData?: CustomData;
-}
-
-export interface CanvasTableColumnSort {
-    col: CanvasTableColumnConf,
-    sort: Sort
-}
-
-
-export enum Align { left, center, right }
-export enum Sort { ascending = 1, descending = -1 }
-
-export enum ItemIndexType { GroupItems, Index }
-export interface GroupItems {
-    type: ItemIndexType.GroupItems,
-    list: GroupItem[]
-}
-
-export interface GroupItem {
-    caption: string,
-    child: (GroupItems|Index),
-    isExpended: boolean
-}
-export interface Index {
-    type: ItemIndexType.Index,
-    list: number[]
-}
-export type IndexType = Index | GroupItems;
 
 interface CanvasTableColumn {
     header: string;

@@ -1,6 +1,7 @@
-import { CustomCanvasTable, CanvasTableColumnConf } from "../../share/CustomCanvasTable";
+import { CustomCanvasTable } from "../../share/CustomCanvasTable";
 import { ScrollView } from "../../share/ScrollView";
 import { OffscreenCanvasMesssage, OffscreenCanvasMesssageType } from "../../share/OffscreenCanvasTableMessage";
+import { CanvasTableColumnConf } from "../../share/CanvasTableColum";
 
 export class OffscreenCanvasTableWorker extends CustomCanvasTable {
     protected drawCanvas(): void {

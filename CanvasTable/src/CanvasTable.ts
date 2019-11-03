@@ -1,9 +1,7 @@
 ﻿import { ScrollView } from './../../share/ScrollView';
-import { CustomCanvasTable, DrawConfig, CanvasTableColumnConf,
-    CustomFilter, CustomSort, CanvasTableColumnSort,
-    Align, ItemIndexType, GroupItems,
-    GroupItem, Index} from './../../share/CustomCanvasTable';
+import { CustomCanvasTable } from './../../share/CustomCanvasTable';
 import { TouchEventToCanvasTableTouchEvent } from './../../share/CanvasTableTouchEvent';
+import { CanvasTableColumnConf } from '../../share/CanvasTableColum';
 
 export class CanvasTable extends CustomCanvasTable {
     private canvas: HTMLCanvasElement;

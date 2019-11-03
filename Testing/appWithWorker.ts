@@ -1,4 +1,3 @@
-
 import {OffscreenCanvasTable} from '../OffscreenCanvasTable/src/OffscreenCanvasTable';
 
 const worker = new Worker('dist/worker.js');
