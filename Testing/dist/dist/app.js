@@ -100,8 +100,8 @@ const ScrollView_1 = __webpack_require__(/*! ./../../share/ScrollView */ "../sha
 const CustomCanvasTable_1 = __webpack_require__(/*! ./../../share/CustomCanvasTable */ "../share/CustomCanvasTable.ts");
 const CanvasTableTouchEvent_1 = __webpack_require__(/*! ./../../share/CanvasTableTouchEvent */ "../share/CanvasTableTouchEvent.ts");
 class CanvasTable extends CustomCanvasTable_1.CustomCanvasTable {
-    constructor(htmlId, data, col) {
-        super();
+    constructor(htmlId, data, col, config) {
+        super(config);
         this.canvasWheel = (e) => {
             e.preventDefault();
             this.wheel(e.deltaMode, e.deltaX, e.deltaY);
@@ -155,7 +155,7 @@ class CanvasTable extends CustomCanvasTable_1.CustomCanvasTable {
         this.setR(window.devicePixelRatio);
         this.doReize(this.canvas.clientWidth, this.canvas.clientHeight);
         this.context = context;
-        this.scrollView = new ScrollView_1.ScrollView(this.context, this, this.askForExtentedMouseMoveAndMaouseUp, this.askForNormalMouseMoveAndMaouseUp);
+        this.scrollView = new ScrollView_1.ScrollView(this.context, this, config ? config.scrollView : undefined, this.askForExtentedMouseMoveAndMaouseUp, this.askForNormalMouseMoveAndMaouseUp);
         this.calcIndex();
         this.canvas.addEventListener("wheel", this.canvasWheel);
         this.canvas.addEventListener("mousedown", this.canvasMouseDown);
@@ -196,6 +196,31 @@ class CanvasTable extends CustomCanvasTable_1.CustomCanvasTable {
     }
 }
 exports.CanvasTable = CanvasTable;
+
+
+/***/ }),
+
+/***/ "../share/CanvasTableColum.ts":
+/*!************************************!*\
+  !*** ../share/CanvasTableColum.ts ***!
+  \************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Align;
+(function (Align) {
+    Align[Align["left"] = 0] = "left";
+    Align[Align["center"] = 1] = "center";
+    Align[Align["right"] = 2] = "right";
+})(Align = exports.Align || (exports.Align = {}));
+var Sort;
+(function (Sort) {
+    Sort[Sort["ascending"] = 1] = "ascending";
+    Sort[Sort["descending"] = -1] = "descending";
+})(Sort = exports.Sort || (exports.Sort = {}));
 
 
 /***/ }),
@@ -327,6 +352,25 @@ exports.CircularBuffer = CircularBuffer;
 
 /***/ }),
 
+/***/ "../share/CustomCanvasIndex.ts":
+/*!*************************************!*\
+  !*** ../share/CustomCanvasIndex.ts ***!
+  \*************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var ItemIndexType;
+(function (ItemIndexType) {
+    ItemIndexType[ItemIndexType["GroupItems"] = 0] = "GroupItems";
+    ItemIndexType[ItemIndexType["Index"] = 1] = "Index";
+})(ItemIndexType = exports.ItemIndexType || (exports.ItemIndexType = {}));
+
+
+/***/ }),
+
 /***/ "../share/CustomCanvasTable.ts":
 /*!*************************************!*\
   !*** ../share/CustomCanvasTable.ts ***!
@@ -337,37 +381,36 @@ exports.CircularBuffer = CircularBuffer;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Align;
-(function (Align) {
-    Align[Align["left"] = 0] = "left";
-    Align[Align["center"] = 1] = "center";
-    Align[Align["right"] = 2] = "right";
-})(Align = exports.Align || (exports.Align = {}));
-var Sort;
-(function (Sort) {
-    Sort[Sort["ascending"] = 1] = "ascending";
-    Sort[Sort["descending"] = -1] = "descending";
-})(Sort = exports.Sort || (exports.Sort = {}));
-var ItemIndexType;
-(function (ItemIndexType) {
-    ItemIndexType[ItemIndexType["GroupItems"] = 0] = "GroupItems";
-    ItemIndexType[ItemIndexType["Index"] = 1] = "Index";
-})(ItemIndexType = exports.ItemIndexType || (exports.ItemIndexType = {}));
+const CanvasTableColum_1 = __webpack_require__(/*! ./CanvasTableColum */ "../share/CanvasTableColum.ts");
+const CustomCanvasIndex_1 = __webpack_require__(/*! ./CustomCanvasIndex */ "../share/CustomCanvasIndex.ts");
 class CustomCanvasTable {
-    constructor() {
+    constructor(config) {
         this.needToCalc = true;
         this.needToCalcFont = true;
         this.r = 1;
         this.data = [];
         this.minFontWidth = 1;
         this.maxFontWidth = 1;
-        this.font = "arial";
         this.cellHeight = 20;
         this.dataIndex = undefined;
         this.column = [];
         this.orgColum = [];
         this.canvasHeight = 0;
         this.canvasWidth = 0;
+        this.config = Object.assign({
+            font: "arial",
+            fontStyle: "",
+            fontSize: 14,
+            fontColor: "black",
+            headerFont: "arial",
+            headerFontStyle: "bold",
+            headerFontSize: 14,
+            headerFontColor: "bold",
+            lineColor: "black",
+            backgroundColor: "white",
+            howerBackgroundColor: "#DCDCDC",
+            sepraBackgroundColor: '#ECECEC'
+        }, config);
     }
     isPlanToRedraw() {
         if (!this.requestAnimationFrame) {
@@ -455,7 +498,7 @@ class CustomCanvasTable {
                 continue;
             }
             this.column[this.column.length] = Object.assign({
-                align: Align.left,
+                align: CanvasTableColum_1.Align.left,
                 leftPos: 0,
                 width: 50,
             }, col[i]);
@@ -485,7 +528,7 @@ class CustomCanvasTable {
         if (this.dataIndex === undefined) {
             return;
         }
-        if (this.dataIndex.type === ItemIndexType.GroupItems) {
+        if (this.dataIndex.type === CustomCanvasIndex_1.ItemIndexType.GroupItems) {
             this.changeChildExpended(this.dataIndex, true);
             this.reCalcForScrollView();
             this.askForReDraw();
@@ -495,7 +538,7 @@ class CustomCanvasTable {
         if (this.dataIndex === undefined) {
             return;
         }
-        if (this.dataIndex.type === ItemIndexType.GroupItems) {
+        if (this.dataIndex.type === CustomCanvasIndex_1.ItemIndexType.GroupItems) {
             this.changeChildExpended(this.dataIndex, false);
             this.reCalcForScrollView();
             this.askForReDraw();
@@ -513,7 +556,7 @@ class CustomCanvasTable {
         if (this.scrollView && this.scrollView.onMouseDown(x, y)) {
             return;
         }
-        if (this.dataIndex.type === ItemIndexType.GroupItems && y > 18) {
+        if (this.dataIndex.type === CustomCanvasIndex_1.ItemIndexType.GroupItems && y > 18) {
             const result = this.findByPos(y);
             if (result !== null && typeof result === "object") {
                 result.isExpended = !result.isExpended;
@@ -574,7 +617,7 @@ class CustomCanvasTable {
         if (this.dataIndex === undefined) {
             return;
         }
-        if (this.dataIndex.type === ItemIndexType.GroupItems) {
+        if (this.dataIndex.type === CustomCanvasIndex_1.ItemIndexType.GroupItems) {
             if (e.changedTouches.length === 1) {
                 const y = e.changedTouches[0].pageY - offsetTop;
                 if (y > 18) {
@@ -633,7 +676,7 @@ class CustomCanvasTable {
         const maxHeight = this.canvasHeight / this.r;
         let find = function (items) {
             let i;
-            if (items.type === ItemIndexType.Index) {
+            if (items.type === CustomCanvasIndex_1.ItemIndexType.Index) {
                 const h = items.list.length * cellHeight;
                 if (y > pos + h) {
                     pos += h;
@@ -749,12 +792,12 @@ class CustomCanvasTable {
         }
         if (this.groupByCol && this.groupByCol.length > 0) {
             const groupByCol = this.groupByCol;
-            let groupItems = { type: ItemIndexType.GroupItems, list: [] };
-            this.group(groupItems, index, 0, groupByCol, this.dataIndex === undefined || this.dataIndex.type === ItemIndexType.Index ? undefined : this.dataIndex);
+            let groupItems = { type: CustomCanvasIndex_1.ItemIndexType.GroupItems, list: [] };
+            this.group(groupItems, index, 0, groupByCol, this.dataIndex === undefined || this.dataIndex.type === CustomCanvasIndex_1.ItemIndexType.Index ? undefined : this.dataIndex);
             this.dataIndex = groupItems;
         }
         else {
-            this.dataIndex = { type: ItemIndexType.Index, list: index };
+            this.dataIndex = { type: CustomCanvasIndex_1.ItemIndexType.Index, list: index };
         }
         this.reCalcForScrollView();
     }
@@ -778,24 +821,24 @@ class CustomCanvasTable {
             let d = r.get(c);
             if (d !== undefined) {
                 const item = g.list[d];
-                if (item.child.type === ItemIndexType.Index) {
+                if (item.child.type === CustomCanvasIndex_1.ItemIndexType.Index) {
                     item.child.list.push(id);
                 }
             }
             else {
                 r.set(c, g.list.length);
                 const oldGroupItem = this.tryFind(old, c);
-                g.list.push({ caption: c, isExpended: oldGroupItem === undefined ? false : oldGroupItem.isExpended, child: { type: ItemIndexType.Index, list: [id] } });
+                g.list.push({ caption: c, isExpended: oldGroupItem === undefined ? false : oldGroupItem.isExpended, child: { type: CustomCanvasIndex_1.ItemIndexType.Index, list: [id] } });
             }
         }
         level++;
         if (groupByCol.length > level) {
             for (let i = 0; i < g.list.length; i++) {
                 const child = g.list[i].child;
-                if (child.type === ItemIndexType.Index) {
-                    let item = { type: ItemIndexType.GroupItems, list: [] };
+                if (child.type === CustomCanvasIndex_1.ItemIndexType.Index) {
+                    let item = { type: CustomCanvasIndex_1.ItemIndexType.GroupItems, list: [] };
                     const oldGroupItem = this.tryFind(old, g.list[i].caption);
-                    this.group(item, child.list, level, groupByCol, oldGroupItem === undefined || oldGroupItem.child.type === ItemIndexType.Index ? undefined : oldGroupItem.child);
+                    this.group(item, child.list, level, groupByCol, oldGroupItem === undefined || oldGroupItem.child.type === CustomCanvasIndex_1.ItemIndexType.Index ? undefined : oldGroupItem.child);
                     g.list[i].child = item;
                 }
             }
@@ -805,7 +848,7 @@ class CustomCanvasTable {
         for (let i = 0; i < g.list.length; i++) {
             g.list[i].isExpended = value;
             const child = g.list[i].child;
-            if (child.type === ItemIndexType.GroupItems) {
+            if (child.type === CustomCanvasIndex_1.ItemIndexType.GroupItems) {
                 this.changeChildExpended(child, value);
             }
         }
@@ -827,10 +870,10 @@ class CustomCanvasTable {
         const cellHeight = this.cellHeight;
         let calc = function (index) {
             switch (index.type) {
-                case ItemIndexType.Index:
+                case CustomCanvasIndex_1.ItemIndexType.Index:
                     h += cellHeight * index.list.length;
                     break;
-                case ItemIndexType.GroupItems:
+                case CustomCanvasIndex_1.ItemIndexType.GroupItems:
                     for (let i = 0; i < index.list.length; i++) {
                         h += cellHeight;
                         if (index.list[i].isExpended) {
@@ -860,8 +903,8 @@ class CustomCanvasTable {
         if (this.needToCalc) {
             this.calcColum();
         }
+        this.context.font = this.config.fontStyle + " " + this.config.fontSize * this.r + "px " + this.config.font;
         if (this.needToCalcFont) {
-            this.context.font = 14 * this.r + "px " + this.font;
             this.minFontWidth = this.context.measureText('i').width;
             this.maxFontWidth = this.context.measureText('Æ').width;
         }
@@ -879,16 +922,15 @@ class CustomCanvasTable {
         if (drawConf === undefined) {
             this.context.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
         }
-        this.context.font = 14 * this.r + "px " + this.font;
-        this.context.fillStyle = 'black';
-        this.context.strokeStyle = 'black';
+        this.context.fillStyle = this.config.fontColor;
+        this.context.strokeStyle = this.config.lineColor;
         const colStart = 0;
         const colEnd = this.column.length;
         const height = this.cellHeight * this.r;
         let index = this.dataIndex;
         let pos, i, maxPos;
         switch (index.type) {
-            case ItemIndexType.Index:
+            case CustomCanvasIndex_1.ItemIndexType.Index:
                 maxPos = this.canvasHeight + this.cellHeight + 5 * this.r;
                 i = Math.floor(this.scrollView.posY / (height));
                 pos = (-this.scrollView.posY + (i + 1) * height);
@@ -909,7 +951,7 @@ class CustomCanvasTable {
                 }
                 this.context.stroke();
                 break;
-            case ItemIndexType.GroupItems:
+            case CustomCanvasIndex_1.ItemIndexType.GroupItems:
                 pos = -this.scrollView.posY;
                 maxPos = this.canvasHeight + this.cellHeight + 5 * this.r;
                 pos += 14 * this.r + height;
@@ -923,6 +965,8 @@ class CustomCanvasTable {
         }
         // Headder
         pos = 14 * this.r;
+        this.context.font = this.config.headerFontStyle + " " + this.config.headerFontSize * this.r + "px " + this.config.headerFont;
+        this.context.fillStyle = this.config.headerFontColor;
         this.context.clearRect(0, 0, this.canvasWidth, headderHeight);
         this.context.beginPath();
         let leftPos = 0;
@@ -954,7 +998,7 @@ class CustomCanvasTable {
         if (groupItem.isExpended) {
             const child = groupItem.child;
             let i;
-            if (child.type === ItemIndexType.Index) {
+            if (child.type === CustomCanvasIndex_1.ItemIndexType.Index) {
                 if (0 > pos + child.list.length * height) {
                     pos += child.list.length * height;
                 }
@@ -965,7 +1009,7 @@ class CustomCanvasTable {
                         pos += i * height;
                     }
                     if (drawConf === undefined) {
-                        this.context.strokeStyle = 'black';
+                        this.context.strokeStyle = this.config.lineColor;
                         this.context.beginPath();
                         this.context.moveTo(0, pos + 4 * this.r + 1 - height);
                         this.context.lineTo(this.column[this.column.length - 1].leftPos + this.column[this.column.length - 1].width * this.r, pos + 4 * this.r + 1 - height);
@@ -1058,20 +1102,20 @@ class CustomCanvasTable {
             }
             let x;
             switch (colItem.align) {
-                case Align.left:
+                case CanvasTableColum_1.Align.left:
                 default:
                     x = colItem.leftPos + offsetLeft;
                     if (this.context.textAlign !== 'left') {
                         this.context.textAlign = 'left';
                     }
                     break;
-                case Align.right:
+                case CanvasTableColum_1.Align.right:
                     x = colItem.leftPos + colItem.width * this.r - offsetLeft;
                     if (this.context.textAlign !== 'right') {
                         this.context.textAlign = 'right';
                     }
                     break;
-                case Align.center:
+                case CanvasTableColum_1.Align.center:
                     x = colItem.leftPos + colItem.width * this.r * 0.5 - offsetLeft;
                     if (this.context.textAlign !== 'center') {
                         this.context.textAlign = 'center';
@@ -1079,10 +1123,10 @@ class CustomCanvasTable {
                     break;
             }
             if (this.overRowValue === indexId) {
-                this.context.fillStyle = '#DCDCDC';
+                this.context.fillStyle = this.config.howerBackgroundColor;
             }
             else {
-                this.context.fillStyle = i % 2 === 0 ? '#ECECEC' : 'white';
+                this.context.fillStyle = i % 2 === 0 ? this.config.sepraBackgroundColor : this.config.backgroundColor;
             }
             if (needClip) {
                 this.context.fillRect(-this.scrollView.posX + colItem.leftPos + 1, pos - height + 4 * this.r + 1, colItem.width * this.r - 1 * 2, height - 3);
@@ -1090,13 +1134,13 @@ class CustomCanvasTable {
                 this.context.beginPath();
                 this.context.rect(-this.scrollView.posX + colItem.leftPos + offsetLeft, pos - height, colItem.width * this.r - offsetLeft * 2, height);
                 this.context.clip();
-                this.context.fillStyle = 'black';
+                this.context.fillStyle = this.config.fontColor;
                 this.context.fillText(data, -this.scrollView.posX + x, pos);
                 this.context.restore();
             }
             else {
                 this.context.fillRect(-this.scrollView.posX + colItem.leftPos + 1, pos - height + 4 * this.r + 1, colItem.width * this.r - 1 * 2, height - 3);
-                this.context.fillStyle = 'black';
+                this.context.fillStyle = this.config.fontColor;
                 this.context.fillText(data, -this.scrollView.posX + x, pos);
             }
             // Ætti að gerast fyrri ofan og lengri línur
@@ -1130,7 +1174,7 @@ exports.CustomCanvasTable = CustomCanvasTable;
 Object.defineProperty(exports, "__esModule", { value: true });
 const CircularBuffer_1 = __webpack_require__(/*! ./CircularBuffer */ "../share/CircularBuffer.ts");
 class ScrollView {
-    constructor(context, drawable, askForExtentedMouseMoveAndMaouseUp, askForNormalMouseMoveAndMaouseUp) {
+    constructor(context, drawable, config, askForExtentedMouseMoveAndMaouseUp, askForNormalMouseMoveAndMaouseUp) {
         this.canvasWidth = -1;
         this.canvasHeight = -1;
         this.r = 1;
@@ -1187,6 +1231,11 @@ class ScrollView {
         this.drawable = drawable;
         this.lastmove = new CircularBuffer_1.CircularBuffer(100, true);
         this.context = context;
+        this.scrollViewConfig = Object.assign({
+            buttonHoverColor: "#808080",
+            buttonColor: "#b0b0b0",
+            backgroundColor: "#f0f0f0",
+        }, config);
     }
     get posY() {
         return this.posYvalue;
@@ -1765,21 +1814,21 @@ class ScrollView {
             const scrollBarPosY = 16 * this.r + ratioY * (height - scrollBarSizeY);
             this.scrollBarThumbMinY = scrollBarPosY / this.r;
             this.scrollBarThumbMaxY = (scrollBarPosY + scrollBarSizeY) / this.r;
-            this.context.fillStyle = '#f0f0f0';
+            this.context.fillStyle = this.scrollViewConfig.backgroundColor;
             this.context.fillRect(this.canvasWidth - this.r * this.scrollbarSize, 0, this.r * this.scrollbarSize, canvasHeight);
-            this.context.fillStyle = this.isOverScrollUpY ? 'red' : '#b0b0b0';
+            this.context.fillStyle = this.isOverScrollUpY ? this.scrollViewConfig.buttonHoverColor : this.scrollViewConfig.buttonColor;
             this.context.beginPath();
             this.context.moveTo(this.canvasWidth - this.r * 10, this.r * 3);
             this.context.lineTo(this.canvasWidth - this.r * 18, this.r * 13);
             this.context.lineTo(this.canvasWidth - this.r * 2, this.r * 13);
             this.context.fill();
-            this.context.fillStyle = this.isOverScrollDownY ? 'red' : '#b0b0b0';
+            this.context.fillStyle = this.isOverScrollDownY ? this.scrollViewConfig.buttonHoverColor : this.scrollViewConfig.buttonColor;
             this.context.beginPath();
             this.context.moveTo(this.canvasWidth - this.r * 10, canvasHeight - this.r * 3);
             this.context.lineTo(this.canvasWidth - this.r * 18, canvasHeight - this.r * 13);
             this.context.lineTo(this.canvasWidth - this.r * 2, canvasHeight - this.r * 13);
             this.context.fill();
-            this.context.fillStyle = this.isOverScollThumbY ? 'red' : '#b0b0b0';
+            this.context.fillStyle = this.isOverScollThumbY ? this.scrollViewConfig.buttonHoverColor : this.scrollViewConfig.buttonColor;
             this.context.beginPath();
             this.context.moveTo(this.canvasWidth - this.r * this.scrollbarSize, scrollBarPosY);
             this.context.lineTo(this.canvasWidth, scrollBarPosY);
@@ -1795,21 +1844,21 @@ class ScrollView {
             const scrollBarPosX = 16 * this.r + ratioX * (width - scrollBarSizeX);
             this.scrollBarThumbMinX = scrollBarPosX / this.r;
             this.scrollBarThumbMaxX = (scrollBarPosX + scrollBarSizeX) / this.r;
-            this.context.fillStyle = '#f0f0f0';
+            this.context.fillStyle = this.scrollViewConfig.backgroundColor;
             this.context.fillRect(0, this.canvasHeight - this.r * this.scrollbarSize, canvasWidth, this.r * this.scrollbarSize);
-            this.context.fillStyle = this.isOverScrollUpX ? 'red' : '#b0b0b0';
+            this.context.fillStyle = this.isOverScrollUpX ? this.scrollViewConfig.buttonHoverColor : this.scrollViewConfig.buttonColor;
             this.context.beginPath();
             this.context.moveTo(this.r * 3, this.canvasHeight - this.r * 10);
             this.context.lineTo(this.r * 13, this.canvasHeight - this.r * 18);
             this.context.lineTo(this.r * 13, this.canvasHeight - this.r * 2);
             this.context.fill();
-            this.context.fillStyle = this.isOverScrollDownX ? 'red' : '#b0b0b0';
+            this.context.fillStyle = this.isOverScrollDownX ? this.scrollViewConfig.buttonHoverColor : this.scrollViewConfig.buttonColor;
             this.context.beginPath();
             this.context.moveTo(canvasWidth - this.r * 3, this.canvasHeight - this.r * 10);
             this.context.lineTo(canvasWidth - this.r * 13, this.canvasHeight - this.r * 18);
             this.context.lineTo(canvasWidth - this.r * 13, this.canvasHeight - this.r * 2);
             this.context.fill();
-            this.context.fillStyle = this.isOverScollThumbX ? 'red' : '#b0b0b0';
+            this.context.fillStyle = this.isOverScollThumbX ? this.scrollViewConfig.buttonHoverColor : this.scrollViewConfig.buttonColor;
             this.context.beginPath();
             this.context.moveTo(scrollBarPosX, this.canvasHeight - this.r * this.scrollbarSize);
             this.context.lineTo(scrollBarPosX, this.canvasHeight);
@@ -1818,7 +1867,7 @@ class ScrollView {
             this.context.fill();
         }
         if (this.hasScrollBarX && this.hasScrollBarY) {
-            this.context.fillStyle = '#f0f0f0';
+            this.context.fillStyle = this.scrollViewConfig.backgroundColor;
             this.context.fillRect(this.canvasWidth - this.r * this.scrollbarSize, this.canvasHeight - this.r * this.scrollbarSize, this.r * this.scrollbarSize, this.r * this.scrollbarSize);
         }
     }
@@ -1853,7 +1902,7 @@ exports.ScrollView = ScrollView;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const CanvasTable_1 = __webpack_require__(/*! ./../CanvasTable/src/CanvasTable */ "../CanvasTable/src/CanvasTable.ts");
-const CustomCanvasTable_1 = __webpack_require__(/*! ./../share/CustomCanvasTable */ "../share/CustomCanvasTable.ts");
+const CanvasTableColum_1 = __webpack_require__(/*! ../share/CanvasTableColum */ "../share/CanvasTableColum.ts");
 function customDraw(canvasTable, context, rowIndex, col, left, top, right, bottom, width, height, r, dataValue, row, data) {
     context.fillStyle = "lightgreen";
     context.fillRect(left, top, width, height);
@@ -1872,7 +1921,7 @@ const sortName = function (data, rowA, rowB) {
     return rowA.name.localeCompare(rowB.name);
 };
 const sort = function () {
-    canvasTable.setSort([{ col: col[6], sort: CustomCanvasTable_1.Sort.ascending }, { col: col[5], sort: CustomCanvasTable_1.Sort.ascending }, { col: col[4], sort: CustomCanvasTable_1.Sort.ascending }]);
+    canvasTable.setSort([{ col: col[6], sort: CanvasTableColum_1.Sort.ascending }, { col: col[5], sort: CanvasTableColum_1.Sort.ascending }, { col: col[4], sort: CanvasTableColum_1.Sort.ascending }]);
 };
 var isGroup = true;
 const group = function () {
@@ -1901,7 +1950,7 @@ const col = [
         header: "Id",
         field: "__rownum__",
         width: 80,
-        align: CustomCanvasTable_1.Align.center
+        align: CanvasTableColum_1.Align.center
     },
     {
         header: "Render",
@@ -1919,7 +1968,7 @@ const col = [
         header: "Id",
         field: "__rownum__",
         width: 30,
-        align: CustomCanvasTable_1.Align.right
+        align: CanvasTableColum_1.Align.right
     },
     {
         header: "Name",
@@ -1935,12 +1984,12 @@ const col = [
         header: "geonameid",
         field: "geonameid",
         width: 100,
-        align: CustomCanvasTable_1.Align.right
+        align: CanvasTableColum_1.Align.right
     }
 ];
 // data = data.splice(1, 20);
 const canvasTable = new CanvasTable_1.CanvasTable("canvas", data, col);
-canvasTable.setSort([{ col: col[2], sort: CustomCanvasTable_1.Sort.ascending }, { col: col[5], sort: CustomCanvasTable_1.Sort.ascending }]);
+canvasTable.setSort([{ col: col[2], sort: CanvasTableColum_1.Sort.ascending }, { col: col[5], sort: CanvasTableColum_1.Sort.ascending }]);
 group();
 var w = window;
 w.canvasTable = canvasTable;

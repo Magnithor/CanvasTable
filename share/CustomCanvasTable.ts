@@ -12,8 +12,13 @@ declare function setTimeout(callback: (...args: any[]) => void, ms: number, ...a
 export interface CanvasTableConfig {
     scrollView?: ScrollViewConfig,
     font?: string,
+    fontStyle?: string,
     fontSize?: number,
     fontColor?: CanvasColor,
+    headerFont?: string,
+    headerFontStyle?: string,
+    headerFontSize?: number,
+    headerFontColor?: CanvasColor,
     lineColor?:  CanvasColor,
     howerBackgroundColor ?: CanvasColor,
     sepraBackgroundColor?: CanvasColor
@@ -22,8 +27,13 @@ export interface CanvasTableConfig {
 interface CanvasTableConf {
     scrollView?: ScrollViewConfig,
     font: string
+    fontStyle: string,
     fontSize: number,
     fontColor: CanvasColor,
+    headerFont: string,
+    headerFontStyle: string,
+    headerFontSize: number,
+    headerFontColor: CanvasColor,
     backgroundColor: CanvasColor,
     lineColor: CanvasColor,
     howerBackgroundColor:CanvasColor,
@@ -72,8 +82,13 @@ export abstract class CustomCanvasTable implements Drawable {
         this.config = {
              ...{
                 font: "arial",
+                fontStyle: "",
                 fontSize: 14,
                 fontColor: "black",
+                headerFont: "arial",
+                headerFontStyle: "bold",
+                headerFontSize: 14,
+                headerFontColor: "bold",            
                 lineColor: "black",
                 backgroundColor: "white",
                 howerBackgroundColor: "#DCDCDC",
@@ -572,8 +587,10 @@ export abstract class CustomCanvasTable implements Drawable {
         if (this.needToCalc){
             this.calcColum();
         }
+
+        this.context.font = this.config.fontStyle + " " + this.config.fontSize * this.r + "px " + this.config.font;
+
         if (this.needToCalcFont) {
-            this.context.font = this.config.fontSize * this.r + "px " + this.config.font;
             this.minFontWidth = this.context.measureText('i').width;
             this.maxFontWidth = this.context.measureText('Æ').width;    
         }
@@ -594,7 +611,7 @@ export abstract class CustomCanvasTable implements Drawable {
         if (drawConf === undefined) {
             this.context.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
         }
-        this.context.font = this.config.fontSize * this.r + "px " + this.config.font;
+
         this.context.fillStyle = this.config.fontColor;
         this.context.strokeStyle = this.config.lineColor;
         const colStart  = 0;
@@ -641,6 +658,8 @@ export abstract class CustomCanvasTable implements Drawable {
         
         // Headder
         pos = 14 * this.r;
+        this.context.font = this.config.headerFontStyle + " " + this.config.headerFontSize * this.r + "px " + this.config.headerFont;
+        this.context.fillStyle = this.config.headerFontColor;
         this.context.clearRect(0, 0, this.canvasWidth, headderHeight);
         this.context.beginPath();
         let leftPos = 0;
