@@ -911,8 +911,8 @@ class CustomCanvasTable {
                     i++;
                 }
                 this.context.beginPath();
-                let leftPos = 0;
-                for (let col = 0; col < this.column.length; col++) {
+                let leftPos = -this.scrollView.posX;
+                for (let col = colStart; col < colEnd; col++) {
                     leftPos += this.column[col].width * this.r;
                     this.context.moveTo(leftPos, headderHeight);
                     this.context.lineTo(leftPos, this.canvasHeight);
