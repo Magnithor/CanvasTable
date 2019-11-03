@@ -1,5 +1,5 @@
 import { Drawable } from "./Drawable";
-import { ScrollView } from "./ScrollView";
+import { ScrollView, ScrollViewConfig } from "./ScrollView";
 import { CanvasContext2D } from "./CanvasContext2D";
 import { CanvasTableTouchEvent } from "./CanvasTableTouchEvent";
 export interface DrawConfig {
@@ -13,6 +13,9 @@ type RenderValue = (canvasTable: CustomCanvasTable, context: CanvasContext2D, ro
 export type CustomFilter = (data: any, row: any, col: CanvasTableColumnConf[]) => boolean;
 export type CustomSort = (data: any, rowA: any, rowB: any) => number;
 
+export interface CanvasTableConfig {
+    scrollView?:ScrollViewConfig
+}
 
 export interface CanvasTableColumnConf {
     header: string;
@@ -88,6 +91,10 @@ export abstract class CustomCanvasTable implements Drawable {
 
     private canvasHeight: number = 0;
     private canvasWidth: number = 0;
+    protected config?: CanvasTableConfig;
+    constructor (config: CanvasTableConfig | undefined) {
+        this.config = config;
+    }
 
     public isPlanToRedraw(): boolean {
         if (!this.requestAnimationFrame) {

@@ -69,7 +69,7 @@ const col: CanvasTableColumnConf[] = [
 ];
 
 declare let data: { country: string, geonameid: number, name: string, subcountry: string }[];
-data = data.splice(1, 20);
+// data = data.splice(1, 20);
 
 const canvasTable = new CanvasTable("canvas", data, col);
 // canvasTable.setSort([{ col: col[2], sort: Sort.ascending }, {col:col[5], sort:Sort.ascending}]);

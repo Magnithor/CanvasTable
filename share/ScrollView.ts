@@ -1,6 +1,6 @@
 import { Drawable } from "./Drawable";
 import { CircularBuffer } from './CircularBuffer';
-import { CanvasContext2D } from "./CanvasContext2D";
+import { CanvasContext2D, CanvasColor } from "./CanvasContext2D";
 import { CanvasTableTouchEvent } from './CanvasTableTouchEvent';
 
 declare function setTimeout(callback: (...args: any[]) => void, ms: number, ...args: any[]): number;
@@ -10,6 +10,19 @@ interface MouseMove {
     y: number;
     time: Date;
 }
+
+export interface ScrollViewConfig {
+   buttonHoverColor?: CanvasColor,
+   buttonColor?: CanvasColor,
+   backgroundColor?: CanvasColor,
+}
+
+interface ScrollViewConf {
+    buttonHoverColor: CanvasColor,
+    buttonColor: CanvasColor,
+    backgroundColor: CanvasColor,
+ }
+
 export class ScrollView {
     private drawable: Drawable;
     private askForExtentedMouseMoveAndMaouseUp: () => void;
@@ -54,14 +67,20 @@ export class ScrollView {
     private runXOrY: boolean = false;
     private runStart: number = -1;
     private speed: number = 1;
+    private scrollViewConfig: ScrollViewConf;
 
 
-    public constructor(context: CanvasContext2D, drawable: Drawable, askForExtentedMouseMoveAndMaouseUp: () => void, askForNormalMouseMoveAndMaouseUp: () => void) {
+    public constructor(context: CanvasContext2D, drawable: Drawable, config:ScrollViewConfig|undefined, askForExtentedMouseMoveAndMaouseUp: () => void, askForNormalMouseMoveAndMaouseUp: () => void) {
         this.askForExtentedMouseMoveAndMaouseUp = askForExtentedMouseMoveAndMaouseUp;
         this.askForNormalMouseMoveAndMaouseUp = askForNormalMouseMoveAndMaouseUp;
         this.drawable = drawable;
         this.lastmove = new CircularBuffer<MouseMove>(100, true);
         this.context = context;
+        this.scrollViewConfig = { ...config, ...{
+            buttonHoverColor: "#808080",
+            buttonColor: "#b0b0b0",
+            backgroundColor: "#f0f0f0",
+        }}
     }
 
     get posY(): number {
@@ -710,24 +729,24 @@ export class ScrollView {
             this.scrollBarThumbMaxY = (scrollBarPosY + scrollBarSizeY) / this.r;
                     
 
-            this.context.fillStyle = '#f0f0f0';
+            this.context.fillStyle = this.scrollViewConfig.backgroundColor;
             this.context.fillRect(this.canvasWidth - this.r * this.scrollbarSize, 0, this.r * this.scrollbarSize, canvasHeight);
 
-            this.context.fillStyle = this.isOverScrollUpY ? 'red' : '#b0b0b0';
+            this.context.fillStyle = this.isOverScrollUpY ? this.scrollViewConfig.buttonHoverColor : this.scrollViewConfig.buttonColor;
             this.context.beginPath();
             this.context.moveTo(this.canvasWidth - this.r * 10, this.r * 3);
             this.context.lineTo(this.canvasWidth - this.r * 18, this.r * 13);
             this.context.lineTo(this.canvasWidth - this.r * 2, this.r * 13);
             this.context.fill();
 
-            this.context.fillStyle = this.isOverScrollDownY ? 'red' : '#b0b0b0';
+            this.context.fillStyle = this.isOverScrollDownY ? this.scrollViewConfig.buttonHoverColor : this.scrollViewConfig.buttonColor;
             this.context.beginPath();
             this.context.moveTo(this.canvasWidth - this.r * 10, canvasHeight - this.r * 3);
             this.context.lineTo(this.canvasWidth - this.r * 18, canvasHeight - this.r * 13);
             this.context.lineTo(this.canvasWidth - this.r * 2, canvasHeight - this.r * 13);
             this.context.fill();
 
-            this.context.fillStyle = this.isOverScollThumbY ? 'red' : '#b0b0b0';
+            this.context.fillStyle = this.isOverScollThumbY ? this.scrollViewConfig.buttonHoverColor : this.scrollViewConfig.buttonColor;
     
             this.context.beginPath();
             this.context.moveTo(this.canvasWidth - this.r * this.scrollbarSize, scrollBarPosY);
@@ -747,24 +766,24 @@ export class ScrollView {
             this.scrollBarThumbMaxX = (scrollBarPosX + scrollBarSizeX) / this.r;
                     
 
-            this.context.fillStyle = '#f0f0f0';
+            this.context.fillStyle = this.scrollViewConfig.backgroundColor;
             this.context.fillRect(0, this.canvasHeight - this.r * this.scrollbarSize, canvasWidth, this.r * this.scrollbarSize);
 
-            this.context.fillStyle = this.isOverScrollUpX ? 'red' : '#b0b0b0';
+            this.context.fillStyle = this.isOverScrollUpX ? this.scrollViewConfig.buttonHoverColor : this.scrollViewConfig.buttonColor;
             this.context.beginPath();
             this.context.moveTo(this.r * 3, this.canvasHeight - this.r * 10);
             this.context.lineTo(this.r * 13, this.canvasHeight - this.r * 18);
             this.context.lineTo(this.r * 13, this.canvasHeight - this.r * 2);
             this.context.fill();
 
-            this.context.fillStyle = this.isOverScrollDownX ? 'red' : '#b0b0b0';
+            this.context.fillStyle = this.isOverScrollDownX ? this.scrollViewConfig.buttonHoverColor : this.scrollViewConfig.buttonColor;
             this.context.beginPath();
             this.context.moveTo(canvasWidth - this.r * 3, this.canvasHeight - this.r * 10);
             this.context.lineTo(canvasWidth - this.r * 13, this.canvasHeight - this.r * 18);
             this.context.lineTo(canvasWidth - this.r * 13, this.canvasHeight - this.r * 2);
             this.context.fill();
             
-            this.context.fillStyle = this.isOverScollThumbX ? 'red' : '#b0b0b0';
+            this.context.fillStyle = this.isOverScollThumbX ? this.scrollViewConfig.buttonHoverColor : this.scrollViewConfig.buttonColor;
     
             this.context.beginPath();
             this.context.moveTo(scrollBarPosX, this.canvasHeight - this.r * this.scrollbarSize);
@@ -775,7 +794,7 @@ export class ScrollView {
         }
         
         if (this.hasScrollBarX && this.hasScrollBarY) {
-            this.context.fillStyle = '#f0f0f0';
+            this.context.fillStyle = this.scrollViewConfig.backgroundColor;
             this.context.fillRect(this.canvasWidth - this.r * this.scrollbarSize, this.canvasHeight - this.r * this.scrollbarSize, this.r * this.scrollbarSize, this.r * this.scrollbarSize);   
         }
     }
