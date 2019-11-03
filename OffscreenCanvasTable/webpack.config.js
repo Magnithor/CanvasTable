@@ -3,16 +3,13 @@ module.exports = {
 	mode: 'production',
 
 	entry: {
-		CustomCanvasTable: [
-			'./src/CanvasContext2D.ts',
-			'./src/Drawable.ts',
-			'./src/CustomCanvasTable.ts',
-			'./src/ScrollView.ts'
+		OffscreenCanvasTable: [
+			'./src/OffscreenCanvasTable.ts'
 			]
 	},
 
 	output: {
-		filename: 'CustomCanvasTable.js',
+		filename: 'OffscreenCanvasTable.js',
 		path: path.resolve(__dirname, './lib'),
 		libraryTarget: 'commonjs2',
 	},    
@@ -31,7 +28,7 @@ module.exports = {
 			{
 				test: /.(ts|tsx)?$/,
 				loader: 'ts-loader',
-				include: [path.resolve(__dirname, './')],
+				include: [path.resolve(__dirname, './'), path.resolve(__dirname, './../share') ],
 				exclude: [/node_modules/]
 			}
 		]

@@ -55,6 +55,9 @@ export class OffscreenCanvasTableWorker extends CustomCanvasTable {
             case OffscreenCanvasMesssageType.expendedAll:
                 this.expendedAll();
                 break;
+            case OffscreenCanvasMesssageType.setGroupBy:
+                this.setGroupBy(data.groupBy);
+                break;
             case OffscreenCanvasMesssageType.scroll:
                 this.wheel(data.deltaMode, data.deltaX, data.deltaY);
                 break;

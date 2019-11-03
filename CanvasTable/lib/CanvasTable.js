@@ -155,6 +155,8 @@ class CanvasTable extends CustomCanvasTable_1.CustomCanvasTable {
         if (context === null) {
             throw "context is null";
         }
+        this.setR(window.devicePixelRatio);
+        this.doReize(this.canvas.clientWidth, this.canvas.clientHeight);
         this.context = context;
         this.scrollView = new ScrollView_1.ScrollView(this.context, this, this.askForExtentedMouseMoveAndMaouseUp, this.askForNormalMouseMoveAndMaouseUp);
         this.calcIndex();
@@ -273,7 +275,7 @@ class ScrollView {
         if (!this.hasScrollBarY) {
             value = 0;
         }
-        if (value < 0) {
+        if (value <= 0) {
             value = 0;
         }
         else {
@@ -293,7 +295,7 @@ class ScrollView {
         if (!this.hasScrollBarX) {
             value = 0;
         }
-        if (value < 0) {
+        if (value <= 0) {
             value = 0;
         }
         else {
@@ -1041,10 +1043,7 @@ class CustomCanvasTable {
         this.maxFontWidth = 1;
         this.font = "arial";
         this.cellHeight = 20;
-        this.dataIndex = {
-            type: ItemIndexType.Index,
-            list: []
-        };
+        this.dataIndex = undefined;
         this.column = [];
         this.orgColum = [];
         this.canvasHeight = 0;
@@ -1160,6 +1159,9 @@ class CustomCanvasTable {
         this.needToCalcFont = true;
     }
     expendedAll() {
+        if (this.dataIndex === undefined) {
+            return;
+        }
         if (this.dataIndex.type === ItemIndexType.GroupItems) {
             this.changeChildExpended(this.dataIndex, true);
             this.reCalcForScrollView();
@@ -1167,6 +1169,9 @@ class CustomCanvasTable {
         }
     }
     collapseAll() {
+        if (this.dataIndex === undefined) {
+            return;
+        }
         if (this.dataIndex.type === ItemIndexType.GroupItems) {
             this.changeChildExpended(this.dataIndex, false);
             this.reCalcForScrollView();
@@ -1179,6 +1184,9 @@ class CustomCanvasTable {
         }
     }
     mouseDown(x, y) {
+        if (this.dataIndex === undefined) {
+            return;
+        }
         if (this.scrollView && this.scrollView.onMouseDown(x, y)) {
             return;
         }
@@ -1238,6 +1246,9 @@ class CustomCanvasTable {
     }
     TouchStart(e, offsetLeft, offsetTop) {
         if (this.scrollView && this.scrollView.OnTouchStart(e, offsetLeft, offsetTop)) {
+            return;
+        }
+        if (this.dataIndex === undefined) {
             return;
         }
         if (this.dataIndex.type === ItemIndexType.GroupItems) {

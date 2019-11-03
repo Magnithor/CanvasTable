@@ -24,6 +24,25 @@ const sortName = function (data: any, rowA: any, rowB: any) {
 const sort = function () {
     canvasTable.setSort([{ col: col[6], sort: Sort.ascending }, { col: col[5], sort: Sort.ascending }, { col: col[4], sort: Sort.ascending }]);
 }
+var isGroup = true;
+const group = function() {
+    const expendedAll = document.getElementById("expendedAll");
+    const collapseAll = document.getElementById("collapseAll");
+    const groupDom = document.getElementById("group");
+    if (!expendedAll || !collapseAll || !groupDom) { return; }
+    if (isGroup) {
+       canvasTable.setGroupBy();
+       expendedAll.style.display = "none";
+       collapseAll.style.display = "none";
+       groupDom.innerText = "Group";
+    } else {
+       canvasTable.setGroupBy(["country", "subcountry"]);
+       expendedAll.style.display = "";
+       collapseAll.style.display = "";
+       groupDom.innerText = "Ungroup";
+    }
+    isGroup = !isGroup;
+}
 
 const col: CanvasTableColumnConf[] = [
     {
@@ -72,13 +91,15 @@ declare let data: { country: string, geonameid: number, name: string, subcountry
 // data = data.splice(1, 20);
 
 const canvasTable = new CanvasTable("canvas", data, col);
-// canvasTable.setSort([{ col: col[2], sort: Sort.ascending }, {col:col[5], sort:Sort.ascending}]);
-// canvasTable.setGroupBy(["country", "subcountry"]);
+canvasTable.setSort([{ col: col[2], sort: Sort.ascending }, {col:col[5], sort:Sort.ascending}]);
+group();
+
 var w = (<any>window);
 w.canvasTable = canvasTable;
 w.onlyIceland = onlyIceland;
 w.sortName = sortName;
 w.col = col;
 w.sort = sort;
+w.group = group;
 
 

@@ -3,7 +3,6 @@ export interface Drawable {
     isPlanToRedraw(): boolean;
 }
 
-import { CanvasTableTouchEvent } from 'mthb-canvas-table-touch-event';
 export declare class ScrollView {
     private drawable;
     private askForExtentedMouseMoveAndMaouseUp;
@@ -66,8 +65,108 @@ export declare class ScrollView {
     private fixPos;
 }
 
+export interface CanvasTableTouchEvent {
+    changedTouches: {
+        pageX: number;
+        pageY: number;
+    }[];
+    touches: {
+        pageX: number;
+        pageY: number;
+    }[];
+}
+interface MyTouchEvent {
+    readonly altKey: boolean;
+    readonly changedTouches: MyTouchList;
+    readonly ctrlKey: boolean;
+    readonly metaKey: boolean;
+    readonly shiftKey: boolean;
+    readonly touches: MyTouchList;
+}
+interface MyTouchList {
+    readonly length: number;
+    item(index: number): MyTouch | null;
+    [index: number]: MyTouch;
+}
+interface MyTouch {
+    readonly pageX: number;
+    readonly pageY: number;
+}
+export declare function TouchEventToCanvasTableTouchEvent(e: MyTouchEvent): CanvasTableTouchEvent;
+export {};
+
+
 export interface CanvasContext2D extends CanvasState, CanvasTransform, CanvasCompositing, CanvasImageSmoothing, CanvasFillStrokeStyles, CanvasShadowStyles, CanvasFilters, CanvasRect, CanvasDrawPath, CanvasText, CanvasDrawImage, CanvasImageData, CanvasPathDrawingStyles, CanvasTextDrawingStyles, CanvasPath {
 }
+
+
+export declare enum OffscreenCanvasMesssageType {
+    create = 0,
+    resize = 1,
+    expendedAll = 2,
+    collapseAll = 3,
+    scroll = 10,
+    mouseDown = 20,
+    mouseMove = 21,
+    mouseUp = 22,
+    mouseLeave = 23,
+    mouseMoveExtended = 24,
+    mouseUpExtended = 25,
+    TouchStart = 30,
+    TouchMove = 31,
+    TouchEnd = 32,
+    keyDown = 40,
+    askForExtentedMouseMoveAndMaouseUp = 100,
+    askForNormalMouseMoveAndMaouseUp = 101
+}
+interface OffscreenCanvasMesssageParnet {
+    type: OffscreenCanvasMesssageType;
+    mthbCanvasTable: number;
+}
+interface OffscreenCanvasMessageCreate extends OffscreenCanvasMesssageParnet {
+    type: OffscreenCanvasMesssageType.create;
+    offscreen: OffscreenCanvas;
+    width: number;
+    height: number;
+    r: number;
+}
+interface OffscreenCanvasMessageResize extends OffscreenCanvasMesssageParnet {
+    type: OffscreenCanvasMesssageType.resize;
+    width: number;
+    height: number;
+    r: number;
+}
+interface OffscreenCanvasMessageFunctions extends OffscreenCanvasMesssageParnet {
+    type: OffscreenCanvasMesssageType.expendedAll | OffscreenCanvasMesssageType.collapseAll | OffscreenCanvasMesssageType.askForExtentedMouseMoveAndMaouseUp | OffscreenCanvasMesssageType.askForNormalMouseMoveAndMaouseUp;
+}
+interface OffscreenCanvasMessageScroll extends OffscreenCanvasMesssageParnet {
+    type: OffscreenCanvasMesssageType.scroll;
+    deltaMode: number;
+    deltaX: number;
+    deltaY: number;
+}
+interface OffscreenCanvasMessageMouse extends OffscreenCanvasMesssageParnet {
+    type: OffscreenCanvasMesssageType.mouseDown | OffscreenCanvasMesssageType.mouseMove | OffscreenCanvasMesssageType.mouseUp | OffscreenCanvasMesssageType.mouseMoveExtended | OffscreenCanvasMesssageType.mouseUpExtended;
+    x: number;
+    y: number;
+}
+interface OffscreenCanvasMessageMouseLeave extends OffscreenCanvasMesssageParnet {
+    type: OffscreenCanvasMesssageType.mouseLeave;
+}
+interface OffscreenCanvasMessageKeyDown extends OffscreenCanvasMesssageParnet {
+    type: OffscreenCanvasMesssageType.keyDown;
+    keycode: number;
+}
+interface OffscreenCanvasMesssageTouch extends OffscreenCanvasMesssageParnet {
+    type: OffscreenCanvasMesssageType.TouchStart | OffscreenCanvasMesssageType.TouchMove | OffscreenCanvasMesssageType.TouchEnd;
+    event: CanvasTableTouchEvent;
+    offsetLeft: number;
+    offsetTop: number;
+}
+export declare type OffscreenCanvasMesssage = OffscreenCanvasMessageScroll | OffscreenCanvasMessageCreate | OffscreenCanvasMessageResize | OffscreenCanvasMessageFunctions | OffscreenCanvasMessageMouse | OffscreenCanvasMessageMouseLeave | OffscreenCanvasMessageKeyDown | OffscreenCanvasMesssageTouch;
+export {};
+
+
 export interface DrawConfig {
     drawOnly?: number[];
 }
@@ -130,7 +229,7 @@ export declare abstract class CustomCanvasTable implements Drawable {
     protected scrollView?: ScrollView;
     protected font: string;
     protected cellHeight: number;
-    protected dataIndex: IndexType;
+    protected dataIndex?: IndexType;
     private column;
     private orgColum;
     private cusomFilter?;
@@ -181,3 +280,16 @@ export declare abstract class CustomCanvasTable implements Drawable {
     private drawRowItem;
 }
 export {};
+
+
+export declare class OffscreenCanvasTableWorker extends CustomCanvasTable {
+    protected drawCanvas(): void;
+    protected setCanvasSize(width: number, height: number): void;
+    private id;
+    private canvas?;
+    constructor(offscreenCanvasTableId: number, col: CanvasTableColumnConf[]);
+    message(data: OffscreenCanvasMesssage): void;
+    protected resize(): void;
+    private askForExtentedMouseMoveAndMaouseUp;
+    private askForNormalMouseMoveAndMaouseUp;
+}

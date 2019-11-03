@@ -1,4 +1,4 @@
-export  interface Drawable {
+export interface Drawable {
     askForReDraw(): void;
     isPlanToRedraw(): boolean;
 }

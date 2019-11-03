@@ -1,4 +1,3 @@
-module.exports =
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -82,40 +81,225 @@ module.exports =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 0);
+/******/ 	return __webpack_require__(__webpack_require__.s = "./worker.ts");
 /******/ })
 /************************************************************************/
-/******/ ([
-/* 0 */
-/***/ (function(module, exports, __webpack_require__) {
+/******/ ({
 
-__webpack_require__(1);
-__webpack_require__(2);
-__webpack_require__(3);
-module.exports = __webpack_require__(4);
-
-
-/***/ }),
-/* 1 */
+/***/ "../OffscreenCanvasTableWorker/src/OffscreenCanvasTableWorker.ts":
+/*!***********************************************************************!*\
+  !*** ../OffscreenCanvasTableWorker/src/OffscreenCanvasTableWorker.ts ***!
+  \***********************************************************************/
+/*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-;
+const CustomCanvasTable_1 = __webpack_require__(/*! ../../share/CustomCanvasTable */ "../share/CustomCanvasTable.ts");
+const ScrollView_1 = __webpack_require__(/*! ../../share/ScrollView */ "../share/ScrollView.ts");
+const OffscreenCanvasTableMessage_1 = __webpack_require__(/*! ../../share/OffscreenCanvasTableMessage */ "../share/OffscreenCanvasTableMessage.ts");
+class OffscreenCanvasTableWorker extends CustomCanvasTable_1.CustomCanvasTable {
+    constructor(offscreenCanvasTableId, col) {
+        super();
+        this.id = offscreenCanvasTableId;
+        this.UpdateColumns(col);
+    }
+    drawCanvas() {
+        if (this.context === undefined || this.dataIndex === undefined) {
+            this.requestAnimationFrame = undefined;
+            this.askForReDraw(this.drawconf);
+            return;
+        }
+        super.drawCanvas();
+    }
+    setCanvasSize(width, height) {
+        if (this.canvas === undefined) {
+            return;
+        }
+        this.canvas.width = width;
+        this.canvas.height = height;
+        super.setCanvasSize(width, height);
+    }
+    message(data) {
+        if (data.mthbCanvasTable !== this.id) {
+            return;
+        }
+        switch (data.type) {
+            case OffscreenCanvasTableMessage_1.OffscreenCanvasMesssageType.create:
+                this.canvas = data.offscreen;
+                this.setR(data.r);
+                const context = this.canvas.getContext('2d');
+                if (context === null) {
+                    return;
+                }
+                this.scrollView = new ScrollView_1.ScrollView(context, this, this.askForExtentedMouseMoveAndMaouseUp, this.askForNormalMouseMoveAndMaouseUp);
+                this.context = context;
+                this.doReize(data.width, data.height);
+                this.askForReDraw();
+                break;
+            case OffscreenCanvasTableMessage_1.OffscreenCanvasMesssageType.resize:
+                this.setR(data.r);
+                this.doReize(data.width, data.height);
+                this.askForReDraw();
+                break;
+            case OffscreenCanvasTableMessage_1.OffscreenCanvasMesssageType.collapseAll:
+                this.collapseAll();
+                break;
+            case OffscreenCanvasTableMessage_1.OffscreenCanvasMesssageType.expendedAll:
+                this.expendedAll();
+                break;
+            case OffscreenCanvasTableMessage_1.OffscreenCanvasMesssageType.setGroupBy:
+                this.setGroupBy(data.groupBy);
+                break;
+            case OffscreenCanvasTableMessage_1.OffscreenCanvasMesssageType.scroll:
+                this.wheel(data.deltaMode, data.deltaX, data.deltaY);
+                break;
+            case OffscreenCanvasTableMessage_1.OffscreenCanvasMesssageType.mouseDown:
+                this.mouseDown(data.x, data.y);
+                break;
+            case OffscreenCanvasTableMessage_1.OffscreenCanvasMesssageType.mouseMove:
+                this.mouseMove(data.x, data.y);
+                break;
+            case OffscreenCanvasTableMessage_1.OffscreenCanvasMesssageType.mouseUp:
+                this.mouseUp(data.x, data.y);
+                break;
+            case OffscreenCanvasTableMessage_1.OffscreenCanvasMesssageType.mouseMoveExtended:
+                this.mouseMoveExtended(data.x, data.y);
+                break;
+            case OffscreenCanvasTableMessage_1.OffscreenCanvasMesssageType.mouseUpExtended:
+                this.mouseUpExtended(data.x, data.y);
+                break;
+            case OffscreenCanvasTableMessage_1.OffscreenCanvasMesssageType.mouseLeave:
+                this.mouseLeave();
+                break;
+            case OffscreenCanvasTableMessage_1.OffscreenCanvasMesssageType.TouchStart:
+                this.TouchStart(data.event, data.offsetLeft, data.offsetTop);
+                break;
+            case OffscreenCanvasTableMessage_1.OffscreenCanvasMesssageType.TouchMove:
+                this.TouchMove(data.event, data.offsetLeft, data.offsetTop);
+                break;
+            case OffscreenCanvasTableMessage_1.OffscreenCanvasMesssageType.TouchEnd:
+                this.TouchEnd(data.event, data.offsetLeft, data.offsetTop);
+                break;
+            case OffscreenCanvasTableMessage_1.OffscreenCanvasMesssageType.keyDown:
+                this.keydown(data.keycode);
+                break;
+        }
+    }
+    resize() { }
+    askForExtentedMouseMoveAndMaouseUp() {
+        postMessage({ mthbCanvasTable: this.id, type: OffscreenCanvasTableMessage_1.OffscreenCanvasMesssageType.askForExtentedMouseMoveAndMaouseUp });
+    }
+    askForNormalMouseMoveAndMaouseUp() {
+        postMessage({ mthbCanvasTable: this.id, type: OffscreenCanvasTableMessage_1.OffscreenCanvasMesssageType.askForNormalMouseMoveAndMaouseUp });
+    }
+}
+exports.OffscreenCanvasTableWorker = OffscreenCanvasTableWorker;
 
 
 /***/ }),
-/* 2 */
+
+/***/ "../share/CircularBuffer.ts":
+/*!**********************************!*\
+  !*** ../share/CircularBuffer.ts ***!
+  \**********************************/
+/*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * Circular buffer
+ */
+class CircularBuffer {
+    /**
+     * constructor of CircularBuffer
+     * @param [length=50] Size of buffer
+     * @param [allowOverFlow=true] allow to push when buffer is full, you will lose data
+     */
+    constructor(length = 50, allowOverFlow = true) {
+        this.pointerWrite = 0;
+        this.pointerRead = 0;
+        this.count = 0;
+        this.length = length;
+        this.allowOverFlow = allowOverFlow;
+        this.buffer = new Array(this.length);
+    }
+    /**
+     * count of item in list
+     * @returns {number} size of list
+     */
+    size() {
+        return this.count;
+    }
+    /**
+     * pop out from lista last
+     * @returns {T} oldes item
+     */
+    pop() {
+        if (this.count === 0) {
+            throw "empty";
+        }
+        const i = this.pointerRead;
+        this.pointerRead = (this.length + this.pointerRead + 1) % this.length;
+        this.count--;
+        const temp = this.buffer[i];
+        if (temp === undefined) {
+            throw "undefined";
+        }
+        this.buffer[i] = undefined;
+        return temp;
+    }
+    /**
+     * Push item in circular buffer
+     * @param item {T} item
+     */
+    push(item) {
+        if (!this.allowOverFlow && this.count === this.length) {
+            throw "overflow";
+        }
+        this.buffer[this.pointerWrite] = item;
+        this.pointerWrite = (this.length + this.pointerWrite + 1) % this.length;
+        if (this.count === this.length) {
+            this.pointerRead = this.pointerWrite;
+        }
+        else {
+            this.count++;
+        }
+    }
+    /**
+     * Empty the circle buffer
+     */
+    clear() {
+        this.pointerRead = 0;
+        this.pointerWrite = 0;
+        this.count = 0;
+        this.buffer = new Array(this.length);
+    }
+    /**
+     * pop all item
+     * @returns {T[]} list
+     */
+    export() {
+        let result = [];
+        while (this.size() > 0) {
+            result[result.length] = this.pop();
+        }
+        return result;
+    }
+}
+exports.CircularBuffer = CircularBuffer;
 
 
 /***/ }),
-/* 3 */
+
+/***/ "../share/CustomCanvasTable.ts":
+/*!*************************************!*\
+  !*** ../share/CustomCanvasTable.ts ***!
+  \*************************************/
+/*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -147,10 +331,7 @@ class CustomCanvasTable {
         this.maxFontWidth = 1;
         this.font = "arial";
         this.cellHeight = 20;
-        this.dataIndex = {
-            type: ItemIndexType.Index,
-            list: []
-        };
+        this.dataIndex = undefined;
         this.column = [];
         this.orgColum = [];
         this.canvasHeight = 0;
@@ -207,6 +388,9 @@ class CustomCanvasTable {
         this.askForReDraw();
     }
     setGroupBy(col) {
+        if (!col) {
+            col = [];
+        }
         this.groupByCol = col;
         this.calcIndex();
         this.askForReDraw();
@@ -266,6 +450,9 @@ class CustomCanvasTable {
         this.needToCalcFont = true;
     }
     expendedAll() {
+        if (this.dataIndex === undefined) {
+            return;
+        }
         if (this.dataIndex.type === ItemIndexType.GroupItems) {
             this.changeChildExpended(this.dataIndex, true);
             this.reCalcForScrollView();
@@ -273,6 +460,9 @@ class CustomCanvasTable {
         }
     }
     collapseAll() {
+        if (this.dataIndex === undefined) {
+            return;
+        }
         if (this.dataIndex.type === ItemIndexType.GroupItems) {
             this.changeChildExpended(this.dataIndex, false);
             this.reCalcForScrollView();
@@ -285,6 +475,9 @@ class CustomCanvasTable {
         }
     }
     mouseDown(x, y) {
+        if (this.dataIndex === undefined) {
+            return;
+        }
         if (this.scrollView && this.scrollView.onMouseDown(x, y)) {
             return;
         }
@@ -344,6 +537,9 @@ class CustomCanvasTable {
     }
     TouchStart(e, offsetLeft, offsetTop) {
         if (this.scrollView && this.scrollView.OnTouchStart(e, offsetLeft, offsetTop)) {
+            return;
+        }
+        if (this.dataIndex === undefined) {
             return;
         }
         if (this.dataIndex.type === ItemIndexType.GroupItems) {
@@ -626,7 +822,7 @@ class CustomCanvasTable {
         this.setCanvasSize(width * this.r, height * this.r);
     }
     drawCanvas() {
-        if (!this.scrollView || !this.context) {
+        if (!this.scrollView || !this.context || !this.dataIndex) {
             return;
         }
         if (this.needToCalc) {
@@ -889,13 +1085,53 @@ exports.CustomCanvasTable = CustomCanvasTable;
 
 
 /***/ }),
-/* 4 */
+
+/***/ "../share/OffscreenCanvasTableMessage.ts":
+/*!***********************************************!*\
+  !*** ../share/OffscreenCanvasTableMessage.ts ***!
+  \***********************************************/
+/*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const mthb_circular_buffer_1 = __webpack_require__(5);
+var OffscreenCanvasMesssageType;
+(function (OffscreenCanvasMesssageType) {
+    OffscreenCanvasMesssageType[OffscreenCanvasMesssageType["create"] = 0] = "create";
+    OffscreenCanvasMesssageType[OffscreenCanvasMesssageType["resize"] = 1] = "resize";
+    OffscreenCanvasMesssageType[OffscreenCanvasMesssageType["expendedAll"] = 2] = "expendedAll";
+    OffscreenCanvasMesssageType[OffscreenCanvasMesssageType["collapseAll"] = 3] = "collapseAll";
+    OffscreenCanvasMesssageType[OffscreenCanvasMesssageType["setGroupBy"] = 4] = "setGroupBy";
+    OffscreenCanvasMesssageType[OffscreenCanvasMesssageType["scroll"] = 10] = "scroll";
+    OffscreenCanvasMesssageType[OffscreenCanvasMesssageType["mouseDown"] = 20] = "mouseDown";
+    OffscreenCanvasMesssageType[OffscreenCanvasMesssageType["mouseMove"] = 21] = "mouseMove";
+    OffscreenCanvasMesssageType[OffscreenCanvasMesssageType["mouseUp"] = 22] = "mouseUp";
+    OffscreenCanvasMesssageType[OffscreenCanvasMesssageType["mouseLeave"] = 23] = "mouseLeave";
+    OffscreenCanvasMesssageType[OffscreenCanvasMesssageType["mouseMoveExtended"] = 24] = "mouseMoveExtended";
+    OffscreenCanvasMesssageType[OffscreenCanvasMesssageType["mouseUpExtended"] = 25] = "mouseUpExtended";
+    OffscreenCanvasMesssageType[OffscreenCanvasMesssageType["TouchStart"] = 30] = "TouchStart";
+    OffscreenCanvasMesssageType[OffscreenCanvasMesssageType["TouchMove"] = 31] = "TouchMove";
+    OffscreenCanvasMesssageType[OffscreenCanvasMesssageType["TouchEnd"] = 32] = "TouchEnd";
+    OffscreenCanvasMesssageType[OffscreenCanvasMesssageType["keyDown"] = 40] = "keyDown";
+    OffscreenCanvasMesssageType[OffscreenCanvasMesssageType["askForExtentedMouseMoveAndMaouseUp"] = 100] = "askForExtentedMouseMoveAndMaouseUp";
+    OffscreenCanvasMesssageType[OffscreenCanvasMesssageType["askForNormalMouseMoveAndMaouseUp"] = 101] = "askForNormalMouseMoveAndMaouseUp";
+})(OffscreenCanvasMesssageType = exports.OffscreenCanvasMesssageType || (exports.OffscreenCanvasMesssageType = {}));
+
+
+/***/ }),
+
+/***/ "../share/ScrollView.ts":
+/*!******************************!*\
+  !*** ../share/ScrollView.ts ***!
+  \******************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const CircularBuffer_1 = __webpack_require__(/*! ./CircularBuffer */ "../share/CircularBuffer.ts");
 class ScrollView {
     constructor(context, drawable, askForExtentedMouseMoveAndMaouseUp, askForNormalMouseMoveAndMaouseUp) {
         this.canvasWidth = -1;
@@ -952,7 +1188,7 @@ class ScrollView {
         this.askForExtentedMouseMoveAndMaouseUp = askForExtentedMouseMoveAndMaouseUp;
         this.askForNormalMouseMoveAndMaouseUp = askForNormalMouseMoveAndMaouseUp;
         this.drawable = drawable;
-        this.lastmove = new mthb_circular_buffer_1.CircularBuffer(100, true);
+        this.lastmove = new CircularBuffer_1.CircularBuffer(100, true);
         this.context = context;
     }
     get posY() {
@@ -962,7 +1198,7 @@ class ScrollView {
         if (!this.hasScrollBarY) {
             value = 0;
         }
-        if (value < 0) {
+        if (value <= 0) {
             value = 0;
         }
         else {
@@ -982,7 +1218,7 @@ class ScrollView {
         if (!this.hasScrollBarX) {
             value = 0;
         }
-        if (value < 0) {
+        if (value <= 0) {
             value = 0;
         }
         else {
@@ -1608,94 +1844,94 @@ exports.ScrollView = ScrollView;
 
 
 /***/ }),
-/* 5 */
+
+/***/ "./worker.ts":
+/*!*******************!*\
+  !*** ./worker.ts ***!
+  \*******************/
+/*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-/**
- * Circular buffer
- */
-class CircularBuffer {
-    /**
-     * constructor of CircularBuffer
-     * @param [length=50] Size of buffer
-     * @param [allowOverFlow=true] allow to push when buffer is full, you will lose data
-     */
-    constructor(length = 50, allowOverFlow = true) {
-        this.pointerWrite = 0;
-        this.pointerRead = 0;
-        this.count = 0;
-        this.length = length;
-        this.allowOverFlow = allowOverFlow;
-        this.buffer = new Array(this.length);
-    }
-    /**
-     * count of item in list
-     * @returns {number} size of list
-     */
-    size() {
-        return this.count;
-    }
-    /**
-     * pop out from lista last
-     * @returns {T} oldes item
-     */
-    pop() {
-        if (this.count === 0) {
-            throw "empty";
-        }
-        const i = this.pointerRead;
-        this.pointerRead = (this.length + this.pointerRead + 1) % this.length;
-        this.count--;
-        const temp = this.buffer[i];
-        if (temp === undefined) {
-            throw "undefined";
-        }
-        this.buffer[i] = undefined;
-        return temp;
-    }
-    /**
-     * Push item in circular buffer
-     * @param item {T} item
-     */
-    push(item) {
-        if (!this.allowOverFlow && this.count === this.length) {
-            throw "overflow";
-        }
-        this.buffer[this.pointerWrite] = item;
-        this.pointerWrite = (this.length + this.pointerWrite + 1) % this.length;
-        if (this.count === this.length) {
-            this.pointerRead = this.pointerWrite;
-        }
-        else {
-            this.count++;
-        }
-    }
-    /**
-     * Empty the circle buffer
-     */
-    clear() {
-        this.pointerRead = 0;
-        this.pointerWrite = 0;
-        this.count = 0;
-        this.buffer = new Array(this.length);
-    }
-    /**
-     * pop all item
-     * @returns {T[]} list
-     */
-    export() {
-        let result = [];
-        while (this.size() > 0) {
-            result[result.length] = this.pop();
-        }
-        return result;
-    }
+const OffscreenCanvasTableWorker_1 = __webpack_require__(/*! ../OffscreenCanvasTableWorker/src/OffscreenCanvasTableWorker */ "../OffscreenCanvasTableWorker/src/OffscreenCanvasTableWorker.ts");
+const CustomCanvasTable_1 = __webpack_require__(/*! ../share/CustomCanvasTable */ "../share/CustomCanvasTable.ts");
+function customDraw(canvasTable, context, rowIndex, col, left, top, right, bottom, width, height, r, dataValue, row, data) {
+    context.fillStyle = "lightgreen";
+    context.fillRect(left, top, width, height);
+    context.strokeStyle = "red";
+    context.beginPath();
+    context.moveTo(left, top);
+    context.lineTo(right, bottom);
+    context.moveTo(left, bottom);
+    context.lineTo(right, top);
+    context.stroke();
 }
-exports.CircularBuffer = CircularBuffer;
+const col = [
+    {
+        header: "Id",
+        field: "__rownum__",
+        width: 80,
+        align: CustomCanvasTable_1.Align.center
+    },
+    {
+        header: "Render",
+        field: "__rownum__",
+        width: 80,
+        renderer: customDraw,
+        visible: true
+    },
+    {
+        header: "Country",
+        field: "country",
+        width: 100
+    },
+    {
+        header: "Id",
+        field: "__rownum__",
+        width: 30,
+        align: CustomCanvasTable_1.Align.right
+    },
+    {
+        header: "Name",
+        field: "name",
+        width: 200
+    },
+    {
+        header: "Subcountry",
+        field: "subcountry",
+        width: 200
+    },
+    {
+        header: "geonameid",
+        field: "geonameid",
+        width: 100,
+        align: CustomCanvasTable_1.Align.right
+    }
+];
+const offscreenCanvasTableWorker = new OffscreenCanvasTableWorker_1.OffscreenCanvasTableWorker(1, col);
+offscreenCanvasTableWorker.setSort([{ col: col[2], sort: CustomCanvasTable_1.Sort.ascending }, { col: col[5], sort: CustomCanvasTable_1.Sort.ascending }]);
+const httpRequest = new XMLHttpRequest();
+httpRequest.onreadystatechange = function () {
+    if (httpRequest.readyState === XMLHttpRequest.DONE) {
+        const data = JSON.parse(httpRequest.responseText);
+        offscreenCanvasTableWorker.setData(data);
+    }
+};
+httpRequest.open('GET', '../data.json', true);
+httpRequest.send();
+addEventListener('message', (message) => {
+    if (message.data.mthbCanvasTable !== undefined) {
+        offscreenCanvasTableWorker.message(message.data);
+        return;
+    }
+    console.log('in webworker', message);
+    postMessage('this is the response ' + message.data);
+});
 
 
 /***/ })
-/******/ ]);
+
+/******/ });
+//# sourceMappingURL=worker.js.map

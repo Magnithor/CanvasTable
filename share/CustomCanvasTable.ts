@@ -149,7 +149,8 @@ export abstract class CustomCanvasTable implements Drawable {
         this.calcIndex();
         this.askForReDraw();
     }
-    public setGroupBy(col:string[]) {
+    public setGroupBy(col?:string[]) {
+        if (!col) { col = []; }
         this.groupByCol = col;
         this.calcIndex();
         this.askForReDraw();

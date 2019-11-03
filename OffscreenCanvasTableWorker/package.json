@@ -1,9 +1,9 @@
 {
-  "name": "mthb-custom-canvas-table",
-  "version": "0.0.1",
+  "name": "mthb-offscreen-canvas-table-worker",
+  "version": "0.0.5",
   "description": "Canvas Table Webworker offscreencanvas",
-  "main": "lib/CustomCanvasTable.js",
-  "types": "lib/CustomCanvasTable.d.ts",
+  "main": "lib/OffscreenCanvasTableWorker.js",
+  "types": "lib/OffscreenCanvasTableWorker.d.ts",
   "scripts": {
     "build": "webpack",
     "prepare": "npm run build"
@@ -20,7 +20,7 @@
     "webworker"
   ],
   "files": [
-    "lib/**/*"
+    "lib/OffscreenCanvasTableWorker.js", "lib/OffscreenCanvasTableWorker.d.ts"
   ],
   "bugs": {
     "url": "https://github.com/Magnithor/CanvasTable/issues"
@@ -31,15 +31,11 @@
   "license": "MIT",
   "homepage": "https://github.com/Magnithor/CanvasTable/blob/master/README.md",
   "devDependencies": {
-    "dts-bundle": "^0.7.3",
-    "dts-bundle-webpack": "^1.0.2",
     "ts-loader": "^6.2.1",
     "typescript": "^3.6.4",
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.9"
   },
   "dependencies": {
-    "mthb-canvas-table-touch-event": "0.0.1",
-    "mthb-circular-buffer": "0.0.45"
   }
 }

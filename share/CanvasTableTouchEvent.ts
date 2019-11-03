@@ -3,7 +3,25 @@ export interface CanvasTableTouchEvent {
     touches: {pageX:number, pageY:number}[]
 };
 
-export function TouchEventToCanvasTableTouchEvent(e: TouchEvent):CanvasTableTouchEvent{
+interface MyTouchEvent {
+    readonly altKey: boolean;
+    readonly changedTouches: MyTouchList;
+    readonly ctrlKey: boolean;
+    readonly metaKey: boolean;
+    readonly shiftKey: boolean;
+    readonly touches: MyTouchList;
+}
+interface MyTouchList {
+    readonly length: number;
+    item(index: number): MyTouch | null;
+    [index: number]: MyTouch;
+}
+interface MyTouch {
+    readonly pageX: number;
+    readonly pageY: number;
+}
+
+export function TouchEventToCanvasTableTouchEvent(e: MyTouchEvent):CanvasTableTouchEvent{
     const x: CanvasTableTouchEvent = { changedTouches:[], touches:[] };
     for (var i = 0; i< e.changedTouches.length; i++){
         x.changedTouches.push({

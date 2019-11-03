@@ -29,7 +29,9 @@ module.exports = {
 	mode: 'development',
 
 	entry: {
-		app: './src/app.ts'
+		app: './src/app.ts',
+		worker: './src/worker.ts',
+		appWithWorker: './src/appWithWorker.ts'
 	},
 
 	output: {

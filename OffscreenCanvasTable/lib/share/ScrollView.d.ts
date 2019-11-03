@@ -1,6 +1,6 @@
 import { Drawable } from "./Drawable";
 import { CanvasContext2D } from "./CanvasContext2D";
-import { CanvasTableTouchEvent } from 'mthb-canvas-table-touch-event';
+import { CanvasTableTouchEvent } from './CanvasTableTouchEvent';
 export declare class ScrollView {
     private drawable;
     private askForExtentedMouseMoveAndMaouseUp;

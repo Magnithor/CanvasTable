@@ -19,7 +19,7 @@ module.exports = {
 	},
 
 	//plugins: [new webpack.ProgressPlugin(), new HtmlWebpackPlugin()],
-
+	devtool: 'source-map',	
 	module: {
 		rules: [
 			{
