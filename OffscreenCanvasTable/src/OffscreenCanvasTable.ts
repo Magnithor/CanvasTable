@@ -114,7 +114,7 @@ export class OffscreenCanvasTable {
         this.postMessage({
             mthbCanvasTable: this.offscreenCanvasTableId,
             type: OffscreenCanvasMesssageType.TouchStart,
-            event:TouchEventToCanvasTableTouchEvent(e),
+            event: TouchEventToCanvasTableTouchEvent(e),
             offsetTop: this.canvas.offsetTop,
             offsetLeft: this.canvas.offsetLeft
         });
@@ -124,7 +124,7 @@ export class OffscreenCanvasTable {
         this.postMessage({
             mthbCanvasTable: this.offscreenCanvasTableId,
             type: OffscreenCanvasMesssageType.TouchMove,
-            event:TouchEventToCanvasTableTouchEvent(e),
+            event: TouchEventToCanvasTableTouchEvent(e),
             offsetTop: this.canvas.offsetTop,
             offsetLeft: this.canvas.offsetLeft
         });
@@ -134,7 +134,7 @@ export class OffscreenCanvasTable {
         this.postMessage({
             mthbCanvasTable: this.offscreenCanvasTableId,
             type: OffscreenCanvasMesssageType.TouchEnd,
-            event:TouchEventToCanvasTableTouchEvent(e),
+            event: TouchEventToCanvasTableTouchEvent(e),
             offsetTop: this.canvas.offsetTop,
             offsetLeft: this.canvas.offsetLeft
         });

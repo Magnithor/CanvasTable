@@ -57,15 +57,15 @@ export class CanvasTable extends CustomCanvasTable {
 
     private canvasTouchStart = (e: TouchEvent) => {
         e.preventDefault();
-        this.TouchStart(TouchEventToCanvasTableTouchEvent(e), this.canvas.offsetTop, this.canvas.offsetLeft);
+        this.TouchStart(TouchEventToCanvasTableTouchEvent(e), this.canvas.offsetLeft, this.canvas.offsetTop);
     }
     private canvasTouchMove = (e: TouchEvent) => {
         e.preventDefault();
-        this.TouchMove(TouchEventToCanvasTableTouchEvent(e), this.canvas.offsetTop, this.canvas.offsetLeft);    
+        this.TouchMove(TouchEventToCanvasTableTouchEvent(e), this.canvas.offsetLeft, this.canvas.offsetTop);    
     }
     private canvasTouchEnd = (e: TouchEvent) => {
         e.preventDefault();
-        this.TouchEnd(TouchEventToCanvasTableTouchEvent(e), this.canvas.offsetTop, this.canvas.offsetLeft);
+        this.TouchEnd(TouchEventToCanvasTableTouchEvent(e), this.canvas.offsetLeft, this.canvas.offsetTop);
     }
 
     private canvasMouseDown = (e: MouseEvent) => {
