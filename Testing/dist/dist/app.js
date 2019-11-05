@@ -111,15 +111,15 @@ class CanvasTable extends CustomCanvasTable_1.CustomCanvasTable {
         };
         this.canvasTouchStart = (e) => {
             e.preventDefault();
-            this.TouchStart(CanvasTableTouchEvent_1.TouchEventToCanvasTableTouchEvent(e), this.canvas.offsetTop, this.canvas.offsetLeft);
+            this.TouchStart(CanvasTableTouchEvent_1.TouchEventToCanvasTableTouchEvent(e), this.canvas.offsetLeft, this.canvas.offsetTop);
         };
         this.canvasTouchMove = (e) => {
             e.preventDefault();
-            this.TouchMove(CanvasTableTouchEvent_1.TouchEventToCanvasTableTouchEvent(e), this.canvas.offsetTop, this.canvas.offsetLeft);
+            this.TouchMove(CanvasTableTouchEvent_1.TouchEventToCanvasTableTouchEvent(e), this.canvas.offsetLeft, this.canvas.offsetTop);
         };
         this.canvasTouchEnd = (e) => {
             e.preventDefault();
-            this.TouchEnd(CanvasTableTouchEvent_1.TouchEventToCanvasTableTouchEvent(e), this.canvas.offsetTop, this.canvas.offsetLeft);
+            this.TouchEnd(CanvasTableTouchEvent_1.TouchEventToCanvasTableTouchEvent(e), this.canvas.offsetLeft, this.canvas.offsetTop);
         };
         this.canvasMouseDown = (e) => {
             e.preventDefault();
@@ -556,8 +556,12 @@ class CustomCanvasTable {
         if (this.scrollView && this.scrollView.onMouseDown(x, y)) {
             return;
         }
-        if (this.dataIndex.type === CustomCanvasIndex_1.ItemIndexType.GroupItems && y > 18) {
-            const result = this.findByPos(y);
+        if (y <= 18) {
+            this.findColByPos(x);
+            return;
+        }
+        if (this.dataIndex.type === CustomCanvasIndex_1.ItemIndexType.GroupItems) {
+            const result = this.findRowByPos(y);
             if (result !== null && typeof result === "object") {
                 result.isExpended = !result.isExpended;
                 this.askForReDraw();
@@ -576,7 +580,7 @@ class CustomCanvasTable {
             return;
         }
         else {
-            const result = this.findByPos(y);
+            const result = this.findRowByPos(y);
             if (typeof result === "number") {
                 this.overRow = result;
                 return;
@@ -622,7 +626,7 @@ class CustomCanvasTable {
                 const y = e.changedTouches[0].pageY - offsetTop;
                 if (y > 18) {
                     this.touchClick = { timeout: setTimeout(() => {
-                            const result = this.findByPos(y);
+                            const result = this.findRowByPos(y);
                             if (result !== null && typeof result === "object") {
                                 result.isExpended = !result.isExpended;
                                 this.askForReDraw();
@@ -667,7 +671,21 @@ class CustomCanvasTable {
             this.touchClick = undefined;
         }
     }
-    findByPos(y) {
+    findColByPos(x) {
+        if (this.scrollView === undefined) {
+            return null;
+        }
+        let pos = this.scrollView.posX / this.r + x;
+        let w = 0;
+        for (var i = 0; i < this.column.length; i++) {
+            w += this.column[i].width;
+            if (w >= pos) {
+                return this.column[i];
+            }
+        }
+        return null;
+    }
+    findRowByPos(y) {
         if (this.dataIndex === undefined || this.scrollView === undefined) {
             return null;
         }

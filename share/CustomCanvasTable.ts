@@ -2,7 +2,7 @@ import { Drawable } from "./Drawable";
 import { ScrollView, ScrollViewConfig } from "./ScrollView";
 import { CanvasContext2D, CanvasColor } from "./CanvasContext2D";
 import { CanvasTableTouchEvent } from "./CanvasTableTouchEvent";
-import { Align, RenderValue, CustomData, CanvasTableColumnConf, CustomFilter, CustomSort, CanvasTableColumnSort } from "./CanvasTableColum";
+import { Align, RenderValue, CustomData, CanvasTableColumnConf, CustomFilter, CustomSort, CanvasTableColumnSort, Sort } from "./CanvasTableColum";
 import { IndexType, ItemIndexType, GroupItem, GroupItems, Index } from "./CustomCanvasIndex";
 export interface DrawConfig {
     drawOnly?: number[]
@@ -19,14 +19,16 @@ export interface CanvasTableConfig {
     headerFontStyle?: string,
     headerFontSize?: number,
     headerFontColor?: CanvasColor,
-    lineColor?:  CanvasColor,
-    howerBackgroundColor ?: CanvasColor,
+    headerDrawSortArrow?: boolean,
+    backgroundColor?: CanvasColor,
+    lineColor?: CanvasColor,
+    howerBackgroundColor?: CanvasColor,
     sepraBackgroundColor?: CanvasColor
 }
 
 interface CanvasTableConf {
     scrollView?: ScrollViewConfig,
-    font: string
+    font: string,
     fontStyle: string,
     fontSize: number,
     fontColor: CanvasColor,
@@ -34,9 +36,10 @@ interface CanvasTableConf {
     headerFontStyle: string,
     headerFontSize: number,
     headerFontColor: CanvasColor,
+    headerDrawSortArrow: boolean,
     backgroundColor: CanvasColor,
     lineColor: CanvasColor,
-    howerBackgroundColor:CanvasColor,
+    howerBackgroundColor: CanvasColor,
     sepraBackgroundColor: CanvasColor
 }
 
@@ -79,6 +82,7 @@ export abstract class CustomCanvasTable implements Drawable {
     private canvasWidth: number = 0;
     protected config: CanvasTableConf;
     constructor (config: CanvasTableConfig | undefined) {
+        
         this.config = {
              ...{
                 font: "arial",
@@ -88,7 +92,8 @@ export abstract class CustomCanvasTable implements Drawable {
                 headerFont: "arial",
                 headerFontStyle: "bold",
                 headerFontSize: 14,
-                headerFontColor: "bold",            
+                headerFontColor: "black",
+                headerDrawSortArrow: true,
                 lineColor: "black",
                 backgroundColor: "white",
                 howerBackgroundColor: "#DCDCDC",
@@ -239,8 +244,20 @@ export abstract class CustomCanvasTable implements Drawable {
             return;
         }
 
-        if (this.dataIndex.type === ItemIndexType.GroupItems && y > 18) {
-            const result = this.findByPos(y);
+        if (y <= 18) {
+            const col = this.findColByPos(x);
+            if (col) {
+                if (this.sortCol && this.sortCol.length == 1 && this.sortCol[0].col == col && this.sortCol[0].sort == Sort.ascending){
+                    this.setSort([{col: col, sort:Sort.descending}]);
+                } else {
+                    this.setSort([{col: col, sort:Sort.ascending}]);
+                }
+            }
+            return;
+        }
+
+        if (this.dataIndex.type === ItemIndexType.GroupItems) {
+            const result = this.findRowByPos(y);
             if (result !== null && typeof result === "object") {
                 result.isExpended = !result.isExpended;
                 this.askForReDraw();
@@ -259,7 +276,7 @@ export abstract class CustomCanvasTable implements Drawable {
             this.overRow = undefined;
             return;
         } else {
-            const result = this.findByPos(y);
+            const result = this.findRowByPos(y);
             if (typeof result === "number") {
                 this.overRow = result;
                 return;
@@ -301,7 +318,7 @@ export abstract class CustomCanvasTable implements Drawable {
                 const y = e.changedTouches[0].pageY - offsetTop;
                 if (y > 18) {
                     this.touchClick = {timeout: setTimeout(()=>{                        
-                        const result = this.findByPos(y);
+                        const result = this.findRowByPos(y);
                         if (result !== null && typeof result === "object") {
                             result.isExpended = !result.isExpended;
                             this.askForReDraw();
@@ -348,7 +365,21 @@ export abstract class CustomCanvasTable implements Drawable {
         }
     }
 
-    protected findByPos(y: number): number | GroupItem | null {
+    protected findColByPos(x: number): CanvasTableColumn | null {
+        if (this.scrollView === undefined) { return null; }
+        let pos = this.scrollView.posX / this.r + x;
+        let w = 0;
+
+        for (var i = 0; i < this.column.length; i++) {
+            w += this.column[i].width;
+            if (w >= pos) {
+                return this.column[i];
+            }    
+        }
+
+        return null;
+    }
+    protected findRowByPos(y: number): number | GroupItem | null {
         if (this.dataIndex === undefined || this.scrollView === undefined) { return null; }
         let pos = -this.scrollView.posY / this.r + 18;
         const cellHeight = this.cellHeight;
@@ -674,6 +705,34 @@ export abstract class CustomCanvasTable implements Drawable {
         this.context.textAlign = 'left';
         for (let col = colStart; col < colEnd; col++) {
             this.context.fillText(this.column[col].header, -this.scrollView.posX + this.column[col].leftPos + offsetLeft, pos);
+
+            if (this.config.headerDrawSortArrow) {
+                var sort:Sort|undefined = undefined;
+                if (this.sortCol){
+                    for (let i = 0; i < this.sortCol.length; i++){
+                        if (this.sortCol[i].col === this.column[col]){
+                            sort = this.sortCol[i].sort;
+                            break;
+                        }
+                    }
+                }
+                if (sort) {
+                    const startX =  -this.scrollView.posX + this.column[col].leftPos + this.column[col].width * this.r;
+                    if (sort === Sort.ascending) { 
+                        this.context.beginPath();
+                        this.context.moveTo(startX - 12 * this.r, 5 * this.r);
+                        this.context.lineTo(startX - 4 * this.r, 5 * this.r);
+                        this.context.lineTo(startX - 8 * this.r, 14 * this.r);
+                        this.context.fill();
+                    } else {
+                        this.context.beginPath();
+                        this.context.moveTo(startX - 8 * this.r, 5 * this.r);
+                        this.context.lineTo(startX - 12 * this.r, 14 * this.r);
+                        this.context.lineTo(startX - 4 * this.r, 14 * this.r);
+                        this.context.fill();
+                    }
+                }
+            }
         }
 
         this.context.beginPath();
