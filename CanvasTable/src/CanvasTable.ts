@@ -103,6 +103,9 @@ export class CanvasTable extends CustomCanvasTable {
         this.reCalcForScrollView();
         this.askForReDraw();
     }
+    protected setCursor(cursor: string): void {
+        this.canvas.style.cursor = cursor;
+    }
     protected setCanvasSize(width:number, height:number) {
         this.canvas.width = width;
         this.canvas.height = height;

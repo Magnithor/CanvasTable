@@ -78,6 +78,7 @@ export abstract class CustomCanvasTable implements Drawable {
     private overRowValue?: number;
     private touchClick?: {timeout: number, x: number, y: number};
 
+    private lastCursor: string = "";
     private canvasHeight: number = 0;
     private canvasWidth: number = 0;
     protected config: CanvasTableConf;
@@ -213,6 +214,12 @@ export abstract class CustomCanvasTable implements Drawable {
         this.needToCalcFont = true;
     }
     protected abstract resize(): void;
+    protected abstract setCursor(cusor: string): void;
+    private updateCursor(cursor: string = ""): void {
+        if (this.lastCursor === cursor) { return; }
+        this.lastCursor = cursor;
+        this.setCursor(cursor);
+    }
 
     public expendedAll() {
         if (this.dataIndex === undefined) { return; }
@@ -232,6 +239,16 @@ export abstract class CustomCanvasTable implements Drawable {
         }
     }
 
+    protected clickOnHeader(col:CanvasTableColumn | null){
+        if (col) {
+            if (this.sortCol && this.sortCol.length == 1 && this.sortCol[0].col == col && this.sortCol[0].sort == Sort.ascending){
+                this.setSort([{col: col, sort:Sort.descending}]);
+            } else {
+                this.setSort([{col: col, sort:Sort.ascending}]);
+            }
+        }
+    }
+
     protected wheel(deltaMode: number, deltaX:number, deltaY: number) {
         if (this.scrollView) {
             this.scrollView.onScroll(deltaMode, deltaX, deltaY); 
@@ -246,13 +263,8 @@ export abstract class CustomCanvasTable implements Drawable {
 
         if (y <= 18) {
             const col = this.findColByPos(x);
-            if (col) {
-                if (this.sortCol && this.sortCol.length == 1 && this.sortCol[0].col == col && this.sortCol[0].sort == Sort.ascending){
-                    this.setSort([{col: col, sort:Sort.descending}]);
-                } else {
-                    this.setSort([{col: col, sort:Sort.ascending}]);
-                }
-            }
+            this.clickOnHeader(col);
+            
             return;
         }
 
@@ -268,14 +280,17 @@ export abstract class CustomCanvasTable implements Drawable {
     }
     protected mouseMove(x: number, y: number) {
         if (this.scrollView && this.scrollView.onMouseMove(x, y)) {
+            this.updateCursor();
             this.overRow = undefined;
             return;
         }
 
         if (y < 18) {
             this.overRow = undefined;
+            this.updateCursor("col-resize");
             return;
         } else {
+            this.updateCursor();
             const result = this.findRowByPos(y);
             if (typeof result === "number") {
                 this.overRow = result;
@@ -295,6 +310,7 @@ export abstract class CustomCanvasTable implements Drawable {
     }
     protected mouseLeave() {
         this.overRow = undefined;
+        this.updateCursor();
         if (this.scrollView) {
             this.scrollView.onMouseLeave();
         }
@@ -311,13 +327,15 @@ export abstract class CustomCanvasTable implements Drawable {
             return;
         }
 
-        if (this.dataIndex === undefined) { return; }
+        //if (this.dataIndex === undefined) { return; }
 
-        if (this.dataIndex.type === ItemIndexType.GroupItems) {
+        //if (this.dataIndex.type === ItemIndexType.GroupItems) 
+        {
             if (e.changedTouches.length === 1) {
                 const y = e.changedTouches[0].pageY - offsetTop;
-                if (y > 18) {
-                    this.touchClick = {timeout: setTimeout(()=>{                        
+                const x = e.changedTouches[0].pageX - offsetLeft;
+                this.touchClick = {timeout: setTimeout(() => {
+                    if (y > 18) {                                        
                         const result = this.findRowByPos(y);
                         if (result !== null && typeof result === "object") {
                             result.isExpended = !result.isExpended;
@@ -325,10 +343,11 @@ export abstract class CustomCanvasTable implements Drawable {
                             this.reCalcForScrollView();
                             return;
                         }
-                    }, 250), x: e.changedTouches[0].pageX - offsetLeft, y:y};
-                } else {
-                    this.clearTouchClick();
-                }
+                    } else {
+                        const col = this.findColByPos(x);
+                        this.clickOnHeader(col);
+                    }
+                }, 250), x: x, y: y};
             } else {
                 this.clearTouchClick();
             }

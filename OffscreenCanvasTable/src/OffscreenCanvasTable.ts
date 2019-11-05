@@ -184,6 +184,9 @@ export class OffscreenCanvasTable {
                 this.canvas.addEventListener("mousemove", this.canvasMouseMove);
                 this.canvas.addEventListener("mouseup", this.canvasMouseUp);            
                 break;
+            case OffscreenCanvasMesssageType.setCursor:
+                this.canvas.style.cursor = data.cursor;
+                break;
         }
     }
 

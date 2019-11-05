@@ -96,11 +96,16 @@ export class OffscreenCanvasTableWorker extends CustomCanvasTable {
     }
 
     protected resize() {}
-
+    protected setCursor(cursor: string): void {
+        const data:OffscreenCanvasMesssage = { mthbCanvasTable:this.id, type:OffscreenCanvasMesssageType.setCursor, cursor: cursor };
+        postMessage(data);
+    }
     private askForExtentedMouseMoveAndMaouseUp() {
-        postMessage({ mthbCanvasTable:this.id, type:OffscreenCanvasMesssageType.askForExtentedMouseMoveAndMaouseUp });
+        const data:OffscreenCanvasMesssage = { mthbCanvasTable:this.id, type:OffscreenCanvasMesssageType.askForExtentedMouseMoveAndMaouseUp };
+        postMessage(data);
     }
     private askForNormalMouseMoveAndMaouseUp() {
-        postMessage({ mthbCanvasTable:this.id, type:OffscreenCanvasMesssageType.askForNormalMouseMoveAndMaouseUp });
+        const data:OffscreenCanvasMesssage = { mthbCanvasTable:this.id, type:OffscreenCanvasMesssageType.askForNormalMouseMoveAndMaouseUp };
+        postMessage(data);
     }
 }

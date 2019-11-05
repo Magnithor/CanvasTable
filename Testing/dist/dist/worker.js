@@ -513,6 +513,16 @@ class CustomCanvasTable {
             this.askForReDraw();
         }
     }
+    clickOnHeader(col) {
+        if (col) {
+            if (this.sortCol && this.sortCol.length == 1 && this.sortCol[0].col == col && this.sortCol[0].sort == CanvasTableColum_1.Sort.ascending) {
+                this.setSort([{ col: col, sort: CanvasTableColum_1.Sort.descending }]);
+            }
+            else {
+                this.setSort([{ col: col, sort: CanvasTableColum_1.Sort.ascending }]);
+            }
+        }
+    }
     wheel(deltaMode, deltaX, deltaY) {
         if (this.scrollView) {
             this.scrollView.onScroll(deltaMode, deltaX, deltaY);
@@ -527,14 +537,7 @@ class CustomCanvasTable {
         }
         if (y <= 18) {
             const col = this.findColByPos(x);
-            if (col) {
-                if (this.sortCol && this.sortCol.length == 1 && this.sortCol[0].col == col && this.sortCol[0].sort == CanvasTableColum_1.Sort.ascending) {
-                    this.setSort([{ col: col, sort: CanvasTableColum_1.Sort.descending }]);
-                }
-                else {
-                    this.setSort([{ col: col, sort: CanvasTableColum_1.Sort.ascending }]);
-                }
-            }
+            this.clickOnHeader(col);
             return;
         }
         if (this.dataIndex.type === CustomCanvasIndex_1.ItemIndexType.GroupItems) {
@@ -595,14 +598,14 @@ class CustomCanvasTable {
         if (this.scrollView && this.scrollView.OnTouchStart(e, offsetLeft, offsetTop)) {
             return;
         }
-        if (this.dataIndex === undefined) {
-            return;
-        }
-        if (this.dataIndex.type === CustomCanvasIndex_1.ItemIndexType.GroupItems) {
+        //if (this.dataIndex === undefined) { return; }
+        //if (this.dataIndex.type === ItemIndexType.GroupItems) 
+        {
             if (e.changedTouches.length === 1) {
                 const y = e.changedTouches[0].pageY - offsetTop;
-                if (y > 18) {
-                    this.touchClick = { timeout: setTimeout(() => {
+                const x = e.changedTouches[0].pageX - offsetLeft;
+                this.touchClick = { timeout: setTimeout(() => {
+                        if (y > 18) {
                             const result = this.findRowByPos(y);
                             if (result !== null && typeof result === "object") {
                                 result.isExpended = !result.isExpended;
@@ -610,11 +613,12 @@ class CustomCanvasTable {
                                 this.reCalcForScrollView();
                                 return;
                             }
-                        }, 250), x: e.changedTouches[0].pageX - offsetLeft, y: y };
-                }
-                else {
-                    this.clearTouchClick();
-                }
+                        }
+                        else {
+                            const col = this.findColByPos(x);
+                            this.clickOnHeader(col);
+                        }
+                    }, 250), x: x, y: y };
             }
             else {
                 this.clearTouchClick();
