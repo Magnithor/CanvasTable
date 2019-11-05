@@ -1,6 +1,6 @@
 {
   "name": "mthb-canvas-table",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Canvas Table",
   "main": "lib/CanvasTable.js",
   "types": "lib/CanvasTable.d.ts",

@@ -21,3 +21,5 @@ CanvasTable is Typescript library who draws a table on canvas.
 * custom render data
 * custom drawing col
 * auto scroll X and Y
+* draw sort arrow on header 
+* sort when click on header

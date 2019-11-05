@@ -1,7 +1,8 @@
-import { CustomCanvasTable, CanvasTableColumnConf } from './../../share/CustomCanvasTable';
+import { CustomCanvasTable, CanvasTableConfig } from './../../share/CustomCanvasTable';
+import { CanvasTableColumnConf } from '../../share/CanvasTableColum';
 export declare class CanvasTable extends CustomCanvasTable {
     private canvas;
-    constructor(htmlId: string, data: any[], col: CanvasTableColumnConf[]);
+    constructor(htmlId: string, data: any[], col: CanvasTableColumnConf[], config?: CanvasTableConfig);
     private askForExtentedMouseMoveAndMaouseUp;
     private askForNormalMouseMoveAndMaouseUp;
     private canvasWheel;

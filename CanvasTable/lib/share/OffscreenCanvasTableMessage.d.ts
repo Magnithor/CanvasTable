@@ -4,6 +4,7 @@ export declare enum OffscreenCanvasMesssageType {
     resize = 1,
     expendedAll = 2,
     collapseAll = 3,
+    setGroupBy = 4,
     scroll = 10,
     mouseDown = 20,
     mouseMove = 21,
@@ -62,5 +63,9 @@ interface OffscreenCanvasMesssageTouch extends OffscreenCanvasMesssageParnet {
     offsetLeft: number;
     offsetTop: number;
 }
-export declare type OffscreenCanvasMesssage = OffscreenCanvasMessageScroll | OffscreenCanvasMessageCreate | OffscreenCanvasMessageResize | OffscreenCanvasMessageFunctions | OffscreenCanvasMessageMouse | OffscreenCanvasMessageMouseLeave | OffscreenCanvasMessageKeyDown | OffscreenCanvasMesssageTouch;
+interface OffscreenCanvasMessageGroupBy extends OffscreenCanvasMesssageParnet {
+    type: OffscreenCanvasMesssageType.setGroupBy;
+    groupBy?: string[];
+}
+export declare type OffscreenCanvasMesssage = OffscreenCanvasMessageScroll | OffscreenCanvasMessageCreate | OffscreenCanvasMessageResize | OffscreenCanvasMessageFunctions | OffscreenCanvasMessageGroupBy | OffscreenCanvasMessageMouse | OffscreenCanvasMessageMouseLeave | OffscreenCanvasMessageKeyDown | OffscreenCanvasMesssageTouch;
 export {};

@@ -13,15 +13,14 @@ If you like to use offscreenCanvas and/or keep the data in webworker then you us
 [Demo](http://magni.strumpur.net/CanvasTable)
 
 #TODO
-* Draw sort arrow on header config
-* sort when click on header
 * send event on click on data CanvasTable
 * send event on click on hader CanvasTable
 * send event on click on data CanvasTableWorker
 * send event on click on hader CanvasTableWorker
+* resize column
 
 #Supported
-* Webworker
+* web worker
 * multi col sort
 * custom sort
 * mulit group
@@ -30,3 +29,5 @@ If you like to use offscreenCanvas and/or keep the data in webworker then you us
 * custom render data
 * custom drawing col
 * auto scroll X and Y
+* draw sort arrow on header 
+* sort when click on header

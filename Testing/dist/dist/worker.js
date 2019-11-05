@@ -373,7 +373,8 @@ class CustomCanvasTable {
             headerFont: "arial",
             headerFontStyle: "bold",
             headerFontSize: 14,
-            headerFontColor: "bold",
+            headerFontColor: "black",
+            headerDrawSortArrow: true,
             lineColor: "black",
             backgroundColor: "white",
             howerBackgroundColor: "#DCDCDC",
@@ -525,7 +526,15 @@ class CustomCanvasTable {
             return;
         }
         if (y <= 18) {
-            this.findColByPos(x);
+            const col = this.findColByPos(x);
+            if (col) {
+                if (this.sortCol && this.sortCol.length == 1 && this.sortCol[0].col == col && this.sortCol[0].sort == CanvasTableColum_1.Sort.ascending) {
+                    this.setSort([{ col: col, sort: CanvasTableColum_1.Sort.descending }]);
+                }
+                else {
+                    this.setSort([{ col: col, sort: CanvasTableColum_1.Sort.ascending }]);
+                }
+            }
             return;
         }
         if (this.dataIndex.type === CustomCanvasIndex_1.ItemIndexType.GroupItems) {
@@ -965,6 +974,34 @@ class CustomCanvasTable {
         this.context.textAlign = 'left';
         for (let col = colStart; col < colEnd; col++) {
             this.context.fillText(this.column[col].header, -this.scrollView.posX + this.column[col].leftPos + offsetLeft, pos);
+            if (this.config.headerDrawSortArrow) {
+                var sort = undefined;
+                if (this.sortCol) {
+                    for (let i = 0; i < this.sortCol.length; i++) {
+                        if (this.sortCol[i].col === this.column[col]) {
+                            sort = this.sortCol[i].sort;
+                            break;
+                        }
+                    }
+                }
+                if (sort) {
+                    const startX = -this.scrollView.posX + this.column[col].leftPos + this.column[col].width * this.r;
+                    if (sort === CanvasTableColum_1.Sort.ascending) {
+                        this.context.beginPath();
+                        this.context.moveTo(startX - 12 * this.r, 5 * this.r);
+                        this.context.lineTo(startX - 4 * this.r, 5 * this.r);
+                        this.context.lineTo(startX - 8 * this.r, 14 * this.r);
+                        this.context.fill();
+                    }
+                    else {
+                        this.context.beginPath();
+                        this.context.moveTo(startX - 8 * this.r, 5 * this.r);
+                        this.context.lineTo(startX - 12 * this.r, 14 * this.r);
+                        this.context.lineTo(startX - 4 * this.r, 14 * this.r);
+                        this.context.fill();
+                    }
+                }
+            }
         }
         this.context.beginPath();
         this.context.moveTo(0, pos + 4 * this.r);
