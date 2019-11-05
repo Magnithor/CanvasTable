@@ -216,6 +216,9 @@ class OffscreenCanvasTable {
                     this.canvas.addEventListener("mousemove", this.canvasMouseMove);
                     this.canvas.addEventListener("mouseup", this.canvasMouseUp);
                     break;
+                case OffscreenCanvasTableMessage_1.OffscreenCanvasMesssageType.setCursor:
+                    this.canvas.style.cursor = data.cursor;
+                    break;
             }
         };
         this.canvas = document.getElementById(htmlId);
@@ -343,6 +346,7 @@ var OffscreenCanvasMesssageType;
     OffscreenCanvasMesssageType[OffscreenCanvasMesssageType["keyDown"] = 40] = "keyDown";
     OffscreenCanvasMesssageType[OffscreenCanvasMesssageType["askForExtentedMouseMoveAndMaouseUp"] = 100] = "askForExtentedMouseMoveAndMaouseUp";
     OffscreenCanvasMesssageType[OffscreenCanvasMesssageType["askForNormalMouseMoveAndMaouseUp"] = 101] = "askForNormalMouseMoveAndMaouseUp";
+    OffscreenCanvasMesssageType[OffscreenCanvasMesssageType["setCursor"] = 102] = "setCursor";
 })(OffscreenCanvasMesssageType = exports.OffscreenCanvasMesssageType || (exports.OffscreenCanvasMesssageType = {}));
 
 

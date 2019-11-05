@@ -188,11 +188,17 @@ class OffscreenCanvasTableWorker extends CustomCanvasTable_1.CustomCanvasTable {
         }
     }
     resize() { }
+    setCursor(cursor) {
+        const data = { mthbCanvasTable: this.id, type: OffscreenCanvasTableMessage_1.OffscreenCanvasMesssageType.setCursor, cursor: cursor };
+        postMessage(data);
+    }
     askForExtentedMouseMoveAndMaouseUp() {
-        postMessage({ mthbCanvasTable: this.id, type: OffscreenCanvasTableMessage_1.OffscreenCanvasMesssageType.askForExtentedMouseMoveAndMaouseUp });
+        const data = { mthbCanvasTable: this.id, type: OffscreenCanvasTableMessage_1.OffscreenCanvasMesssageType.askForExtentedMouseMoveAndMaouseUp };
+        postMessage(data);
     }
     askForNormalMouseMoveAndMaouseUp() {
-        postMessage({ mthbCanvasTable: this.id, type: OffscreenCanvasTableMessage_1.OffscreenCanvasMesssageType.askForNormalMouseMoveAndMaouseUp });
+        const data = { mthbCanvasTable: this.id, type: OffscreenCanvasTableMessage_1.OffscreenCanvasMesssageType.askForNormalMouseMoveAndMaouseUp };
+        postMessage(data);
     }
 }
 exports.OffscreenCanvasTableWorker = OffscreenCanvasTableWorker;
@@ -363,6 +369,7 @@ class CustomCanvasTable {
         this.dataIndex = undefined;
         this.column = [];
         this.orgColum = [];
+        this.lastCursor = "";
         this.canvasHeight = 0;
         this.canvasWidth = 0;
         this.config = Object.assign({
@@ -493,6 +500,13 @@ class CustomCanvasTable {
         this.needToCalc = true;
         this.needToCalcFont = true;
     }
+    updateCursor(cursor = "") {
+        if (this.lastCursor === cursor) {
+            return;
+        }
+        this.lastCursor = cursor;
+        this.setCursor(cursor);
+    }
     expendedAll() {
         if (this.dataIndex === undefined) {
             return;
@@ -552,14 +566,17 @@ class CustomCanvasTable {
     }
     mouseMove(x, y) {
         if (this.scrollView && this.scrollView.onMouseMove(x, y)) {
+            this.updateCursor();
             this.overRow = undefined;
             return;
         }
         if (y < 18) {
             this.overRow = undefined;
+            this.updateCursor("col-resize");
             return;
         }
         else {
+            this.updateCursor();
             const result = this.findRowByPos(y);
             if (typeof result === "number") {
                 this.overRow = result;
@@ -585,6 +602,7 @@ class CustomCanvasTable {
     }
     mouseLeave() {
         this.overRow = undefined;
+        this.updateCursor();
         if (this.scrollView) {
             this.scrollView.onMouseLeave();
         }
@@ -1219,6 +1237,7 @@ var OffscreenCanvasMesssageType;
     OffscreenCanvasMesssageType[OffscreenCanvasMesssageType["keyDown"] = 40] = "keyDown";
     OffscreenCanvasMesssageType[OffscreenCanvasMesssageType["askForExtentedMouseMoveAndMaouseUp"] = 100] = "askForExtentedMouseMoveAndMaouseUp";
     OffscreenCanvasMesssageType[OffscreenCanvasMesssageType["askForNormalMouseMoveAndMaouseUp"] = 101] = "askForNormalMouseMoveAndMaouseUp";
+    OffscreenCanvasMesssageType[OffscreenCanvasMesssageType["setCursor"] = 102] = "setCursor";
 })(OffscreenCanvasMesssageType = exports.OffscreenCanvasMesssageType || (exports.OffscreenCanvasMesssageType = {}));
 
 
