@@ -1,10 +1,11 @@
 import { CustomCanvasTable, CanvasTableConfig } from './../../share/CustomCanvasTable';
-import { CanvasTableColumnConf } from '../../share/CanvasTableColum';
+import { CanvasTableColumnConf, Align, Sort } from '../../share/CanvasTableColum';
+export { Align, Sort };
 export declare class CanvasTable extends CustomCanvasTable {
     private canvas;
     constructor(htmlId: string, data: any[], col: CanvasTableColumnConf[], config?: CanvasTableConfig);
-    private askForExtentedMouseMoveAndMaouseUp;
-    private askForNormalMouseMoveAndMaouseUp;
+    protected askForExtentedMouseMoveAndMaouseUp(): void;
+    protected askForNormalMouseMoveAndMaouseUp(): void;
     private canvasWheel;
     private canvasKeydown;
     private canvasTouchStart;
@@ -17,5 +18,6 @@ export declare class CanvasTable extends CustomCanvasTable {
     private canvasMouseMoveExtended;
     private canvasMouseMove;
     protected resize(): void;
+    protected setCursor(cursor: string): void;
     protected setCanvasSize(width: number, height: number): void;
 }

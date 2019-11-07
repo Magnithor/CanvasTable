@@ -11,13 +11,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "mthb-canvas-table": "0.0.8",
+    "mthb-canvas-table": "0.0.11",
     "mthb-offscreen-canvas-table": "0.0.5",
     "mthb-offscreen-canvas-table-worker": "0.0.5"
   },
   "devDependencies": {
     "ts-loader": "^6.2.1",
-    "typescript": "^3.6.4",
+    "typescript": "^3.7.2",
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.10",
     "webpack-dev-server": "^3.9.0"

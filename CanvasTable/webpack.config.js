@@ -11,7 +11,9 @@ module.exports = {
 	output: {
 		filename: 'CanvasTable.js',
 		path: path.resolve(__dirname, './lib'),
-		libraryTarget: 'commonjs2',
+		libraryTarget: 'umd',
+		library: 'mthb-canvas-table',
+		umdNamedDefine: true
 	},    
 	optimization: {
         minimize: false

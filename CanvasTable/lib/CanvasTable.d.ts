@@ -125,36 +125,41 @@ export interface DrawConfig {
     drawOnly?: number[];
 }
 export interface CanvasTableConfig {
-    scrollView?: ScrollViewConfig;
-    font?: string;
-    fontStyle?: string;
-    fontSize?: number;
-    fontColor?: CanvasColor;
-    headerFont?: string;
-    headerFontStyle?: string;
-    headerFontSize?: number;
-    headerFontColor?: CanvasColor;
-    headerDrawSortArrow?: boolean;
-    backgroundColor?: CanvasColor;
-    lineColor?: CanvasColor;
-    howerBackgroundColor?: CanvasColor;
-    sepraBackgroundColor?: CanvasColor;
+    scrollView?: ScrollViewConfig,
+    font?: string,
+    fontStyle?: string,
+    fontSize?: number,
+    fontColor?: CanvasColor,
+    headerFont?: string,
+    headerFontStyle?: string,
+    headerFontSize?: number,
+    headerFontColor?: CanvasColor,
+    headerDrawSortArrow?: boolean,
+    headerDrawSortArrowColor?: CanvasColor,
+    headerBackgroundColor?: CanvasColor,
+    backgroundColor?: CanvasColor,
+    lineColor?: CanvasColor,
+    howerBackgroundColor?: CanvasColor,
+    sepraBackgroundColor?: CanvasColor
 }
+
 interface CanvasTableConf {
-    scrollView?: ScrollViewConfig;
-    font: string;
-    fontStyle: string;
-    fontSize: number;
-    fontColor: CanvasColor;
-    headerFont: string;
-    headerFontStyle: string;
-    headerFontSize: number;
-    headerFontColor: CanvasColor;
-    headerDrawSortArrow: boolean;
-    backgroundColor: CanvasColor;
-    lineColor: CanvasColor;
-    howerBackgroundColor: CanvasColor;
-    sepraBackgroundColor: CanvasColor;
+    scrollView?: ScrollViewConfig,
+    font: string,
+    fontStyle: string,
+    fontSize: number,
+    fontColor: CanvasColor,
+    headerFont: string,
+    headerFontStyle: string,
+    headerFontSize: number,
+    headerFontColor: CanvasColor,
+    headerDrawSortArrow: boolean,
+    headerDrawSortArrowColor: CanvasColor,
+    headerBackgroundColor: CanvasColor,
+    backgroundColor: CanvasColor,
+    lineColor: CanvasColor,
+    howerBackgroundColor: CanvasColor,
+    sepraBackgroundColor: CanvasColor
 }
 interface CanvasTableColumn {
     header: string;

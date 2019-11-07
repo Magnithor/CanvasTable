@@ -1,11 +1,11 @@
-import {CanvasTable} from "mthb-canvas-table";
+import { CanvasTable, CanvasTableColumnConf, Align } from "mthb-canvas-table";
 //import {Align, CanvasTableColumnConf} from "mthb-canvas-table";
-const col:any[] = [
+const col:CanvasTableColumnConf[] = [
     {
         header: "Id",
         field: "__rownum__",
         width: 80,
-        //align: Align.center
+        align: Align.center
     },
     {
         header: "Name",
@@ -14,4 +14,6 @@ const col:any[] = [
     }
 ];
 let data = [{name:'magni'},{name:'dagrún'}];
-let canvasTable = new CanvasTable("canvas", data, <any>col);
+let canvasTable = new CanvasTable("canvas", data, col);
+let w = <any>window;
+w.align = Align;

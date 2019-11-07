@@ -854,7 +854,12 @@ class CustomCanvasTable {
                     data = this.data[indexId][colItem.field];
             }
             if (colItem.customData) {
-                data = colItem.customData(this, data, this.data[indexId], this.data, indexId, colItem);
+                try {
+                   data = colItem.customData(this, data, this.data[indexId], this.data, indexId, colItem);
+                } catch(e) {
+                    console.log("CanvasTable customData", colItem.header, e);
+                    data = "";
+                }
             }
             if (colItem.renderer) {
                 const left = -this.scrollView.posX + colItem.leftPos + 1;

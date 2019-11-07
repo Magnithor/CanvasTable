@@ -1,5 +1,14 @@
-module.exports =
-/******/ (function(modules) { // webpackBootstrap
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory();
+	else if(typeof define === 'function' && define.amd)
+		define("mthb-canvas-table", [], factory);
+	else if(typeof exports === 'object')
+		exports["mthb-canvas-table"] = factory();
+	else
+		root["mthb-canvas-table"] = factory();
+})(window, function() {
+return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 /******/
@@ -82,26 +91,49 @@ module.exports =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 0);
+/******/ 	return __webpack_require__(__webpack_require__.s = 1);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(1);
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Align;
+(function (Align) {
+    Align[Align["left"] = 0] = "left";
+    Align[Align["center"] = 1] = "center";
+    Align[Align["right"] = 2] = "right";
+})(Align = exports.Align || (exports.Align = {}));
+var Sort;
+(function (Sort) {
+    Sort[Sort["ascending"] = 1] = "ascending";
+    Sort[Sort["descending"] = -1] = "descending";
+})(Sort = exports.Sort || (exports.Sort = {}));
 
 
 /***/ }),
 /* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
+module.exports = __webpack_require__(2);
+
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const ScrollView_1 = __webpack_require__(2);
-const CustomCanvasTable_1 = __webpack_require__(4);
+const ScrollView_1 = __webpack_require__(3);
+const CustomCanvasTable_1 = __webpack_require__(5);
 const CanvasTableTouchEvent_1 = __webpack_require__(7);
+const CanvasTableColum_1 = __webpack_require__(0);
+exports.Align = CanvasTableColum_1.Align;
+exports.Sort = CanvasTableColum_1.Sort;
 class CanvasTable extends CustomCanvasTable_1.CustomCanvasTable {
     constructor(htmlId, data, col, config) {
         super(config);
@@ -192,6 +224,9 @@ class CanvasTable extends CustomCanvasTable_1.CustomCanvasTable {
         this.reCalcForScrollView();
         this.askForReDraw();
     }
+    setCursor(cursor) {
+        this.canvas.style.cursor = cursor;
+    }
     setCanvasSize(width, height) {
         this.canvas.width = width;
         this.canvas.height = height;
@@ -202,13 +237,13 @@ exports.CanvasTable = CanvasTable;
 
 
 /***/ }),
-/* 2 */
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const CircularBuffer_1 = __webpack_require__(3);
+const CircularBuffer_1 = __webpack_require__(4);
 class ScrollView {
     constructor(context, drawable, config, askForExtentedMouseMoveAndMaouseUp, askForNormalMouseMoveAndMaouseUp) {
         this.canvasWidth = -1;
@@ -322,6 +357,8 @@ class ScrollView {
         if (this.height === undefined || this.width === undefined) {
             this.hasScrollBarX = false;
             this.hasScrollBarY = false;
+            this.scrollBarPosMaxX = 0;
+            this.scrollBarPosMaxY = 0;
             return;
         }
         if ((this.height / (this.canvasHeight - (18 + this.scrollbarSize) * this.r) > 1) && (this.width / (this.canvasWidth - this.scrollbarSize * this.r) > 1)) {
@@ -329,6 +366,7 @@ class ScrollView {
             this.pageY = this.height / (this.canvasHeight - (18 + this.scrollbarSize) * this.r);
             if (this.pageY < 1) {
                 this.hasScrollBarY = false;
+                this.scrollBarPosMaxY = 0;
             }
             else {
                 this.hasScrollBarY = true;
@@ -337,6 +375,7 @@ class ScrollView {
             this.pageX = this.width / (this.canvasWidth - this.scrollbarSize * this.r);
             if (this.pageX < 1) {
                 this.hasScrollBarX = false;
+                this.scrollBarPosMaxX = 0;
             }
             else {
                 this.hasScrollBarX = true;
@@ -348,6 +387,7 @@ class ScrollView {
             this.pageY = this.height / (this.canvasHeight - 18 * this.r);
             if (this.pageY < 1) {
                 this.hasScrollBarY = false;
+                this.scrollBarPosMaxY = 0;
             }
             else {
                 this.hasScrollBarY = true;
@@ -356,17 +396,18 @@ class ScrollView {
             this.pageX = this.width / this.canvasWidth;
             if (this.pageX < 1) {
                 this.hasScrollBarX = false;
+                this.scrollBarPosMaxX = 0;
             }
             else {
                 this.hasScrollBarX = true;
                 this.scrollBarPosMaxX = this.width - this.canvasWidth;
             }
         }
-        if (this.posY > this.height - this.canvasWidth) {
-            this.posY = this.height - this.canvasWidth;
+        if (this.posY > this.scrollBarPosMaxY) {
+            this.posY = this.scrollBarPosMaxY;
         }
-        if (this.posX > this.width - this.canvasWidth) {
-            this.posX = this.width - this.canvasWidth;
+        if (this.posX > this.scrollBarPosMaxX) {
+            this.posX = this.scrollBarPosMaxX;
         }
     }
     beforeDraw() {
@@ -926,7 +967,7 @@ exports.ScrollView = ScrollView;
 
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1016,13 +1057,13 @@ exports.CircularBuffer = CircularBuffer;
 
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const CanvasTableColum_1 = __webpack_require__(5);
+const CanvasTableColum_1 = __webpack_require__(0);
 const CustomCanvasIndex_1 = __webpack_require__(6);
 class CustomCanvasTable {
     constructor(config) {
@@ -1036,6 +1077,7 @@ class CustomCanvasTable {
         this.dataIndex = undefined;
         this.column = [];
         this.orgColum = [];
+        this.lastCursor = "";
         this.canvasHeight = 0;
         this.canvasWidth = 0;
         this.config = Object.assign({
@@ -1047,6 +1089,8 @@ class CustomCanvasTable {
             headerFontStyle: "bold",
             headerFontSize: 14,
             headerFontColor: "black",
+            headerBackgroundColor: "#add8e6",
+            headerDrawSortArrowColor: "purple",
             headerDrawSortArrow: true,
             lineColor: "black",
             backgroundColor: "white",
@@ -1142,7 +1186,9 @@ class CustomCanvasTable {
             this.column[this.column.length] = Object.assign({
                 align: CanvasTableColum_1.Align.left,
                 leftPos: 0,
+                rightPos: 0,
                 width: 50,
+                orginalCol: col[i]
             }, col[i]);
         }
         this.needToCalc = true;
@@ -1155,6 +1201,7 @@ class CustomCanvasTable {
         for (let i = 0; i < this.column.length; i++) {
             this.column[i].leftPos = leftPos;
             leftPos += this.column[i].width * this.r;
+            this.column[i].rightPos = leftPos;
         }
         this.reCalcForScrollView();
     }
@@ -1165,6 +1212,13 @@ class CustomCanvasTable {
         this.r = r;
         this.needToCalc = true;
         this.needToCalcFont = true;
+    }
+    updateCursor(cursor = "") {
+        if (this.lastCursor === cursor) {
+            return;
+        }
+        this.lastCursor = cursor;
+        this.setCursor(cursor);
     }
     expendedAll() {
         if (this.dataIndex === undefined) {
@@ -1186,6 +1240,32 @@ class CustomCanvasTable {
             this.askForReDraw();
         }
     }
+    resizeColIfNeed(x) {
+        if (this.columnResize === undefined) {
+            return false;
+        }
+        const d = x - this.columnResize.x;
+        const col = this.columnResize.col;
+        if (d === 0 || col.width + d < 10) {
+            return true;
+        }
+        col.width += d;
+        this.columnResize.x = x;
+        col.orginalCol.width = col.width;
+        this.calcColum();
+        this.askForReDraw();
+        return true;
+    }
+    clickOnHeader(col) {
+        if (col) {
+            if (this.sortCol && this.sortCol.length == 1 && this.sortCol[0].col == col && this.sortCol[0].sort == CanvasTableColum_1.Sort.ascending) {
+                this.setSort([{ col: col, sort: CanvasTableColum_1.Sort.descending }]);
+            }
+            else {
+                this.setSort([{ col: col, sort: CanvasTableColum_1.Sort.ascending }]);
+            }
+        }
+    }
     wheel(deltaMode, deltaX, deltaY) {
         if (this.scrollView) {
             this.scrollView.onScroll(deltaMode, deltaX, deltaY);
@@ -1199,15 +1279,14 @@ class CustomCanvasTable {
             return;
         }
         if (y <= 18) {
-            const col = this.findColByPos(x);
-            if (col) {
-                if (this.sortCol && this.sortCol.length == 1 && this.sortCol[0].col == col && this.sortCol[0].sort == CanvasTableColum_1.Sort.ascending) {
-                    this.setSort([{ col: col, sort: CanvasTableColum_1.Sort.descending }]);
-                }
-                else {
-                    this.setSort([{ col: col, sort: CanvasTableColum_1.Sort.ascending }]);
-                }
+            const colSplit = this.findColSplit(x);
+            if (colSplit !== null) {
+                this.columnResize = { x: x, col: this.column[colSplit] };
+                this.askForExtentedMouseMoveAndMaouseUp();
+                return;
             }
+            const col = this.findColByPos(x);
+            this.clickOnHeader(col);
             return;
         }
         if (this.dataIndex.type === CustomCanvasIndex_1.ItemIndexType.GroupItems) {
@@ -1221,15 +1300,29 @@ class CustomCanvasTable {
         }
     }
     mouseMove(x, y) {
-        if (this.scrollView && this.scrollView.onMouseMove(x, y)) {
+        if (!this.scrollView) {
+            return;
+        }
+        if (this.resizeColIfNeed(x)) {
+            return;
+        }
+        if (this.scrollView.onMouseMove(x, y)) {
+            this.updateCursor();
             this.overRow = undefined;
             return;
         }
         if (y < 18) {
             this.overRow = undefined;
+            if (this.findColSplit(x) === null) {
+                this.updateCursor();
+            }
+            else {
+                this.updateCursor("col-resize");
+            }
             return;
         }
         else {
+            this.updateCursor();
             const result = this.findRowByPos(y);
             if (typeof result === "number") {
                 this.overRow = result;
@@ -1239,22 +1332,36 @@ class CustomCanvasTable {
         }
     }
     mouseUp(x, y) {
+        if (this.columnResize) {
+            this.columnResize = undefined;
+            this.askForNormalMouseMoveAndMaouseUp();
+        }
         if (this.scrollView && this.scrollView.onMouseUp(x, y)) {
             return;
         }
     }
     mouseMoveExtended(x, y) {
+        if (this.resizeColIfNeed(x)) {
+            return;
+        }
         if (this.scrollView && this.scrollView.onExtendedMouseMove(x, y)) {
             return;
         }
     }
     mouseUpExtended(x, y) {
+        if (this.columnResize) {
+            this.columnResize = undefined;
+            this.askForNormalMouseMoveAndMaouseUp();
+        }
         if (this.scrollView && this.scrollView.onExtendedMouseUp(x, y)) {
             return;
         }
     }
     mouseLeave() {
         this.overRow = undefined;
+        if (this.columnResize === undefined) {
+            this.updateCursor();
+        }
         if (this.scrollView) {
             this.scrollView.onMouseLeave();
         }
@@ -1268,14 +1375,14 @@ class CustomCanvasTable {
         if (this.scrollView && this.scrollView.OnTouchStart(e, offsetLeft, offsetTop)) {
             return;
         }
-        if (this.dataIndex === undefined) {
-            return;
-        }
-        if (this.dataIndex.type === CustomCanvasIndex_1.ItemIndexType.GroupItems) {
+        //if (this.dataIndex === undefined) { return; }
+        //if (this.dataIndex.type === ItemIndexType.GroupItems) 
+        {
             if (e.changedTouches.length === 1) {
                 const y = e.changedTouches[0].pageY - offsetTop;
-                if (y > 18) {
-                    this.touchClick = { timeout: setTimeout(() => {
+                const x = e.changedTouches[0].pageX - offsetLeft;
+                this.touchClick = { timeout: setTimeout(() => {
+                        if (y > 18) {
                             const result = this.findRowByPos(y);
                             if (result !== null && typeof result === "object") {
                                 result.isExpended = !result.isExpended;
@@ -1283,11 +1390,12 @@ class CustomCanvasTable {
                                 this.reCalcForScrollView();
                                 return;
                             }
-                        }, 250), x: e.changedTouches[0].pageX - offsetLeft, y: y };
-                }
-                else {
-                    this.clearTouchClick();
-                }
+                        }
+                        else {
+                            const col = this.findColByPos(x);
+                            this.clickOnHeader(col);
+                        }
+                    }, 250), x: x, y: y };
             }
             else {
                 this.clearTouchClick();
@@ -1320,6 +1428,18 @@ class CustomCanvasTable {
             clearTimeout(this.touchClick.timeout);
             this.touchClick = undefined;
         }
+    }
+    findColSplit(x) {
+        if (this.scrollView === undefined) {
+            return null;
+        }
+        for (let i = 0; i < this.column.length; i++) {
+            const d = ((-this.scrollView.posX + this.column[i].rightPos) / this.r) - x;
+            if (-3 <= d && d <= 3) {
+                return i;
+            }
+        }
+        return null;
     }
     findColByPos(x) {
         if (this.scrollView === undefined) {
@@ -1611,11 +1731,10 @@ class CustomCanvasTable {
                     i++;
                 }
                 this.context.beginPath();
-                let leftPos = -this.scrollView.posX;
                 for (let col = colStart; col < colEnd; col++) {
-                    leftPos += this.column[col].width * this.r;
-                    this.context.moveTo(leftPos, headderHeight);
-                    this.context.lineTo(leftPos, this.canvasHeight);
+                    const rightPos = -this.scrollView.posX + this.column[col].rightPos;
+                    this.context.moveTo(rightPos, headderHeight);
+                    this.context.lineTo(rightPos, this.canvasHeight);
                 }
                 this.context.stroke();
                 break;
@@ -1637,16 +1756,43 @@ class CustomCanvasTable {
         this.context.fillStyle = this.config.headerFontColor;
         this.context.clearRect(0, 0, this.canvasWidth, headderHeight);
         this.context.beginPath();
-        let leftPos = 0;
         for (let col = colStart; col < colEnd; col++) {
-            leftPos += this.column[col].width * this.r;
-            this.context.moveTo(-this.scrollView.posX + leftPos, 0);
-            this.context.lineTo(-this.scrollView.posX + leftPos, headderHeight);
+            const rightPos = -this.scrollView.posX + this.column[col].rightPos;
+            this.context.moveTo(rightPos, 0);
+            this.context.lineTo(rightPos, headderHeight);
         }
         this.context.stroke();
         this.context.textAlign = 'left';
         for (let col = colStart; col < colEnd; col++) {
-            this.context.fillText(this.column[col].header, -this.scrollView.posX + this.column[col].leftPos + offsetLeft, pos);
+            let needClip;
+            const colItem = this.column[col];
+            const colWidth = this.column[col].width * this.r - offsetLeft * 2;
+            const data = this.column[col].header;
+            if (colWidth > data.length * this.maxFontWidth) {
+                needClip = false;
+            }
+            else if (colWidth < data.length * this.minFontWidth) {
+                needClip = true;
+            }
+            else {
+                needClip = colWidth < this.context.measureText(data).width;
+            }
+            this.context.fillStyle = this.config.headerBackgroundColor;
+            if (needClip) {
+                this.context.fillRect(-this.scrollView.posX + colItem.leftPos + 1, pos - height + 4 * this.r + 1, colItem.width * this.r - 1 * 2, height - 3);
+                this.context.save();
+                this.context.beginPath();
+                this.context.rect(-this.scrollView.posX + colItem.leftPos + offsetLeft, pos - height, colItem.width * this.r - offsetLeft * 2, height);
+                this.context.clip();
+                this.context.fillStyle = this.config.headerFontColor;
+                this.context.fillText(data, -this.scrollView.posX + colItem.leftPos + offsetLeft, pos);
+                this.context.restore();
+            }
+            else {
+                this.context.fillRect(-this.scrollView.posX + colItem.leftPos + 1, pos - height + 4 * this.r + 1, colItem.width * this.r - 1 * 2, height - 3);
+                this.context.fillStyle = this.config.headerFontColor;
+                this.context.fillText(data, -this.scrollView.posX + colItem.leftPos + offsetLeft, pos);
+            }
             if (this.config.headerDrawSortArrow) {
                 var sort = undefined;
                 if (this.sortCol) {
@@ -1658,7 +1804,8 @@ class CustomCanvasTable {
                     }
                 }
                 if (sort) {
-                    const startX = -this.scrollView.posX + this.column[col].leftPos + this.column[col].width * this.r;
+                    this.context.fillStyle = this.config.headerDrawSortArrowColor;
+                    const startX = -this.scrollView.posX + this.column[col].rightPos;
                     if (sort === CanvasTableColum_1.Sort.ascending) {
                         this.context.beginPath();
                         this.context.moveTo(startX - 12 * this.r, 5 * this.r);
@@ -1708,15 +1855,23 @@ class CustomCanvasTable {
                         this.context.strokeStyle = this.config.lineColor;
                         this.context.beginPath();
                         this.context.moveTo(0, pos + 4 * this.r + 1 - height);
-                        this.context.lineTo(this.column[this.column.length - 1].leftPos + this.column[this.column.length - 1].width * this.r, pos + 4 * this.r + 1 - height);
+                        this.context.lineTo(this.column[this.column.length - 1].rightPos, pos + 4 * this.r + 1 - height);
                         this.context.stroke();
                     }
+                    const startPos = pos;
                     for (; i < child.list.length && pos < maxPos; i++) {
                         const item = child.list[i];
                         if (pos > 0) {
                             this.drawRowItem(item, i, pos, height, offsetLeft, colStart, colEnd, drawConf);
                         }
                         pos += height;
+                    }
+                    for (var col = colStart; col < colEnd; col++) {
+                        const colItem = this.column[col];
+                        this.context.beginPath();
+                        this.context.moveTo(-this.scrollView.posX + colItem.rightPos, startPos + 4 * this.r + 1 - height);
+                        this.context.lineTo(-this.scrollView.posX + colItem.rightPos, pos + 4 * this.r + 1 - height);
+                        this.context.stroke();
                     }
                 }
             }
@@ -1806,7 +1961,7 @@ class CustomCanvasTable {
                     }
                     break;
                 case CanvasTableColum_1.Align.right:
-                    x = colItem.leftPos + colItem.width * this.r - offsetLeft;
+                    x = colItem.rightPos - offsetLeft;
                     if (this.context.textAlign !== 'right') {
                         this.context.textAlign = 'right';
                     }
@@ -1839,41 +1994,16 @@ class CustomCanvasTable {
                 this.context.fillStyle = this.config.fontColor;
                 this.context.fillText(data, -this.scrollView.posX + x, pos);
             }
-            // Ætti að gerast fyrri ofan og lengri línur
-            this.context.beginPath();
-            this.context.moveTo(-this.scrollView.posX + colItem.leftPos + colItem.width * this.r, pos - height + 4 * this.r);
-            this.context.lineTo(-this.scrollView.posX + colItem.leftPos + colItem.width * this.r, pos + 4 * this.r);
-            this.context.stroke();
         }
         if (drawConf === undefined) {
             this.context.beginPath();
             this.context.moveTo(0, pos + 4 * this.r);
-            this.context.lineTo(this.column[this.column.length - 1].leftPos + this.column[this.column.length - 1].width * this.r, pos + 4 * this.r);
+            this.context.lineTo(this.column[this.column.length - 1].rightPos, pos + 4 * this.r);
             this.context.stroke();
         }
     }
 }
 exports.CustomCanvasTable = CustomCanvasTable;
-
-
-/***/ }),
-/* 5 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var Align;
-(function (Align) {
-    Align[Align["left"] = 0] = "left";
-    Align[Align["center"] = 1] = "center";
-    Align[Align["right"] = 2] = "right";
-})(Align = exports.Align || (exports.Align = {}));
-var Sort;
-(function (Sort) {
-    Sort[Sort["ascending"] = 1] = "ascending";
-    Sort[Sort["descending"] = -1] = "descending";
-})(Sort = exports.Sort || (exports.Sort = {}));
 
 
 /***/ }),
@@ -1919,3 +2049,4 @@ exports.TouchEventToCanvasTableTouchEvent = TouchEventToCanvasTableTouchEvent;
 
 /***/ })
 /******/ ]);
+});

@@ -18,6 +18,8 @@ export interface CanvasTableConfig {
     headerFontSize?: number;
     headerFontColor?: CanvasColor;
     headerDrawSortArrow?: boolean;
+    headerDrawSortArrowColor?: CanvasColor;
+    headerBackgroundColor?: CanvasColor;
     backgroundColor?: CanvasColor;
     lineColor?: CanvasColor;
     howerBackgroundColor?: CanvasColor;
@@ -34,6 +36,8 @@ interface CanvasTableConf {
     headerFontSize: number;
     headerFontColor: CanvasColor;
     headerDrawSortArrow: boolean;
+    headerDrawSortArrowColor: CanvasColor;
+    headerBackgroundColor: CanvasColor;
     backgroundColor: CanvasColor;
     lineColor: CanvasColor;
     howerBackgroundColor: CanvasColor;
@@ -45,8 +49,10 @@ interface CanvasTableColumn {
     width: number;
     align: Align;
     leftPos: number;
+    rightPos: number;
     renderer?: RenderValue;
     customData?: CustomData;
+    orginalCol: CanvasTableColumnConf;
 }
 export declare abstract class CustomCanvasTable implements Drawable {
     private needToCalc;
@@ -70,7 +76,9 @@ export declare abstract class CustomCanvasTable implements Drawable {
     private sortCol?;
     private groupByCol?;
     private overRowValue?;
+    private columnResize?;
     private touchClick?;
+    private lastCursor;
     private canvasHeight;
     private canvasWidth;
     protected config: CanvasTableConf;
@@ -87,8 +95,14 @@ export declare abstract class CustomCanvasTable implements Drawable {
     private calcColum;
     protected setR(r: number): void;
     protected abstract resize(): void;
+    protected abstract setCursor(cusor: string): void;
+    protected abstract askForExtentedMouseMoveAndMaouseUp(): void;
+    protected abstract askForNormalMouseMoveAndMaouseUp(): void;
+    private updateCursor;
     expendedAll(): void;
     collapseAll(): void;
+    private resizeColIfNeed;
+    protected clickOnHeader(col: CanvasTableColumn | null): void;
     protected wheel(deltaMode: number, deltaX: number, deltaY: number): void;
     protected mouseDown(x: number, y: number): void;
     protected mouseMove(x: number, y: number): void;
@@ -101,6 +115,7 @@ export declare abstract class CustomCanvasTable implements Drawable {
     protected TouchMove(e: CanvasTableTouchEvent, offsetLeft: number, offsetTop: number): void;
     protected TouchEnd(e: CanvasTableTouchEvent, offsetLeft: number, offsetTop: number): void;
     private clearTouchClick;
+    protected findColSplit(x: number): number | null;
     protected findColByPos(x: number): CanvasTableColumn | null;
     protected findRowByPos(y: number): number | GroupItem | null;
     protected overRow: number | undefined;
