@@ -139,7 +139,9 @@ export class ScrollView {
 
         if (this.height === undefined || this.width === undefined) {
             this.hasScrollBarX = false;
-            this.hasScrollBarY = false
+            this.hasScrollBarY = false;
+            this.scrollBarPosMaxX = 0;
+            this.scrollBarPosMaxY = 0;
             return;
         }
 
@@ -147,7 +149,8 @@ export class ScrollView {
             // has X and Y
             this.pageY = this.height / (this.canvasHeight - (18 + this.scrollbarSize) * this.r);
             if (this.pageY < 1) {
-                this.hasScrollBarY = false;            
+                this.hasScrollBarY = false;
+                this.scrollBarPosMaxY = 0;            
             } else {
                 this.hasScrollBarY = true;
                 this.scrollBarPosMaxY  = this.height - (this.canvasHeight - (18 + this.scrollbarSize) * this.r);        
@@ -155,7 +158,8 @@ export class ScrollView {
 
             this.pageX = this.width / (this.canvasWidth - this.scrollbarSize * this.r);
             if (this.pageX < 1) {
-                this.hasScrollBarX = false;            
+                this.hasScrollBarX = false;
+                this.scrollBarPosMaxX = 0;          
             } else {
                 this.hasScrollBarX = true;
                 this.scrollBarPosMaxX  = this.width - (this.canvasWidth - this.scrollbarSize * this.r);        
@@ -164,7 +168,8 @@ export class ScrollView {
             // has x or Y
             this.pageY = this.height / (this.canvasHeight - 18 * this.r);
             if (this.pageY < 1) {
-                this.hasScrollBarY = false;            
+                this.hasScrollBarY = false;
+                this.scrollBarPosMaxY = 0;            
             } else {
                 this.hasScrollBarY = true;
                 this.scrollBarPosMaxY  = this.height - (this.canvasHeight - 18 * this.r);        
@@ -172,15 +177,16 @@ export class ScrollView {
 
             this.pageX = this.width / this.canvasWidth;
             if (this.pageX < 1) {
-                this.hasScrollBarX = false;            
+                this.hasScrollBarX = false;
+                this.scrollBarPosMaxX = 0;            
             } else {
                 this.hasScrollBarX = true;
                 this.scrollBarPosMaxX  = this.width - this.canvasWidth;        
             }
         }
 
-        if (this.posY > this.height - this.canvasWidth) { this.posY = this.height - this.canvasWidth; }
-        if (this.posX > this.width - this.canvasWidth) { this.posX = this.width - this.canvasWidth; }
+        if (this.posY > this.scrollBarPosMaxY) { this.posY = this.scrollBarPosMaxY; }
+        if (this.posX > this.scrollBarPosMaxX) { this.posX = this.scrollBarPosMaxX; }
     }
 
     public beforeDraw(): boolean{

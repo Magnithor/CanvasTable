@@ -33,13 +33,13 @@ export class CanvasTable extends CustomCanvasTable {
             this.resize();
         });
     }
-    private askForExtentedMouseMoveAndMaouseUp() {
+    protected askForExtentedMouseMoveAndMaouseUp() {
         this.canvas.removeEventListener("mousemove", this.canvasMouseMove);
         this.canvas.removeEventListener("mouseup", this.canvasMouseUp);
         window.addEventListener("mousemove", this.canvasMouseMoveExtended);
         window.addEventListener("mouseup", this.canvasMouseUpExtended);
     }
-    private askForNormalMouseMoveAndMaouseUp() {
+    protected askForNormalMouseMoveAndMaouseUp() {
         window.removeEventListener("mousemove", this.canvasMouseMoveExtended);
         window.removeEventListener("mouseup", this.canvasMouseUpExtended);
         this.canvas.addEventListener("mousemove", this.canvasMouseMove);
