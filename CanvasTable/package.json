@@ -1,11 +1,11 @@
 {
   "name": "mthb-canvas-table",
-  "version": "0.0.11",
+  "version": "0.0.17",
   "description": "Canvas Table",
-  "main": "lib/CanvasTable.js",
-  "types": "lib/CanvasTable.d.ts",
+  "main": "lib/CanvasTable/src/CanvasTable.js",
+  "types": "lib/CanvasTable/src/CanvasTable.d.ts",
   "scripts": {
-    "build": "webpack",
+    "build": "tsc --module commonjs",
     "prepare": "npm run build"
   },
   "repository": {
@@ -18,7 +18,7 @@
     "table"
   ],
   "files": [
-    "lib/CanvasTable.js", "lib/CanvasTable.d.ts"
+    "lib/**/*"
   ],
   "bugs": {
     "url": "https://github.com/Magnithor/CanvasTable/issues"
@@ -29,11 +29,7 @@
   "license": "MIT",
   "homepage": "https://github.com/Magnithor/CanvasTable/blob/master/README.md",
   "devDependencies": {
-    "ts-loader": "^6.2.1",
-    "typescript": "^3.6.4",
-    "webpack": "^4.41.2",
-    "webpack-cli": "^3.3.9"
+    "typescript": "^3.6.4"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }

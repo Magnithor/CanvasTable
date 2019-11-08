@@ -99,7 +99,7 @@ export declare abstract class CustomCanvasTable implements Drawable {
     protected abstract askForExtentedMouseMoveAndMaouseUp(): void;
     protected abstract askForNormalMouseMoveAndMaouseUp(): void;
     private updateCursor;
-    expendedAll(): void;
+    expendAll(): void;
     collapseAll(): void;
     private resizeColIfNeed;
     protected clickOnHeader(col: CanvasTableColumn | null): void;
@@ -122,7 +122,7 @@ export declare abstract class CustomCanvasTable implements Drawable {
     protected calcIndex(): void;
     private tryFind;
     private group;
-    private changeChildExpended;
+    private changeChildExpend;
     protected reCalcForScrollView(): void;
     protected setCanvasSize(width: number, height: number): void;
     protected doReize(width: number, height: number): void;

@@ -2,8 +2,9 @@ import { CanvasTableTouchEvent } from "./CanvasTableTouchEvent";
 export declare enum OffscreenCanvasMesssageType {
     create = 0,
     resize = 1,
-    expendedAll = 2,
+    expendAll = 2,
     collapseAll = 3,
+    setGroupBy = 4,
     scroll = 10,
     mouseDown = 20,
     mouseMove = 21,
@@ -16,7 +17,8 @@ export declare enum OffscreenCanvasMesssageType {
     TouchEnd = 32,
     keyDown = 40,
     askForExtentedMouseMoveAndMaouseUp = 100,
-    askForNormalMouseMoveAndMaouseUp = 101
+    askForNormalMouseMoveAndMaouseUp = 101,
+    setCursor = 102
 }
 interface OffscreenCanvasMesssageParnet {
     type: OffscreenCanvasMesssageType;
@@ -36,7 +38,7 @@ interface OffscreenCanvasMessageResize extends OffscreenCanvasMesssageParnet {
     r: number;
 }
 interface OffscreenCanvasMessageFunctions extends OffscreenCanvasMesssageParnet {
-    type: OffscreenCanvasMesssageType.expendedAll | OffscreenCanvasMesssageType.collapseAll | OffscreenCanvasMesssageType.askForExtentedMouseMoveAndMaouseUp | OffscreenCanvasMesssageType.askForNormalMouseMoveAndMaouseUp;
+    type: OffscreenCanvasMesssageType.expendAll | OffscreenCanvasMesssageType.collapseAll | OffscreenCanvasMesssageType.askForExtentedMouseMoveAndMaouseUp | OffscreenCanvasMesssageType.askForNormalMouseMoveAndMaouseUp;
 }
 interface OffscreenCanvasMessageScroll extends OffscreenCanvasMesssageParnet {
     type: OffscreenCanvasMesssageType.scroll;
@@ -62,5 +64,13 @@ interface OffscreenCanvasMesssageTouch extends OffscreenCanvasMesssageParnet {
     offsetLeft: number;
     offsetTop: number;
 }
-export declare type OffscreenCanvasMesssage = OffscreenCanvasMessageScroll | OffscreenCanvasMessageCreate | OffscreenCanvasMessageResize | OffscreenCanvasMessageFunctions | OffscreenCanvasMessageMouse | OffscreenCanvasMessageMouseLeave | OffscreenCanvasMessageKeyDown | OffscreenCanvasMesssageTouch;
+interface OffscreenCanvasMessageGroupBy extends OffscreenCanvasMesssageParnet {
+    type: OffscreenCanvasMesssageType.setGroupBy;
+    groupBy?: string[];
+}
+interface OffscreenCanvasMessageSetCursor extends OffscreenCanvasMesssageParnet {
+    type: OffscreenCanvasMesssageType.setCursor;
+    cursor: string;
+}
+export declare type OffscreenCanvasMesssage = OffscreenCanvasMessageScroll | OffscreenCanvasMessageCreate | OffscreenCanvasMessageResize | OffscreenCanvasMessageSetCursor | OffscreenCanvasMessageFunctions | OffscreenCanvasMessageGroupBy | OffscreenCanvasMessageMouse | OffscreenCanvasMessageMouseLeave | OffscreenCanvasMessageKeyDown | OffscreenCanvasMesssageTouch;
 export {};

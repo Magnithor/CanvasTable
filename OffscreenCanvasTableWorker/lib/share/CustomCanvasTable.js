@@ -26,7 +26,7 @@ class CustomCanvasTable {
             headerFontStyle: "bold",
             headerFontSize: 14,
             headerFontColor: "black",
-            headerBackgroundColor: "#0000EC",
+            headerBackgroundColor: "#add8e6",
             headerDrawSortArrowColor: "purple",
             headerDrawSortArrow: true,
             lineColor: "black",
@@ -157,12 +157,12 @@ class CustomCanvasTable {
         this.lastCursor = cursor;
         this.setCursor(cursor);
     }
-    expendedAll() {
+    expendAll() {
         if (this.dataIndex === undefined) {
             return;
         }
         if (this.dataIndex.type === CustomCanvasIndex_1.ItemIndexType.GroupItems) {
-            this.changeChildExpended(this.dataIndex, true);
+            this.changeChildExpend(this.dataIndex, true);
             this.reCalcForScrollView();
             this.askForReDraw();
         }
@@ -172,7 +172,7 @@ class CustomCanvasTable {
             return;
         }
         if (this.dataIndex.type === CustomCanvasIndex_1.ItemIndexType.GroupItems) {
-            this.changeChildExpended(this.dataIndex, false);
+            this.changeChildExpend(this.dataIndex, false);
             this.reCalcForScrollView();
             this.askForReDraw();
         }
@@ -329,6 +329,12 @@ class CustomCanvasTable {
                             }
                         }
                         else {
+                            const colSplit = this.findColSplit(x);
+                            if (colSplit !== null) {
+                                this.columnResize = { x: x, col: this.column[colSplit] };
+                                //   console.log(this.columnResize);
+                                return;
+                            }
                             const col = this.findColByPos(x);
                             this.clickOnHeader(col);
                         }
@@ -340,6 +346,12 @@ class CustomCanvasTable {
         }
     }
     TouchMove(e, offsetLeft, offsetTop) {
+        const x = e.changedTouches[0].pageX - offsetLeft;
+        if (this.resizeColIfNeed(x)) {
+            //    console.log('R');
+            return;
+        }
+        //        console.log('-');
         if (this.scrollView) {
             this.scrollView.OnTouchMove(e, offsetLeft, offsetTop);
         }
@@ -349,13 +361,13 @@ class CustomCanvasTable {
                 return;
             }
             const y = e.changedTouches[0].pageY - offsetTop;
-            const x = e.changedTouches[0].pageX - offsetLeft;
             if (Math.abs(x - this.touchClick.x) > 4 || Math.abs(y - this.touchClick.y) > 4) {
                 this.clearTouchClick();
             }
         }
     }
     TouchEnd(e, offsetLeft, offsetTop) {
+        this.columnResize = undefined;
         if (this.scrollView) {
             this.scrollView.OnTouchEnd(e);
         }
@@ -398,7 +410,6 @@ class CustomCanvasTable {
         }
         let pos = -this.scrollView.posY / this.r + 18;
         const cellHeight = this.cellHeight;
-        const maxHeight = this.canvasHeight / this.r;
         let find = function (items) {
             let i;
             if (items.type === CustomCanvasIndex_1.ItemIndexType.Index) {
@@ -539,7 +550,6 @@ class CustomCanvasTable {
     }
     group(g, index, level, groupByCol, old) {
         let r = new Map();
-        let p = new Map();
         for (let i = 0; i < index.length; i++) {
             const id = index[i];
             let c = String(this.data[id][groupByCol[level]]);
@@ -569,12 +579,12 @@ class CustomCanvasTable {
             }
         }
     }
-    changeChildExpended(g, value) {
+    changeChildExpend(g, value) {
         for (let i = 0; i < g.list.length; i++) {
             g.list[i].isExpended = value;
             const child = g.list[i].child;
             if (child.type === CustomCanvasIndex_1.ItemIndexType.GroupItems) {
-                this.changeChildExpended(child, value);
+                this.changeChildExpend(child, value);
             }
         }
     }
@@ -664,6 +674,9 @@ class CustomCanvasTable {
                     if (i < index.list.length) {
                         this.drawRowItem(index.list[i], i, pos, height, offsetLeft, colStart, colEnd, drawConf);
                     }
+                    else {
+                        break;
+                    }
                     pos += height;
                     i++;
                 }
@@ -671,7 +684,7 @@ class CustomCanvasTable {
                 for (let col = colStart; col < colEnd; col++) {
                     const rightPos = -this.scrollView.posX + this.column[col].rightPos;
                     this.context.moveTo(rightPos, headderHeight);
-                    this.context.lineTo(rightPos, this.canvasHeight);
+                    this.context.lineTo(rightPos, pos - height + 4 * this.r);
                 }
                 this.context.stroke();
                 break;
@@ -693,6 +706,7 @@ class CustomCanvasTable {
         this.context.fillStyle = this.config.headerFontColor;
         this.context.clearRect(0, 0, this.canvasWidth, headderHeight);
         this.context.beginPath();
+        this.context.strokeStyle = this.config.lineColor;
         for (let col = colStart; col < colEnd; col++) {
             const rightPos = -this.scrollView.posX + this.column[col].rightPos;
             this.context.moveTo(rightPos, 0);
@@ -762,7 +776,7 @@ class CustomCanvasTable {
         }
         this.context.beginPath();
         this.context.moveTo(0, pos + 4 * this.r);
-        this.context.lineTo(this.canvasWidth, pos + 4 * this.r);
+        this.context.lineTo(Math.min(-this.scrollView.posX + this.column[this.column.length - 1].rightPos, this.canvasWidth), pos + 4 * this.r);
         this.context.stroke();
         this.scrollView.draw();
     }
@@ -854,12 +868,7 @@ class CustomCanvasTable {
                     data = this.data[indexId][colItem.field];
             }
             if (colItem.customData) {
-                try {
-                   data = colItem.customData(this, data, this.data[indexId], this.data, indexId, colItem);
-                } catch(e) {
-                    console.log("CanvasTable customData", colItem.header, e);
-                    data = "";
-                }
+                data = colItem.customData(this, data, this.data[indexId], this.data, indexId, colItem);
             }
             if (colItem.renderer) {
                 const left = -this.scrollView.posX + colItem.leftPos + 1;
@@ -940,9 +949,10 @@ class CustomCanvasTable {
         if (drawConf === undefined) {
             this.context.beginPath();
             this.context.moveTo(0, pos + 4 * this.r);
-            this.context.lineTo(this.column[this.column.length - 1].rightPos, pos + 4 * this.r);
+            this.context.lineTo(Math.min(-this.scrollView.posX + this.column[this.column.length - 1].rightPos, this.canvasWidth), pos + 4 * this.r);
             this.context.stroke();
         }
     }
 }
 exports.CustomCanvasTable = CustomCanvasTable;
+//# sourceMappingURL=CustomCanvasTable.js.map

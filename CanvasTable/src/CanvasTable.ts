@@ -3,7 +3,7 @@ import { CustomCanvasTable, CanvasTableConfig } from './../../share/CustomCanvas
 import { TouchEventToCanvasTableTouchEvent } from './../../share/CanvasTableTouchEvent';
 import { CanvasTableColumnConf, Align, Sort } from '../../share/CanvasTableColum';
 
-export { Align, Sort }
+export { CanvasTableColumnConf, Align, Sort }
 
 export class CanvasTable extends CustomCanvasTable {
     private canvas: HTMLCanvasElement;

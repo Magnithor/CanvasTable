@@ -1,6 +1,11 @@
 import { Drawable } from "./Drawable";
-import { CanvasContext2D } from "./CanvasContext2D";
+import { CanvasContext2D, CanvasColor } from "./CanvasContext2D";
 import { CanvasTableTouchEvent } from './CanvasTableTouchEvent';
+export interface ScrollViewConfig {
+    buttonHoverColor?: CanvasColor;
+    buttonColor?: CanvasColor;
+    backgroundColor?: CanvasColor;
+}
 export declare class ScrollView {
     private drawable;
     private askForExtentedMouseMoveAndMaouseUp;
@@ -41,7 +46,8 @@ export declare class ScrollView {
     private runXOrY;
     private runStart;
     private speed;
-    constructor(context: CanvasContext2D, drawable: Drawable, askForExtentedMouseMoveAndMaouseUp: () => void, askForNormalMouseMoveAndMaouseUp: () => void);
+    private scrollViewConfig;
+    constructor(context: CanvasContext2D, drawable: Drawable, config: ScrollViewConfig | undefined, askForExtentedMouseMoveAndMaouseUp: () => void, askForNormalMouseMoveAndMaouseUp: () => void);
     posY: number;
     posX: number;
     setSize(r: number, canvasWidth: number, canvasHeight: number, width?: number, height?: number): void;

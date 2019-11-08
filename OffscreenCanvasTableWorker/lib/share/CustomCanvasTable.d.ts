@@ -1,54 +1,59 @@
 import { Drawable } from "./Drawable";
-import { ScrollView } from "./ScrollView";
-import { CanvasContext2D } from "./CanvasContext2D";
+import { ScrollView, ScrollViewConfig } from "./ScrollView";
+import { CanvasContext2D, CanvasColor } from "./CanvasContext2D";
 import { CanvasTableTouchEvent } from "./CanvasTableTouchEvent";
+import { Align, RenderValue, CustomData, CanvasTableColumnConf, CustomFilter, CustomSort, CanvasTableColumnSort } from "./CanvasTableColum";
+import { IndexType, GroupItem } from "./CustomCanvasIndex";
 export interface DrawConfig {
     drawOnly?: number[];
 }
-declare type CustomData = (canvasTable: CustomCanvasTable, dataValue: any, row: any, data: any, rowIndex: number, col: CanvasTableColumnConf) => string;
-declare type RenderValue = (canvasTable: CustomCanvasTable, context: CanvasContext2D, rowIndex: number, col: CanvasTableColumnConf, left: number, top: number, right: number, bottom: number, width: number, height: number, r: number, dataValue: any, row: any, data: any) => void;
-export declare type CustomFilter = (data: any, row: any, col: CanvasTableColumnConf[]) => boolean;
-export declare type CustomSort = (data: any, rowA: any, rowB: any) => number;
-export interface CanvasTableColumnConf {
+export interface CanvasTableConfig {
+    scrollView?: ScrollViewConfig;
+    font?: string;
+    fontStyle?: string;
+    fontSize?: number;
+    fontColor?: CanvasColor;
+    headerFont?: string;
+    headerFontStyle?: string;
+    headerFontSize?: number;
+    headerFontColor?: CanvasColor;
+    headerDrawSortArrow?: boolean;
+    headerDrawSortArrowColor?: CanvasColor;
+    headerBackgroundColor?: CanvasColor;
+    backgroundColor?: CanvasColor;
+    lineColor?: CanvasColor;
+    howerBackgroundColor?: CanvasColor;
+    sepraBackgroundColor?: CanvasColor;
+}
+interface CanvasTableConf {
+    scrollView?: ScrollViewConfig;
+    font: string;
+    fontStyle: string;
+    fontSize: number;
+    fontColor: CanvasColor;
+    headerFont: string;
+    headerFontStyle: string;
+    headerFontSize: number;
+    headerFontColor: CanvasColor;
+    headerDrawSortArrow: boolean;
+    headerDrawSortArrowColor: CanvasColor;
+    headerBackgroundColor: CanvasColor;
+    backgroundColor: CanvasColor;
+    lineColor: CanvasColor;
+    howerBackgroundColor: CanvasColor;
+    sepraBackgroundColor: CanvasColor;
+}
+interface CanvasTableColumn {
     header: string;
     field: string;
-    width?: number;
-    align?: Align;
-    visible?: boolean;
+    width: number;
+    align: Align;
+    leftPos: number;
+    rightPos: number;
     renderer?: RenderValue;
     customData?: CustomData;
+    orginalCol: CanvasTableColumnConf;
 }
-export interface CanvasTableColumnSort {
-    col: CanvasTableColumnConf;
-    sort: Sort;
-}
-export declare enum Align {
-    left = 0,
-    center = 1,
-    right = 2
-}
-export declare enum Sort {
-    ascending = 1,
-    descending = -1
-}
-export declare enum ItemIndexType {
-    GroupItems = 0,
-    Index = 1
-}
-export interface GroupItems {
-    type: ItemIndexType.GroupItems;
-    list: GroupItem[];
-}
-export interface GroupItem {
-    caption: string;
-    child: (GroupItems | Index);
-    isExpended: boolean;
-}
-export interface Index {
-    type: ItemIndexType.Index;
-    list: number[];
-}
-export declare type IndexType = Index | GroupItems;
 export declare abstract class CustomCanvasTable implements Drawable {
     private needToCalc;
     private needToCalcFont;
@@ -62,7 +67,6 @@ export declare abstract class CustomCanvasTable implements Drawable {
     private minFontWidth;
     private maxFontWidth;
     protected scrollView?: ScrollView;
-    protected font: string;
     protected cellHeight: number;
     protected dataIndex?: IndexType;
     private column;
@@ -72,23 +76,33 @@ export declare abstract class CustomCanvasTable implements Drawable {
     private sortCol?;
     private groupByCol?;
     private overRowValue?;
+    private columnResize?;
     private touchClick?;
+    private lastCursor;
     private canvasHeight;
     private canvasWidth;
+    protected config: CanvasTableConf;
+    constructor(config: CanvasTableConfig | undefined);
     isPlanToRedraw(): boolean;
     askForReDraw(config?: DrawConfig): void;
     setFilter(filter?: CustomFilter | null): void;
     setCustomSort(customSort?: CustomSort | null): void;
     setSort(sortCol?: CanvasTableColumnSort[]): void;
-    setGroupBy(col: string[]): void;
+    setGroupBy(col?: string[]): void;
     setData(data?: any[]): void;
     setColumnVisible(col: number, visible: boolean): void;
     UpdateColumns(col: CanvasTableColumnConf[]): void;
     private calcColum;
     protected setR(r: number): void;
     protected abstract resize(): void;
-    expendedAll(): void;
+    protected abstract setCursor(cusor: string): void;
+    protected abstract askForExtentedMouseMoveAndMaouseUp(): void;
+    protected abstract askForNormalMouseMoveAndMaouseUp(): void;
+    private updateCursor;
+    expendAll(): void;
     collapseAll(): void;
+    private resizeColIfNeed;
+    protected clickOnHeader(col: CanvasTableColumn | null): void;
     protected wheel(deltaMode: number, deltaX: number, deltaY: number): void;
     protected mouseDown(x: number, y: number): void;
     protected mouseMove(x: number, y: number): void;
@@ -101,12 +115,14 @@ export declare abstract class CustomCanvasTable implements Drawable {
     protected TouchMove(e: CanvasTableTouchEvent, offsetLeft: number, offsetTop: number): void;
     protected TouchEnd(e: CanvasTableTouchEvent, offsetLeft: number, offsetTop: number): void;
     private clearTouchClick;
-    protected findByPos(y: number): number | GroupItem | null;
+    protected findColSplit(x: number): number | null;
+    protected findColByPos(x: number): CanvasTableColumn | null;
+    protected findRowByPos(y: number): number | GroupItem | null;
     protected overRow: number | undefined;
     protected calcIndex(): void;
     private tryFind;
     private group;
-    private changeChildExpended;
+    private changeChildExpend;
     protected reCalcForScrollView(): void;
     protected setCanvasSize(width: number, height: number): void;
     protected doReize(width: number, height: number): void;

@@ -4,7 +4,7 @@ var OffscreenCanvasMesssageType;
 (function (OffscreenCanvasMesssageType) {
     OffscreenCanvasMesssageType[OffscreenCanvasMesssageType["create"] = 0] = "create";
     OffscreenCanvasMesssageType[OffscreenCanvasMesssageType["resize"] = 1] = "resize";
-    OffscreenCanvasMesssageType[OffscreenCanvasMesssageType["expendedAll"] = 2] = "expendedAll";
+    OffscreenCanvasMesssageType[OffscreenCanvasMesssageType["expendAll"] = 2] = "expendAll";
     OffscreenCanvasMesssageType[OffscreenCanvasMesssageType["collapseAll"] = 3] = "collapseAll";
     OffscreenCanvasMesssageType[OffscreenCanvasMesssageType["setGroupBy"] = 4] = "setGroupBy";
     OffscreenCanvasMesssageType[OffscreenCanvasMesssageType["scroll"] = 10] = "scroll";

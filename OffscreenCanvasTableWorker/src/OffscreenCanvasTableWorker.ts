@@ -2,6 +2,7 @@ import { CustomCanvasTable, CanvasTableConfig } from "../../share/CustomCanvasTa
 import { ScrollView } from "../../share/ScrollView";
 import { OffscreenCanvasMesssage, OffscreenCanvasMesssageType } from "../../share/OffscreenCanvasTableMessage";
 import { CanvasTableColumnConf } from "../../share/CanvasTableColum";
+import { CanvasContext2D } from "../../share/CanvasContext2D";
 
 export class OffscreenCanvasTableWorker extends CustomCanvasTable {
     protected drawCanvas(): void {
@@ -37,7 +38,7 @@ export class OffscreenCanvasTableWorker extends CustomCanvasTable {
             case OffscreenCanvasMesssageType.create:
                 this.canvas = data.offscreen;                    
                 this.setR(data.r);
-                const context = this.canvas.getContext('2d');
+                const context = <CanvasContext2D>this.canvas.getContext('2d');
                 if (context === null) { return; }
                 this.scrollView = new ScrollView(context, this, this.config ? this.config.scrollView : undefined, this.askForExtentedMouseMoveAndMaouseUp, this.askForNormalMouseMoveAndMaouseUp);
 
@@ -53,8 +54,8 @@ export class OffscreenCanvasTableWorker extends CustomCanvasTable {
             case OffscreenCanvasMesssageType.collapseAll:
                 this.collapseAll();
                 break;
-            case OffscreenCanvasMesssageType.expendedAll:
-                this.expendedAll();
+            case OffscreenCanvasMesssageType.expendAll:
+                this.expendAll();
                 break;
             case OffscreenCanvasMesssageType.setGroupBy:
                 this.setGroupBy(data.groupBy);

@@ -4,8 +4,8 @@
     "module": "commonjs",
     "declaration": true,
     "outDir": "./lib",
-    "strict": true
+    "strict": true,
+    "noUnusedLocals": true
   },
-  "include": ["../share", "src"],
-  "exclude": ["node_modules", "**/__tests__/*"]
+  "files": ["src/OffscreenCanvasTable.ts"]
 }

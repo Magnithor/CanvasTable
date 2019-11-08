@@ -3,8 +3,9 @@ export declare class OffscreenCanvasTable {
     private worker;
     readonly offscreenCanvasTableId: number;
     constructor(offscreenCanvasTableId: number, worker: Worker, htmlId: string);
-    expendedAll(): void;
+    expendAll(): void;
     collapseAll(): void;
+    setGroupBy(col?: string[]): void;
     private resize;
     private canvasWheel;
     private canvasMouseDown;

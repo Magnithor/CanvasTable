@@ -1,6 +1,6 @@
 import { CustomCanvasTable, CanvasTableConfig } from './../../share/CustomCanvasTable';
 import { CanvasTableColumnConf, Align, Sort } from '../../share/CanvasTableColum';
-export { Align, Sort };
+export { CanvasTableColumnConf, Align, Sort };
 export declare class CanvasTable extends CustomCanvasTable {
     private canvas;
     constructor(htmlId: string, data: any[], col: CanvasTableColumnConf[], config?: CanvasTableConfig);

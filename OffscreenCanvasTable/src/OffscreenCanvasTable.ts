@@ -36,10 +36,10 @@ export class OffscreenCanvasTable {
         });
         worker.addEventListener('message', this.workerMessage);
     }
-    public expendedAll():void {
+    public expendAll():void {
         this.postMessage({
             mthbCanvasTable: this.offscreenCanvasTableId, 
-            type: OffscreenCanvasMesssageType.expendedAll
+            type: OffscreenCanvasMesssageType.expendAll
         });
     }
     public collapseAll():void {

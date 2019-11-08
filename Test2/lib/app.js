@@ -7,6 +7,7 @@ const col = [
         header: "Id",
         field: "__rownum__",
         width: 80,
+        align: mthb_canvas_table_1.Align.center
     },
     {
         header: "Name",
@@ -16,3 +17,5 @@ const col = [
 ];
 let data = [{ name: 'magni' }, { name: 'dagrún' }];
 let canvasTable = new mthb_canvas_table_1.CanvasTable("canvas", data, col);
+let w = window;
+w.align = mthb_canvas_table_1.Align;
