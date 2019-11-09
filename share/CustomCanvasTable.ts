@@ -158,29 +158,29 @@ export abstract class CustomCanvasTable implements Drawable {
             });
     }
 
-    
+    public askForReIndex(){
+        this.calcIndex();
+        this.askForReDraw();
+    }
     public setFilter(filter?: CustomFilter | null) {
         if (filter === null) {
             filter = undefined;
         }
         if (this.cusomFilter !== filter) {
             this.cusomFilter = filter;
-            this.calcIndex();
-            this.askForReDraw();
+            this.askForReIndex();
         }
     }
     public setCustomSort(customSort?: CustomSort | null) {
         if (customSort === null) { customSort = undefined; }
         this.customSort = customSort;
         this.sortCol = undefined;
-        this.calcIndex();
-        this.askForReDraw();
+        this.askForReIndex();
     }
     public setSort(sortCol?: CanvasTableColumnSort[]) {
         this.sortCol = sortCol;
         this.customSort = undefined;
-        this.calcIndex();
-        this.askForReDraw();
+        this.askForReIndex();        
     }
     public setGroupBy(col?:(string|CanvasTableGroup)[]) {
         if (!col) { col = []; }
@@ -195,15 +195,13 @@ export abstract class CustomCanvasTable implements Drawable {
             }
         }
         this.groupByCol = list;
-        this.calcIndex();
-        this.askForReDraw();
+        this.askForReIndex();        
     }
     public setData(data?:any[]) {
         if (data !== undefined) {
             this.data = data;
         }
-        this.calcIndex();
-        this.askForReDraw();
+        this.askForReIndex();
     }
     public setColumnVisible(col: number, visible: boolean) {
         if (col < 0 || col >= this.orgColum.length) {
