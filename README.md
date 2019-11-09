@@ -2,7 +2,7 @@
 CanvasTable is Typescript library who draws a table on canvas.
 
 If you like to use offscreenCanvas and/or keep the data in webworker then you use **mthb-offscreen-canvas-table** on main javascript and **mthb-offscreen-canvas-table-worker** in weworker they will work to geather
-  
+
 
 | npm | remarks |
 | ---- | -------- |
