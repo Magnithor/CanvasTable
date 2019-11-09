@@ -216,6 +216,9 @@ exports.OffscreenCanvasTableWorker = OffscreenCanvasTableWorker;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * Align text
+ */
 var Align;
 (function (Align) {
     Align[Align["left"] = 0] = "left";
@@ -359,6 +362,8 @@ const CanvasTableColum_1 = __webpack_require__(/*! ./CanvasTableColum */ "../sha
 const CustomCanvasIndex_1 = __webpack_require__(/*! ./CustomCanvasIndex */ "../share/CustomCanvasIndex.ts");
 class CustomCanvasTable {
     constructor(config) {
+        this.eventClick = [];
+        this.eventClickHeader = [];
         this.needToCalc = true;
         this.needToCalcFont = true;
         this.r = 1;
@@ -489,7 +494,7 @@ class CustomCanvasTable {
     }
     calcColum() {
         this.needToCalc = false;
-        let leftPos = 0;
+        let leftPos = 1;
         for (let i = 0; i < this.column.length; i++) {
             this.column[i].leftPos = leftPos;
             leftPos += this.column[i].width * this.r;
@@ -512,6 +517,9 @@ class CustomCanvasTable {
         this.lastCursor = cursor;
         this.setCursor(cursor);
     }
+    /**
+     * Expend All data in tree mode
+     */
     expendAll() {
         if (this.dataIndex === undefined) {
             return;
@@ -522,6 +530,9 @@ class CustomCanvasTable {
             this.askForReDraw();
         }
     }
+    /**
+     * Collapse All data in tree mode
+     */
     collapseAll() {
         if (this.dataIndex === undefined) {
             return;
@@ -530,6 +541,46 @@ class CustomCanvasTable {
             this.changeChildExpend(this.dataIndex, false);
             this.reCalcForScrollView();
             this.askForReDraw();
+        }
+    }
+    addEvent(eventName, event) {
+        this.getEvent(eventName).push(event);
+    }
+    removeEvent(eventName, event) {
+        const e = this.getEvent(eventName);
+        const index = e.indexOf(event);
+        if (index != -1) {
+            e.splice(index, 1);
+        }
+    }
+    getEvent(eventName) {
+        switch (eventName) {
+            case "click":
+                return this.eventClick;
+            case "clickHeader":
+                return this.eventClickHeader;
+            default:
+                throw "unknown;";
+        }
+    }
+    fireClick(row, col) {
+        for (var i = 0; i < this.eventClick.length; i++) {
+            try {
+                this.eventClick[i](row, col === null ? null : col.orginalCol);
+            }
+            catch (_a) {
+                console.log("fireClick");
+            }
+        }
+    }
+    fireClickHeader(col) {
+        for (var i = 0; i < this.eventClick.length; i++) {
+            try {
+                this.eventClickHeader[i](col === null ? null : col.orginalCol);
+            }
+            catch (_a) {
+                console.log("fireClickHeader");
+            }
         }
     }
     resizeColIfNeed(x) {
@@ -570,26 +621,28 @@ class CustomCanvasTable {
         if (this.scrollView && this.scrollView.onMouseDown(x, y)) {
             return;
         }
+        const col = this.findColByPos(x);
         if (y <= 18) {
             const colSplit = this.findColSplit(x);
             if (colSplit !== null) {
                 this.columnResize = { x: x, col: this.column[colSplit] };
                 this.askForExtentedMouseMoveAndMaouseUp();
+                this.fireClickHeader(col);
                 return;
             }
-            const col = this.findColByPos(x);
             this.clickOnHeader(col);
+            this.fireClickHeader(col);
             return;
         }
+        const row = this.findRowByPos(y);
         if (this.dataIndex.type === CustomCanvasIndex_1.ItemIndexType.GroupItems) {
-            const result = this.findRowByPos(y);
-            if (result !== null && typeof result === "object") {
-                result.isExpended = !result.isExpended;
+            if (row !== null && typeof row === "object") {
+                row.isExpended = !row.isExpended;
                 this.askForReDraw();
                 this.reCalcForScrollView();
-                return;
             }
         }
+        this.fireClick(row, col);
     }
     mouseMove(x, y) {
         if (!this.scrollView) {
@@ -765,7 +818,6 @@ class CustomCanvasTable {
         }
         let pos = -this.scrollView.posY / this.r + 18;
         const cellHeight = this.cellHeight;
-        const maxHeight = this.canvasHeight / this.r;
         let find = function (items) {
             let i;
             if (items.type === CustomCanvasIndex_1.ItemIndexType.Index) {
@@ -906,7 +958,6 @@ class CustomCanvasTable {
     }
     group(g, index, level, groupByCol, old) {
         let r = new Map();
-        let p = new Map();
         for (let i = 0; i < index.length; i++) {
             const id = index[i];
             let c = String(this.data[id][groupByCol[level]]);
@@ -1031,14 +1082,21 @@ class CustomCanvasTable {
                     if (i < index.list.length) {
                         this.drawRowItem(index.list[i], i, pos, height, offsetLeft, colStart, colEnd, drawConf);
                     }
+                    else {
+                        break;
+                    }
                     pos += height;
                     i++;
                 }
                 this.context.beginPath();
+                const end = pos - height + 4 * this.r;
+                const leftPos = -this.scrollView.posX + this.column[colStart].leftPos;
+                this.context.moveTo(leftPos, headderHeight);
+                this.context.lineTo(leftPos, end);
                 for (let col = colStart; col < colEnd; col++) {
                     const rightPos = -this.scrollView.posX + this.column[col].rightPos;
                     this.context.moveTo(rightPos, headderHeight);
-                    this.context.lineTo(rightPos, this.canvasHeight);
+                    this.context.lineTo(rightPos, end);
                 }
                 this.context.stroke();
                 break;
@@ -1060,6 +1118,10 @@ class CustomCanvasTable {
         this.context.fillStyle = this.config.headerFontColor;
         this.context.clearRect(0, 0, this.canvasWidth, headderHeight);
         this.context.beginPath();
+        this.context.strokeStyle = this.config.lineColor;
+        const leftPos = -this.scrollView.posX + this.column[colStart].leftPos;
+        this.context.moveTo(leftPos, 0);
+        this.context.lineTo(leftPos, headderHeight);
         for (let col = colStart; col < colEnd; col++) {
             const rightPos = -this.scrollView.posX + this.column[col].rightPos;
             this.context.moveTo(rightPos, 0);
@@ -1129,7 +1191,7 @@ class CustomCanvasTable {
         }
         this.context.beginPath();
         this.context.moveTo(0, pos + 4 * this.r);
-        this.context.lineTo(this.canvasWidth, pos + 4 * this.r);
+        this.context.lineTo(Math.min(-this.scrollView.posX + this.column[this.column.length - 1].rightPos, this.canvasWidth), pos + 4 * this.r);
         this.context.stroke();
         this.scrollView.draw();
     }
@@ -1159,7 +1221,7 @@ class CustomCanvasTable {
                         this.context.strokeStyle = this.config.lineColor;
                         this.context.beginPath();
                         this.context.moveTo(0, pos + 4 * this.r + 1 - height);
-                        this.context.lineTo(this.column[this.column.length - 1].rightPos, pos + 4 * this.r + 1 - height);
+                        this.context.lineTo(-this.scrollView.posX + this.column[this.column.length - 1].rightPos, pos + 4 * this.r + 1 - height);
                         this.context.stroke();
                     }
                     const startPos = pos;
@@ -1170,13 +1232,18 @@ class CustomCanvasTable {
                         }
                         pos += height;
                     }
+                    const start = startPos + 4 * this.r + 1 - height;
+                    const end = pos + 4 * this.r + 1 - height;
+                    const leftPos = -this.scrollView.posX + this.column[colStart].leftPos;
+                    this.context.beginPath();
+                    this.context.moveTo(leftPos, start);
+                    this.context.lineTo(leftPos, end);
                     for (var col = colStart; col < colEnd; col++) {
                         const colItem = this.column[col];
-                        this.context.beginPath();
-                        this.context.moveTo(-this.scrollView.posX + colItem.rightPos, startPos + 4 * this.r + 1 - height);
-                        this.context.lineTo(-this.scrollView.posX + colItem.rightPos, pos + 4 * this.r + 1 - height);
-                        this.context.stroke();
+                        this.context.moveTo(-this.scrollView.posX + colItem.rightPos, start);
+                        this.context.lineTo(-this.scrollView.posX + colItem.rightPos, end);
                     }
+                    this.context.stroke();
                 }
             }
             else {
@@ -1302,7 +1369,7 @@ class CustomCanvasTable {
         if (drawConf === undefined) {
             this.context.beginPath();
             this.context.moveTo(0, pos + 4 * this.r);
-            this.context.lineTo(this.column[this.column.length - 1].rightPos, pos + 4 * this.r);
+            this.context.lineTo(Math.min(-this.scrollView.posX + this.column[this.column.length - 1].rightPos, this.canvasWidth), pos + 4 * this.r);
             this.context.stroke();
         }
     }
