@@ -15,6 +15,10 @@ interface FrameRequestCallback {
 }
 declare function requestAnimationFrame(callback: FrameRequestCallback): number;
 declare function setTimeout(callback: (...args: any[]) => void, ms: number, ...args: any[]): number;
+export interface CanvasTableGroup {
+    field: string,
+    aggregate?:(data:GroupItem) => string
+}
 export interface CanvasTableConfig {
     scrollView?: ScrollViewConfig,
     font?: string,
@@ -90,7 +94,7 @@ export abstract class CustomCanvasTable implements Drawable {
     private cusomFilter?: CustomFilter;
     private customSort?: CustomSort;
     private sortCol?: CanvasTableColumnSort[];
-    private groupByCol?:string[];
+    private groupByCol?:CanvasTableGroup[];
     private overRowValue?: number;
     private columnResize?: {x:number, col:CanvasTableColumn};
     private touchClick?: {timeout: number, x: number, y: number};
@@ -174,9 +178,19 @@ export abstract class CustomCanvasTable implements Drawable {
         this.calcIndex();
         this.askForReDraw();
     }
-    public setGroupBy(col?:string[]) {
+    public setGroupBy(col?:(string|CanvasTableGroup)[]) {
         if (!col) { col = []; }
-        this.groupByCol = col;
+        let list:CanvasTableGroup[] = [];
+        for (var i= 0; i < col.length; i++){
+            const item = col[i];
+            if (typeof item === "string"){
+                list.push({field: item});
+            }
+            else {
+                list.push(item);
+            }
+        }
+        this.groupByCol = list;
         this.calcIndex();
         this.askForReDraw();
     }
@@ -374,7 +388,6 @@ export abstract class CustomCanvasTable implements Drawable {
         }
         this.fireClick(row, col);
     }
-
     protected mouseMove(x: number, y: number) {
         if (!this.scrollView) { return; }
         if (this.resizeColIfNeed(x)) {
@@ -447,37 +460,33 @@ export abstract class CustomCanvasTable implements Drawable {
             return;
         }
 
-        //if (this.dataIndex === undefined) { return; }
+        if (e.changedTouches.length === 1) {
+            const y = e.changedTouches[0].pageY - offsetTop;
+            const x = e.changedTouches[0].pageX - offsetLeft;
+            this.touchClick = {timeout: setTimeout(() => {
+                const row = this.findRowByPos(y);
+                const col = this.findColByPos(x);
 
-        //if (this.dataIndex.type === ItemIndexType.GroupItems) 
-        {
-            if (e.changedTouches.length === 1) {
-                const y = e.changedTouches[0].pageY - offsetTop;
-                const x = e.changedTouches[0].pageX - offsetLeft;
-                this.touchClick = {timeout: setTimeout(() => {
-                    if (y > 18) {                                        
-                        const result = this.findRowByPos(y);
-                        if (result !== null && typeof result === "object") {
-                            result.isExpended = !result.isExpended;
-                            this.askForReDraw();
-                            this.reCalcForScrollView();
-                            return;
-                        }
-                    } else {
-                        const colSplit = this.findColSplit(x);
-                        if (colSplit !== null) {
-                            this.columnResize = {x:x, col:this.column[colSplit]};
-                         //   console.log(this.columnResize);
-                            return;
-                        }
-            
-                        const col = this.findColByPos(x);
-                        this.clickOnHeader(col);
+                if (y > 18) {                                        
+                    if (row !== null && typeof row === "object") {
+                        row.isExpended = !row.isExpended;
+                        this.askForReDraw();
+                        this.reCalcForScrollView();
                     }
-                }, 250), x: x, y: y};
-            } else {
-                this.clearTouchClick();
-            }
+                    this.fireClick(row, col);
+                } else {
+                    const colSplit = this.findColSplit(x);
+                    if (colSplit !== null) {
+                        this.columnResize = {x:x, col:this.column[colSplit]};
+                        return;
+                    }
+        
+                    this.clickOnHeader(col);
+                    this.fireClickHeader(col);            
+                }
+            }, 250), x: x, y: y};
+        } else {
+            this.clearTouchClick();
         }
     }
     protected TouchMove(e:CanvasTableTouchEvent, offsetLeft:number, offsetTop:number) {
@@ -687,12 +696,13 @@ export abstract class CustomCanvasTable implements Drawable {
 
         return undefined;
     }
-    private group(g: GroupItems, index: number[], level: number, groupByCol: string[], old: GroupItems | undefined) {
+    private group(g: GroupItems, index: number[], level: number, groupByCol: CanvasTableGroup[], old: GroupItems | undefined) {
         let r = new Map<string, number>();
-        
+        //console.log(level);
+        const groupItem = groupByCol[level];
         for (let i=0; i < index.length; i++) {
             const id = index[i];
-            let c = String(this.data[id][groupByCol[level]]);
+            let c = String(this.data[id][groupItem.field]);
             let d = r.get(c);
             if (d !== undefined) {
                 const item = g.list[d];
@@ -705,17 +715,36 @@ export abstract class CustomCanvasTable implements Drawable {
                 g.list.push({caption: c, isExpended: oldGroupItem === undefined ? false : oldGroupItem.isExpended, child: { type:ItemIndexType.Index, list: [id] }});
             }    
         }
+
         level++;
         if (groupByCol.length > level) {
-            for (let i=0;i<g.list.length;i++) {
+            for (let i=0; i < g.list.length; i++) {
                 const child = g.list[i].child;
                 if (child.type === ItemIndexType.Index) {
-                    let item: GroupItems = {  type: ItemIndexType.GroupItems, list: []};
+                    let item: GroupItems = { type: ItemIndexType.GroupItems, list: [] };
                     const oldGroupItem = this.tryFind(old, g.list[i].caption);
                     this.group(item, child.list, level, groupByCol, oldGroupItem === undefined || oldGroupItem.child.type === ItemIndexType.Index?undefined:oldGroupItem.child);
                     g.list[i].child = item;
+                    if (groupItem.aggregate) {
+                        try {
+                            g.list[i].aggregate = groupItem.aggregate(g.list[i]);
+                        } catch {
+                            console.log('err2');
+                        }
+                    }
                 }
             }
+        } else {
+            if (groupItem.aggregate) {
+                for (let i=0; i < g.list.length; i++) {
+                    try {
+                        g.list[i].aggregate = groupItem.aggregate(g.list[i]);
+                    } catch {
+                        console.log('err');
+                    }
+                }
+            }
+
         }
     }
 
@@ -950,7 +979,11 @@ export abstract class CustomCanvasTable implements Drawable {
         }
         if (pos > 0 && drawConf === undefined) {
             this.context.textAlign = 'left';
-            this.context.fillText(groupItem.caption + ' (' + groupItem.child.list.length + ')',  -this.scrollView.posX + 10 * level * this.r, pos);
+            if (groupItem.aggregate) {
+                this.context.fillText(groupItem.caption + ' ' + groupItem.aggregate,  -this.scrollView.posX + 10 * level * this.r, pos);
+            } else {
+                this.context.fillText(groupItem.caption + ' (' + groupItem.child.list.length + ')',  -this.scrollView.posX + 10 * level * this.r, pos);
+            }
         }
         pos += height;
         if (groupItem.isExpended) {

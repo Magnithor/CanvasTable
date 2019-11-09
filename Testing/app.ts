@@ -1,6 +1,7 @@
 ﻿import { CanvasTable } from './../CanvasTable/src/CanvasTable';
 import { CustomCanvasTable } from './../share/CustomCanvasTable';
 import { CanvasTableColumnConf, Sort, Align } from '../share/CanvasTableColum';
+import { GroupItem } from '../share/CustomCanvasIndex';
 
 function customDraw(canvasTable: CustomCanvasTable, context: CanvasRenderingContext2D, rowIndex: number, col: CanvasTableColumnConf, left: number, top: number, right: number, bottom: number, width: number, height: number, r: number, dataValue: any, row: any, data: any): void {
     context.fillStyle = "lightgreen";
@@ -14,6 +15,12 @@ function customDraw(canvasTable: CustomCanvasTable, context: CanvasRenderingCont
     context.lineTo(right, top);
 
     context.stroke();
+}
+function g1(v:GroupItem):string {
+    return v.child.list.length.toString();
+}
+function g2(v:GroupItem):string {
+    return v.child.list.length.toString();
 }
 
 const onlyIceland = function (data: any, row: any, col: CanvasTableColumnConf[]): boolean {
@@ -37,7 +44,7 @@ const group = function() {
        collapseAll.style.display = "none";
        groupDom.innerText = "Group";
     } else {
-       canvasTable.setGroupBy(["country", "subcountry"]);
+       canvasTable.setGroupBy([{field:"country",aggregate:g1}, {field:"subcountry",aggregate:g2}]);
        expendedAll.style.display = "";
        collapseAll.style.display = "";
        groupDom.innerText = "Ungroup";

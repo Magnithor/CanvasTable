@@ -1,11 +1,12 @@
 export enum ItemIndexType { GroupItems, Index }
 export interface GroupItems {
     type: ItemIndexType.GroupItems,
-    list: GroupItem[]
+    list: GroupItem[],
 }
 
 export interface GroupItem {
     caption: string,
+    aggregate?: string
     child: (GroupItems|Index),
     isExpended: boolean
 }

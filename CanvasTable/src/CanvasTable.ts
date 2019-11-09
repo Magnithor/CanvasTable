@@ -1,9 +1,10 @@
 ﻿import { ScrollView } from './../../share/ScrollView';
-import { CustomCanvasTable, CanvasTableConfig } from './../../share/CustomCanvasTable';
+import { CustomCanvasTable, CanvasTableConfig, CanvasTableGroup } from './../../share/CustomCanvasTable';
 import { TouchEventToCanvasTableTouchEvent } from './../../share/CanvasTableTouchEvent';
-import { CanvasTableColumnConf, Align, Sort } from '../../share/CanvasTableColum';
+import { CanvasTableColumnConf, Align, Sort, CanvasTableColumnSort, CustomFilter, CustomSort } from '../../share/CanvasTableColum';
+import { GroupItem } from '../../share/CustomCanvasIndex';
 
-export { CanvasTableColumnConf, Align, Sort }
+export { CanvasTableColumnConf, Align, Sort, GroupItem, CanvasTableGroup, CanvasTableColumnSort, CustomSort, CustomFilter}
 
 export class CanvasTable extends CustomCanvasTable {
     private canvas: HTMLCanvasElement;
