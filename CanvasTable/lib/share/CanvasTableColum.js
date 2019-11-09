@@ -1,5 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * Align text
+ */
 var Align;
 (function (Align) {
     Align[Align["left"] = 0] = "left";

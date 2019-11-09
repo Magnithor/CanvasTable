@@ -7,7 +7,14 @@ const CanvasTableColum_1 = require("../../share/CanvasTableColum");
 exports.Align = CanvasTableColum_1.Align;
 exports.Sort = CanvasTableColum_1.Sort;
 class CanvasTable extends CustomCanvasTable_1.CustomCanvasTable {
-    constructor(htmlId, data, col, config) {
+    /**
+     * Constructor of CanvasTable
+     * @param canvas id of canvas or htmlCanvasElemnt
+     * @param data array of data
+     * @param col columns
+     * @param config config
+     */
+    constructor(canvas, data, col, config) {
         super(config);
         this.canvasWheel = (e) => {
             e.preventDefault();
@@ -54,7 +61,12 @@ class CanvasTable extends CustomCanvasTable_1.CustomCanvasTable {
             this.mouseMove(x, y);
         };
         this.data = data;
-        this.canvas = document.getElementById(htmlId);
+        if (typeof canvas === "string") {
+            this.canvas = document.getElementById(canvas);
+        }
+        else {
+            this.canvas = canvas;
+        }
         const context = this.canvas.getContext("2d");
         if (context === null) {
             throw "context is null";
