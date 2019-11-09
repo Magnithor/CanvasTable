@@ -4,6 +4,9 @@ import { CanvasContext2D, CanvasColor } from "./CanvasContext2D";
 import { CanvasTableTouchEvent } from "./CanvasTableTouchEvent";
 import { Align, RenderValue, CustomData, CanvasTableColumnConf, CustomFilter, CustomSort, CanvasTableColumnSort, Sort } from "./CanvasTableColum";
 import { IndexType, ItemIndexType, GroupItem, GroupItems, Index } from "./CustomCanvasIndex";
+import { EventManagerClick, EventManagerClickHeader } from "./EventManager";
+
+export type rowItem = number | GroupItem | null;
 export interface DrawConfig {
     drawOnly?: number[]
 }
@@ -63,6 +66,10 @@ interface CanvasTableColumn {
 }
 
 export abstract class CustomCanvasTable implements Drawable {
+    private eventClick: EventManagerClick[] = [];
+    private eventClickHeader: EventManagerClickHeader[] = [];
+
+
     private needToCalc: boolean = true;
     private needToCalcFont: boolean = true;
     protected context?: CanvasContext2D;
@@ -213,7 +220,7 @@ export abstract class CustomCanvasTable implements Drawable {
     private calcColum() {
         this.needToCalc = false;
 
-        let leftPos = 0;
+        let leftPos = 1;
         for (let i = 0; i < this.column.length; i++) {
             this.column[i].leftPos = leftPos;
             leftPos += this.column[i].width * this.r;
@@ -238,6 +245,9 @@ export abstract class CustomCanvasTable implements Drawable {
         this.setCursor(cursor);
     }
 
+    /**
+     * Expend All data in tree mode
+     */
     public expendAll() {
         if (this.dataIndex === undefined) { return; }
         if (this.dataIndex.type === ItemIndexType.GroupItems) {
@@ -247,12 +257,60 @@ export abstract class CustomCanvasTable implements Drawable {
         }
     }
 
+    /**
+     * Collapse All data in tree mode
+     */
     public collapseAll() {
         if (this.dataIndex === undefined) { return; }
         if (this.dataIndex.type === ItemIndexType.GroupItems) {
             this.changeChildExpend(this.dataIndex, false);
             this.reCalcForScrollView();
             this.askForReDraw();
+        }
+    }
+
+    
+    public addEvent(eventName: "clickHeader", event:EventManagerClickHeader): void;
+    public addEvent(eventName: "click", event:EventManagerClick): void;
+    public addEvent(eventName: string, event:any):void {
+        this.getEvent(eventName).push(event);
+    }
+
+    public removeEvent(eventName:"clickHeader", event:EventManagerClickHeader): void;
+    public removeEvent(eventName:"click", event:EventManagerClick): void;
+    public removeEvent(eventName:string, event:any): void {
+        const e = this.getEvent(eventName);
+        const index = e.indexOf(event);
+        if (index != -1) {
+            e.splice(index, 1);
+        }
+    }
+    private getEvent(eventName: string): any[] {
+        switch(eventName) {
+            case "click":
+                return this.eventClick;
+            case "clickHeader":
+                return this.eventClickHeader;
+            default:
+                throw "unknown;"
+        }
+    }
+    private fireClick(row: rowItem, col:CanvasTableColumn | null) {        
+        for (var i = 0; i < this.eventClick.length; i++) {
+            try {
+                this.eventClick[i](row, col === null ? null : col.orginalCol);
+            } catch {
+                console.log("fireClick")
+            }
+        }
+    }
+    private fireClickHeader(col:CanvasTableColumn | null) {
+        for (var i = 0; i < this.eventClick.length; i++) {
+            try {
+                this.eventClickHeader[i](col === null ? null : col.orginalCol);
+            } catch {
+                console.log("fireClickHeader")
+            }
         }
     }
 
@@ -291,28 +349,30 @@ export abstract class CustomCanvasTable implements Drawable {
             return;
         }
 
+        const col = this.findColByPos(x);
         if (y <= 18) {
             const colSplit = this.findColSplit(x);
             if (colSplit !== null) {
                 this.columnResize = {x:x, col:this.column[colSplit]};
                 this.askForExtentedMouseMoveAndMaouseUp();
+                this.fireClickHeader(col);
                 return;
             }
-            const col = this.findColByPos(x);
             this.clickOnHeader(col);
-            
+            this.fireClickHeader(col);            
             return;
         }
+        
+        const row =  this.findRowByPos(y);
 
         if (this.dataIndex.type === ItemIndexType.GroupItems) {
-            const result = this.findRowByPos(y);
-            if (result !== null && typeof result === "object") {
-                result.isExpended = !result.isExpended;
+            if (row !== null && typeof row === "object") {
+                row.isExpended = !row.isExpended;
                 this.askForReDraw();
                 this.reCalcForScrollView();
-                return;
             }
         }
+        this.fireClick(row, col);
     }
 
     protected mouseMove(x: number, y: number) {
@@ -483,7 +543,7 @@ export abstract class CustomCanvasTable implements Drawable {
 
         return null;
     }
-    protected findRowByPos(y: number): number | GroupItem | null {
+    protected findRowByPos(y: number): rowItem {
         if (this.dataIndex === undefined || this.scrollView === undefined) { return null; }
         let pos = -this.scrollView.posY / this.r + 18;
         const cellHeight = this.cellHeight;        
@@ -773,10 +833,14 @@ export abstract class CustomCanvasTable implements Drawable {
                 }
 
                 this.context.beginPath();
+                const end = pos - height + 4 * this.r;
+                const leftPos = -this.scrollView.posX + this.column[colStart].leftPos;
+                this.context.moveTo(leftPos, headderHeight)
+                this.context.lineTo(leftPos, end);
                 for (let col = colStart; col < colEnd; col++) {
                     const rightPos = -this.scrollView.posX + this.column[col].rightPos;
                     this.context.moveTo(rightPos, headderHeight)
-                    this.context.lineTo(rightPos, pos - height + 4 * this.r);
+                    this.context.lineTo(rightPos, end);
                 }
                 this.context.stroke();
                 break;
@@ -800,6 +864,11 @@ export abstract class CustomCanvasTable implements Drawable {
         this.context.clearRect(0, 0, this.canvasWidth, headderHeight);
         this.context.beginPath();
         this.context.strokeStyle = this.config.lineColor;
+
+        const leftPos = -this.scrollView.posX + this.column[colStart].leftPos;
+        this.context.moveTo(leftPos, 0)
+        this.context.lineTo(leftPos, headderHeight);
+
         for (let col = colStart; col < colEnd; col++) {
             const rightPos = -this.scrollView.posX + this.column[col].rightPos;
             this.context.moveTo(rightPos, 0)
@@ -900,7 +969,7 @@ export abstract class CustomCanvasTable implements Drawable {
                         this.context.strokeStyle = this.config.lineColor;
                         this.context.beginPath();            
                         this.context.moveTo(0, pos+ 4*this.r+1 -height);
-                        this.context.lineTo(this.column[this.column.length-1].rightPos, pos + 4*this.r+1-height);
+                        this.context.lineTo(-this.scrollView.posX + this.column[this.column.length-1].rightPos, pos + 4*this.r+1-height);
                         this.context.stroke();
                     }
                     const startPos = pos;
@@ -911,13 +980,20 @@ export abstract class CustomCanvasTable implements Drawable {
                         }
                         pos += height;
                     }    
+
+                    const start = startPos + 4*this.r + 1- height;
+                    const end =  pos + 4*this.r + 1 - height;
+                    const leftPos = -this.scrollView.posX + this.column[colStart].leftPos;
+                    this.context.beginPath();            
+                    this.context.moveTo(leftPos, start)
+                    this.context.lineTo(leftPos, end);
+    
                     for (var col = colStart; col < colEnd; col++) {
                         const colItem = this.column[col];
-                        this.context.beginPath();            
-                        this.context.moveTo( -this.scrollView.posX + colItem.rightPos, startPos+ 4*this.r+1-height);
-                        this.context.lineTo( -this.scrollView.posX + colItem.rightPos, pos+ 4*this.r+1-height);
-                        this.context.stroke();
+                        this.context.moveTo( -this.scrollView.posX + colItem.rightPos, start);
+                        this.context.lineTo( -this.scrollView.posX + colItem.rightPos, end);
                     }
+                    this.context.stroke();
             
                 }
             } else {

@@ -94,6 +94,8 @@ declare let data: { country: string, geonameid: number, name: string, subcountry
 const canvasTable = new CanvasTable("canvas", data, col);
 canvasTable.setSort([{ col: col[2], sort: Sort.ascending }, {col:col[5], sort:Sort.ascending}]);
 group();
+canvasTable.addEvent("click", (row,col) => { console.log(row,col); });
+canvasTable.addEvent("clickHeader", (col) => { console.log(col); });
 
 var w = (<any>window);
 w.canvasTable = canvasTable;

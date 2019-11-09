@@ -8,10 +8,21 @@ export { CanvasTableColumnConf, Align, Sort }
 export class CanvasTable extends CustomCanvasTable {
     private canvas: HTMLCanvasElement;
    
-    constructor(htmlId: string, data: any[], col: CanvasTableColumnConf[], config?: CanvasTableConfig) {
+    /**
+     * Constructor of CanvasTable
+     * @param canvas id of canvas or htmlCanvasElemnt
+     * @param data array of data
+     * @param col columns
+     * @param config config
+     */
+    constructor(canvas: string|HTMLCanvasElement, data: any[], col: CanvasTableColumnConf[], config?: CanvasTableConfig) {
         super(config);
         this.data = data;
-        this.canvas = <HTMLCanvasElement>document.getElementById(htmlId);
+        if (typeof canvas === "string") {
+            this.canvas = <HTMLCanvasElement>document.getElementById(canvas);
+        } else {
+            this.canvas = canvas;
+        }
         const context = this.canvas.getContext("2d");
         if (context === null) { throw "context is null"; }
         this.setR(window.devicePixelRatio);
