@@ -31,6 +31,8 @@ export interface CanvasTableConfig {
     headerDrawSortArrow?: boolean,
     headerDrawSortArrowColor?: CanvasColor,
     headerBackgroundColor?: CanvasColor,
+    groupItemFontColor?: CanvasColor,
+    groupItemArrowColor?: CanvasColor,
     backgroundColor?: CanvasColor,
     lineColor?: CanvasColor,
     howerBackgroundColor?: CanvasColor,
@@ -50,6 +52,8 @@ interface CanvasTableConf {
     headerDrawSortArrow: boolean,
     headerDrawSortArrowColor: CanvasColor,
     headerBackgroundColor: CanvasColor,
+    groupItemFontColor: CanvasColor,
+    groupItemArrowColor: CanvasColor,
     backgroundColor: CanvasColor,
     lineColor: CanvasColor,
     howerBackgroundColor: CanvasColor,
@@ -116,6 +120,8 @@ export abstract class CustomCanvasTable implements Drawable {
                 headerBackgroundColor: "#add8e6",
                 headerDrawSortArrowColor: "purple",
                 headerDrawSortArrow: true,
+                groupItemFontColor:"back",
+                groupItemArrowColor:"black",
                 lineColor: "black",
                 backgroundColor: "white",
                 howerBackgroundColor: "#DCDCDC",
@@ -976,11 +982,25 @@ export abstract class CustomCanvasTable implements Drawable {
             return 0;
         }
         if (pos > 0 && drawConf === undefined) {
+            this.context.fillStyle = this.config.groupItemArrowColor;
+            this.context.beginPath();
+            if (groupItem.isExpended){
+                this.context.moveTo(-this.scrollView.posX+ (9+10*(level-1)) * this.r, pos-this.r*10);
+                this.context.lineTo(-this.scrollView.posX+ (5+10*(level-1)) * this.r, pos);
+                this.context.lineTo(-this.scrollView.posX+ (2+10*(level-1)) * this.r, pos-this.r*10);
+            } else {
+                this.context.moveTo(-this.scrollView.posX+ (9+10*(level-1)) * this.r, pos-this.r*5);
+                this.context.lineTo(-this.scrollView.posX+ (2+10*(level-1)) * this.r, pos);
+                this.context.lineTo(-this.scrollView.posX+ (2+10*(level-1)) * this.r, pos-this.r*10);
+            }
+            this.context.fill();
+
+            this.context.fillStyle = this.config.groupItemFontColor;
             this.context.textAlign = 'left';
             if (groupItem.aggregate) {
-                this.context.fillText(groupItem.caption + ' ' + groupItem.aggregate,  -this.scrollView.posX + 10 * level * this.r, pos);
+                this.context.fillText(groupItem.caption + ' ' + groupItem.aggregate,  -this.scrollView.posX + (20 + 10 * (level-1)) * this.r, pos);
             } else {
-                this.context.fillText(groupItem.caption + ' (' + groupItem.child.list.length + ')',  -this.scrollView.posX + 10 * level * this.r, pos);
+                this.context.fillText(groupItem.caption + ' (' + groupItem.child.list.length + ')',  -this.scrollView.posX + (20 + 10 * (level-1)) * this.r, pos);
             }
         }
         pos += height;
