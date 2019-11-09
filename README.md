@@ -13,11 +13,7 @@ If you like to use offscreenCanvas and/or keep the data in webworker then you us
 [Demo](http://magni.strumpur.net/CanvasTable)
 
 #TODO
-* send event on click on data CanvasTable
-* send event on click on hader CanvasTable
-* send event on click on data CanvasTableWorker
-* send event on click on hader CanvasTableWorker
-* resize column
+*groupby arrow
 
 #Supported
 * web worker

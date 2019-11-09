@@ -1,5 +1,6 @@
 import { CanvasTableColumnConf } from "./CanvasTableColum";
-import { rowItem } from "./CustomCanvasTable";
+import { RowItem } from "./CustomCanvasIndex";
 
-export type EventManagerClick = (row:rowItem, col:CanvasTableColumnConf|null)=>void;
+
+export type EventManagerClick = (row:RowItem, col:CanvasTableColumnConf|null)=>void;
 export type EventManagerClickHeader = (col:CanvasTableColumnConf|null)=>void;

@@ -1,13 +1,24 @@
 import { OffscreenCanvasMesssage, OffscreenCanvasMesssageType } from "../../share/OffscreenCanvasTableMessage";
 import { TouchEventToCanvasTableTouchEvent } from "../../share/CanvasTableTouchEvent";
+import { EventManagerClickHeader, EventManagerClick } from "../../share/EventManager";
+import { RowItem } from "../../share/CustomCanvasIndex";
+import { CanvasTableColumnConf } from "../../share/CanvasTableColum";
 
 export class OffscreenCanvasTable {
+    private eventClick: EventManagerClick[] = [];
+    private eventClickHeader: EventManagerClickHeader[] = [];
+
     private canvas: HTMLCanvasElement;
     private worker: Worker;
     readonly offscreenCanvasTableId: number;
 
-    constructor(offscreenCanvasTableId:number, worker: Worker, htmlId: string) {
-        this.canvas = <HTMLCanvasElement>document.getElementById(htmlId);
+    constructor(offscreenCanvasTableId:number, worker: Worker, canvas: HTMLCanvasElement|string) {
+        if(typeof canvas === "string") {
+            this.canvas = <HTMLCanvasElement>document.getElementById(canvas);
+        } else {
+            this.canvas = canvas;
+        }
+
         const offscreen = this.canvas.transferControlToOffscreen();
         this.worker = worker;
         this.offscreenCanvasTableId = offscreenCanvasTableId;
@@ -55,6 +66,51 @@ export class OffscreenCanvasTable {
             groupBy: col
         });
     }
+
+    public addEvent(eventName: "clickHeader", event:EventManagerClickHeader): void;
+    public addEvent(eventName: "click", event:EventManagerClick): void;
+    public addEvent(eventName: string, event:any):void {
+        this.getEvent(eventName).push(event);
+    }
+
+    public removeEvent(eventName:"clickHeader", event:EventManagerClickHeader): void;
+    public removeEvent(eventName:"click", event:EventManagerClick): void;
+    public removeEvent(eventName:string, event:any): void {
+        const e = this.getEvent(eventName);
+        const index = e.indexOf(event);
+        if (index != -1) {
+            e.splice(index, 1);
+        }
+    }
+    private getEvent(eventName: string): any[] {
+        switch(eventName) {
+            case "click":
+                return this.eventClick;
+            case "clickHeader":
+                return this.eventClickHeader;
+            default:
+                throw "unknown;"
+        }
+    }
+    protected fireClick(row: RowItem, col:CanvasTableColumnConf | null) {        
+        for (var i = 0; i < this.eventClick.length; i++) {
+            try {
+                this.eventClick[i](row, col);
+            } catch {
+                console.log("fireClick")
+            }
+        }
+    }
+    protected fireClickHeader(col:CanvasTableColumnConf | null) {
+        for (var i = 0; i < this.eventClick.length; i++) {
+            try {
+                this.eventClickHeader[i](col);
+            } catch {
+                console.log("fireClickHeader")
+            }
+        }
+    }
+
     private resize() {
         this.postMessage({
             mthbCanvasTable: this.offscreenCanvasTableId, 
@@ -186,6 +242,10 @@ export class OffscreenCanvasTable {
                 break;
             case OffscreenCanvasMesssageType.setCursor:
                 this.canvas.style.cursor = data.cursor;
+                break;
+            case OffscreenCanvasMesssageType.fireClick:
+                break;
+            case OffscreenCanvasMesssageType.fireClickHeader:
                 break;
         }
     }

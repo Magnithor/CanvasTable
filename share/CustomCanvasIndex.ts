@@ -1,3 +1,6 @@
+export type RowItem = number | GroupItem | null;
+
+
 export enum ItemIndexType { GroupItems, Index }
 export interface GroupItems {
     type: ItemIndexType.GroupItems,

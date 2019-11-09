@@ -1,8 +1,9 @@
-import { CustomCanvasTable, CanvasTableConfig } from "../../share/CustomCanvasTable";
+import { CustomCanvasTable, CanvasTableConfig, CanvasTableColumn } from "../../share/CustomCanvasTable";
 import { ScrollView } from "../../share/ScrollView";
 import { OffscreenCanvasMesssage, OffscreenCanvasMesssageType } from "../../share/OffscreenCanvasTableMessage";
 import { CanvasTableColumnConf } from "../../share/CanvasTableColum";
 import { CanvasContext2D } from "../../share/CanvasContext2D";
+import { RowItem } from "../../share/CustomCanvasIndex";
 
 export class OffscreenCanvasTableWorker extends CustomCanvasTable {
     protected drawCanvas(): void {
@@ -107,6 +108,16 @@ export class OffscreenCanvasTableWorker extends CustomCanvasTable {
     }
     protected askForNormalMouseMoveAndMaouseUp() {
         const data:OffscreenCanvasMesssage = { mthbCanvasTable:this.id, type:OffscreenCanvasMesssageType.askForNormalMouseMoveAndMaouseUp };
+        postMessage(data);
+    }
+    protected fireClick(row: RowItem, col:CanvasTableColumn | null) {        
+        super.fireClick(row, col);
+        const data:OffscreenCanvasMesssage = { mthbCanvasTable:this.id, type:OffscreenCanvasMesssageType.fireClick, row: row, col: col };
+        postMessage(data);
+    }
+    protected fireClickHeader(col:CanvasTableColumn | null) {
+        super.fireClickHeader(col);
+        const data:OffscreenCanvasMesssage = { mthbCanvasTable:this.id, type:OffscreenCanvasMesssageType.fireClickHeader, col: col };
         postMessage(data);
     }
 }

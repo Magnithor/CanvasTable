@@ -3,10 +3,9 @@ import { ScrollView, ScrollViewConfig } from "./ScrollView";
 import { CanvasContext2D, CanvasColor } from "./CanvasContext2D";
 import { CanvasTableTouchEvent } from "./CanvasTableTouchEvent";
 import { Align, RenderValue, CustomData, CanvasTableColumnConf, CustomFilter, CustomSort, CanvasTableColumnSort, Sort } from "./CanvasTableColum";
-import { IndexType, ItemIndexType, GroupItem, GroupItems, Index } from "./CustomCanvasIndex";
+import { IndexType, ItemIndexType, GroupItem, GroupItems, Index, RowItem } from "./CustomCanvasIndex";
 import { EventManagerClick, EventManagerClickHeader } from "./EventManager";
 
-export type rowItem = number | GroupItem | null;
 export interface DrawConfig {
     drawOnly?: number[]
 }
@@ -57,7 +56,7 @@ interface CanvasTableConf {
     sepraBackgroundColor: CanvasColor
 }
 
-interface CanvasTableColumn {
+export interface CanvasTableColumn {
     header: string,
     field: string,
     width: number,
@@ -72,7 +71,6 @@ interface CanvasTableColumn {
 export abstract class CustomCanvasTable implements Drawable {
     private eventClick: EventManagerClick[] = [];
     private eventClickHeader: EventManagerClickHeader[] = [];
-
 
     private needToCalc: boolean = true;
     private needToCalcFont: boolean = true;
@@ -309,7 +307,7 @@ export abstract class CustomCanvasTable implements Drawable {
                 throw "unknown;"
         }
     }
-    private fireClick(row: rowItem, col:CanvasTableColumn | null) {        
+    protected fireClick(row: RowItem, col:CanvasTableColumn | null) {        
         for (var i = 0; i < this.eventClick.length; i++) {
             try {
                 this.eventClick[i](row, col === null ? null : col.orginalCol);
@@ -318,7 +316,7 @@ export abstract class CustomCanvasTable implements Drawable {
             }
         }
     }
-    private fireClickHeader(col:CanvasTableColumn | null) {
+    protected fireClickHeader(col:CanvasTableColumn | null) {
         for (var i = 0; i < this.eventClick.length; i++) {
             try {
                 this.eventClickHeader[i](col === null ? null : col.orginalCol);
@@ -552,7 +550,7 @@ export abstract class CustomCanvasTable implements Drawable {
 
         return null;
     }
-    protected findRowByPos(y: number): rowItem {
+    protected findRowByPos(y: number): RowItem {
         if (this.dataIndex === undefined || this.scrollView === undefined) { return null; }
         let pos = -this.scrollView.posY / this.r + 18;
         const cellHeight = this.cellHeight;        
