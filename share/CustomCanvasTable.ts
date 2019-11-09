@@ -348,7 +348,7 @@ export abstract class CustomCanvasTable implements Drawable {
         if (this.scrollView && this.scrollView.onMouseDown(x, y)) {
             return;
         }
-
+        
         const col = this.findColByPos(x);
         if (y <= 18) {
             const colSplit = this.findColSplit(x);
