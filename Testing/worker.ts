@@ -58,9 +58,13 @@ const col: CanvasTableColumnConf[] = [
         align: Align.right
     }
 ];
+let filter = "";
 const offscreenCanvasTableWorker = new OffscreenCanvasTableWorker(1, col);
 offscreenCanvasTableWorker.setSort([{ col: col[2], sort: Sort.ascending }, {col:col[5], sort:Sort.ascending}]);
-
+offscreenCanvasTableWorker.setFilter(function(data: any, row: any, col: CanvasTableColumnConf[]) {
+    if (filter === null) { return true; }
+    return !((row.country||'').indexOf(filter) === -1 && (row.name||'').indexOf(filter) === -1 && (row.subcountry||'').indexOf(filter) === -1);
+});
 
 
 const httpRequest = new XMLHttpRequest();
@@ -79,6 +83,10 @@ addEventListener('message', (message) => {
     if (message.data.mthbCanvasTable !== undefined) {
         offscreenCanvasTableWorker.message(message.data);
         return;
+    }
+    if (message.data.filter) {
+        filter = message.data.filter;
+        offscreenCanvasTableWorker.askForReIndex();
     }
 
     console.log('in webworker', message);

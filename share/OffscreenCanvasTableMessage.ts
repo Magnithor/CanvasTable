@@ -1,6 +1,4 @@
 import { CanvasTableTouchEvent } from "./CanvasTableTouchEvent";
-import { RowItem } from "./CustomCanvasIndex";
-import { CanvasTableColumnConf } from "./CanvasTableColum";
 
 export enum OffscreenCanvasMesssageType { 
     create = 0, 
@@ -10,8 +8,7 @@ export enum OffscreenCanvasMesssageType {
     mouseDown = 20, mouseMove = 21, mouseUp = 22, mouseLeave = 23, mouseMoveExtended = 24, mouseUpExtended = 25,
     TouchStart = 30, TouchMove = 31, TouchEnd = 32,
     keyDown = 40,
-    askForExtentedMouseMoveAndMaouseUp = 100, askForNormalMouseMoveAndMaouseUp = 101, setCursor = 102,
-    fireClick = 103, fireClickHeader = 104
+    askForExtentedMouseMoveAndMaouseUp = 100, askForNormalMouseMoveAndMaouseUp = 101, setCursor = 102
     }
 
 interface OffscreenCanvasMesssageParnet {
@@ -82,15 +79,6 @@ interface OffscreenCanvasMessageSetCursor extends OffscreenCanvasMesssageParnet 
     cursor: string
 }
 
-interface OffscreenCanvasMessageSetFireClick extends OffscreenCanvasMesssageParnet {
-    type: OffscreenCanvasMesssageType.fireClick,
-    col: CanvasTableColumnConf | null,
-    row: RowItem
-}
-interface OffscreenCanvasMessageFireClickHeader extends OffscreenCanvasMesssageParnet {
-    type: OffscreenCanvasMesssageType.fireClickHeader,
-    col: CanvasTableColumnConf | null
-}
 
 
 export type OffscreenCanvasMesssage = 
@@ -103,6 +91,4 @@ export type OffscreenCanvasMesssage =
     | OffscreenCanvasMessageMouse
     | OffscreenCanvasMessageMouseLeave
     | OffscreenCanvasMessageKeyDown
-    | OffscreenCanvasMesssageTouch
-    | OffscreenCanvasMessageSetFireClick
-    | OffscreenCanvasMessageFireClickHeader;
+    | OffscreenCanvasMesssageTouch;

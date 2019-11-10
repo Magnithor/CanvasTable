@@ -1,6 +1,7 @@
 import {OffscreenCanvasTable} from '../OffscreenCanvasTable/src/OffscreenCanvasTable';
 
 const worker = new Worker('dist/worker.js');
+const filter = <HTMLInputElement>document.getElementById("filter");
 const canvasTable = new OffscreenCanvasTable(1, worker, "canvas");
 
 worker.addEventListener('message', message => {
@@ -29,6 +30,12 @@ const group = function() {
 }
 
 group();
+
+if (filter != null) {
+    filter.addEventListener("keyup", function() {
+        worker.postMessage({filter:filter.value});
+    });
+}
 
 var w = (<any>window);
 w.canvasTable = canvasTable;

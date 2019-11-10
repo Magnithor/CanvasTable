@@ -64,7 +64,7 @@ const col: CanvasTableColumnConf[] = [
         field: "__rownum__",
         width: 80,
         renderer: customDraw,
-        visible: false
+        visible: true
     },
     {
         header: "Country",

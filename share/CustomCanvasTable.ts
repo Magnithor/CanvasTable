@@ -33,6 +33,7 @@ export interface CanvasTableConfig {
     headerBackgroundColor?: CanvasColor,
     groupItemFontColor?: CanvasColor,
     groupItemArrowColor?: CanvasColor,
+    groupItemBackgroundColor?: CanvasColor,
     backgroundColor?: CanvasColor,
     lineColor?: CanvasColor,
     howerBackgroundColor?: CanvasColor,
@@ -54,6 +55,7 @@ interface CanvasTableConf {
     headerBackgroundColor: CanvasColor,
     groupItemFontColor: CanvasColor,
     groupItemArrowColor: CanvasColor,
+    groupItemBackgroundColor: CanvasColor,
     backgroundColor: CanvasColor,
     lineColor: CanvasColor,
     howerBackgroundColor: CanvasColor,
@@ -122,6 +124,7 @@ export abstract class CustomCanvasTable implements Drawable {
                 headerDrawSortArrow: true,
                 groupItemFontColor:"back",
                 groupItemArrowColor:"black",
+                groupItemBackgroundColor: "#F9D3CB",
                 lineColor: "black",
                 backgroundColor: "white",
                 howerBackgroundColor: "#DCDCDC",
@@ -764,7 +767,7 @@ export abstract class CustomCanvasTable implements Drawable {
         let w:number | undefined = 1;
         if (this.column) {
             for (let i =0; i < this.column.length; i++) {
-                w += this.column[i].width * this.r + 2;
+                w += this.column[i].width * this.r + 0;
             }        
         } else {
             w = undefined;
@@ -980,6 +983,10 @@ export abstract class CustomCanvasTable implements Drawable {
             return 0;
         }
         if (pos > 0 && drawConf === undefined) {
+            const w = Math.min(-this.scrollView.posX + this.column[this.column.length-1].rightPos, this.canvasWidth);
+            this.context.fillStyle = this.config.groupItemBackgroundColor;
+            this.context.fillRect(0 , pos - height+4*this.r+1, w, height-3);
+
             this.context.fillStyle = this.config.groupItemArrowColor;
             this.context.beginPath();
             if (groupItem.isExpended){
@@ -1000,6 +1007,11 @@ export abstract class CustomCanvasTable implements Drawable {
             } else {
                 this.context.fillText(groupItem.caption + ' (' + groupItem.child.list.length + ')',  -this.scrollView.posX + (20 + 10 * (level-1)) * this.r, pos);
             }
+
+            this.context.beginPath();            
+            this.context.moveTo(0, pos + 4 * this.r);
+            this.context.lineTo(w, pos+ 4*this.r);
+            this.context.stroke();
         }
         pos += height;
         if (groupItem.isExpended) {
