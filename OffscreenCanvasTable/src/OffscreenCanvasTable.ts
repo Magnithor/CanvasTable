@@ -1,8 +1,5 @@
 import { OffscreenCanvasMesssage, OffscreenCanvasMesssageType } from "../../share/OffscreenCanvasTableMessage";
 import { TouchEventToCanvasTableTouchEvent } from "../../share/CanvasTableTouchEvent";
-import { EventManagerClickHeader, EventManagerClick } from "../../share/EventManager";
-import { RowItem } from "../../share/CustomCanvasIndex";
-import { CanvasTableColumnConf } from "../../share/CanvasTableColum";
 
 export class OffscreenCanvasTable {
     private canvas: HTMLCanvasElement;
