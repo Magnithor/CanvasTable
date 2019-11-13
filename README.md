@@ -1,5 +1,5 @@
 # CanvasTable
-CanvasTable is Typescript library who draws a table on canvas.
+CanvasTable is Typescript library who draws a table on canvas. It is very fast to draw table and it will not slow down if data is big
 
 If you like to use offscreenCanvas and/or keep the data in webworker then you use **mthb-offscreen-canvas-table** on main javascript and **mthb-offscreen-canvas-table-worker** in weworker they will work to geather
 
@@ -10,12 +10,12 @@ If you like to use offscreenCanvas and/or keep the data in webworker then you us
 | mthb-offscreen-canvas-table | connect canvas and events to webworker |
 | mthb-offscreen-canvas-table-worker | draw on webworker |
 
-[Demo](http://magni.strumpur.net/CanvasTable)
+[Demo](https://magni.strumpur.net/CanvasTable)
 
-#TODO
-*groupby arrow
+# TODO
 
-#Supported
+
+# Supported
 * web worker
 * multi col sort
 * custom sort
@@ -24,6 +24,7 @@ If you like to use offscreenCanvas and/or keep the data in webworker then you us
 * sepra grid
 * custom render data
 * custom drawing col
+* custom style for row and cal
 * auto scroll X and Y
 * draw sort arrow on header 
 * sort when click on header

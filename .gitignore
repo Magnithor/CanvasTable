@@ -1,3 +1,5 @@
 node_modules
 dist
 lib
+share/*.js
+share/*.d.ts

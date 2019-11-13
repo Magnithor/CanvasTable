@@ -9,7 +9,9 @@ module.exports = {
 	entry: {
 		app: './app.ts',
 		appWithWorker: './appWithWorker.ts',
-		worker: './worker.ts'
+		worker: './worker.ts',
+		CanvasTable : './CanvasTable.ts',
+		kjartan: './kjartan.ts'
 	},
 
 	output: {

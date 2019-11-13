@@ -2,7 +2,7 @@ import { Drawable } from "./Drawable";
 import { ScrollView, ScrollViewConfig } from "./ScrollView";
 import { CanvasContext2D, CanvasColor } from "./CanvasContext2D";
 import { CanvasTableTouchEvent } from "./CanvasTableTouchEvent";
-import { Align, RenderValue, CustomData, CanvasTableColumnConf, CustomFilter, CustomSort, CanvasTableColumnSort, Sort } from "./CanvasTableColum";
+import { Align, RenderValue, CustomData, CanvasTableColumnConf, CustomFilter, CustomSort, CanvasTableColumnSort, Sort, CustomRowColStyle, CanvasTableRowColStyle } from "./CanvasTableColum";
 import { IndexType, ItemIndexType, GroupItem, GroupItems, Index, RowItem } from "./CustomCanvasIndex";
 import { EventManagerClick, EventManagerClickHeader } from "./EventManager";
 
@@ -61,6 +61,26 @@ interface CanvasTableConf {
     howerBackgroundColor: CanvasColor,
     sepraBackgroundColor: CanvasColor
 }
+const defaultConfig: CanvasTableConf = {
+    font: "arial",
+    fontStyle: "",
+    fontSize: 14,
+    fontColor: "black",
+    headerFont: "arial",
+    headerFontStyle: "bold",
+    headerFontSize: 14,
+    headerFontColor: "black",
+    headerBackgroundColor: "#add8e6",
+    headerDrawSortArrowColor: "purple",
+    headerDrawSortArrow: true,
+    groupItemFontColor:"back",
+    groupItemArrowColor:"black",
+    groupItemBackgroundColor: "#F9D3CB",
+    lineColor: "black",
+    backgroundColor: "white",
+    howerBackgroundColor: "#DCDCDC",
+    sepraBackgroundColor: '#ECECEC'
+};
 
 export interface CanvasTableColumn {
     header: string,
@@ -95,7 +115,8 @@ export abstract class CustomCanvasTable implements Drawable {
     protected dataIndex?: IndexType = undefined;
     private column: CanvasTableColumn[] = [];
     private orgColum: CanvasTableColumnConf[] = [];
-    private cusomFilter?: CustomFilter;
+    private customRowColStyle?: CustomRowColStyle;
+    private customFilter?: CustomFilter;
     private customSort?: CustomSort;
     private sortCol?: CanvasTableColumnSort[];
     private groupByCol?:CanvasTableGroup[];
@@ -106,30 +127,15 @@ export abstract class CustomCanvasTable implements Drawable {
     private lastCursor: string = "";
     private canvasHeight: number = 0;
     private canvasWidth: number = 0;
-    protected config: CanvasTableConf;
+    protected config: CanvasTableConf = defaultConfig;
     constructor (config: CanvasTableConfig | undefined) {
-        
+        this.updateConfig(config);
+    }
+    
+    public updateConfig(config:CanvasTableConfig | undefined){
         this.config = {
-             ...{
-                font: "arial",
-                fontStyle: "",
-                fontSize: 14,
-                fontColor: "black",
-                headerFont: "arial",
-                headerFontStyle: "bold",
-                headerFontSize: 14,
-                headerFontColor: "black",
-                headerBackgroundColor: "#add8e6",
-                headerDrawSortArrowColor: "purple",
-                headerDrawSortArrow: true,
-                groupItemFontColor:"back",
-                groupItemArrowColor:"black",
-                groupItemBackgroundColor: "#F9D3CB",
-                lineColor: "black",
-                backgroundColor: "white",
-                howerBackgroundColor: "#DCDCDC",
-                sepraBackgroundColor: '#ECECEC'
-            }, ...config };
+            ...defaultConfig, ...config };
+
     }
 
     public isPlanToRedraw(): boolean {
@@ -161,16 +167,25 @@ export abstract class CustomCanvasTable implements Drawable {
             });
     }
 
-    public askForReIndex(){
+    public askForReIndex() {
         this.calcIndex();
         this.askForReDraw();
+    }
+    public setRowColStyle(style?: CustomRowColStyle | null) {
+        if (style === null) {
+            style = undefined;
+        }
+        if (this.customRowColStyle !== style) {
+            this.customRowColStyle = style;
+            this.askForReDraw();
+        }
     }
     public setFilter(filter?: CustomFilter | null) {
         if (filter === null) {
             filter = undefined;
         }
-        if (this.cusomFilter !== filter) {
-            this.cusomFilter = filter;
+        if (this.customFilter !== filter) {
+            this.customFilter = filter;
             this.askForReIndex();
         }
     }
@@ -619,9 +634,9 @@ export abstract class CustomCanvasTable implements Drawable {
             return;
         }
         let index: number[] = []
-        if (this.cusomFilter) {
+        if (this.customFilter) {
             for (let i = 0; i < this.data.length; i++) {
-                if (this.cusomFilter(this.data, this.data[i], this.orgColum)) {
+                if (this.customFilter(this.data, this.data[i], this.orgColum)) {
                     index[index.length] = i;
                 }
             }
@@ -649,16 +664,26 @@ export abstract class CustomCanvasTable implements Drawable {
                                 break;
                             default:
                                 let da = this.data[a][col.col.field], db = this.data[b][col.col.field];
-                                if (da === undefined) {
-                                    if (db === undefined) {
+                                if (da === undefined || da === null) {
+                                    if (db === undefined || db === null) {
                                         continue; 
                                     }
                                     return col.sort;
                                 }
-                                if (db === undefined) {
+                                if (db === undefined || db === null) {
                                     return -1 * col.sort;
                                 }
                                 if (typeof da === "string" && typeof db === "string") {
+                                    if (da === "") {
+                                        if (db === ""){
+                                            continue;
+                                        }
+                                        return col.sort;
+                                    }
+
+                                    if (db === "") {
+                                        return -1 * col.sort;
+                                    }
                                     d = da.localeCompare(db);
                                     if (d !== 0) { return d * col.sort; }
                                     continue;
@@ -1080,10 +1105,11 @@ export abstract class CustomCanvasTable implements Drawable {
             
             if (!found) {
                 return;
-            } else {
-                this.context.clearRect(0, pos - height + 4*this.r+1, this.canvasWidth, height-2);
             }
         }
+        const isOver = this.overRowValue === indexId;
+        const isSepra =  i % 2 === 0;
+
         for (let col = colStart; col < colEnd; col++) {
             const colItem = this.column[col];
             let data: string;
@@ -1121,10 +1147,23 @@ export abstract class CustomCanvasTable implements Drawable {
                 this.context.restore();
                 continue;
             }
+
+            let customStyle:CanvasTableRowColStyle|undefined|null;
+            if (this.customRowColStyle){
+                try {
+                    customStyle = this.customRowColStyle(this.data, this.data[indexId],colItem.orginalCol, isOver, isSepra, data);
+                } catch {
+                    console.log("Canvas Table customRowColStyle");
+                }
+            }
+
+            if (!customStyle) {
+                customStyle = {};
+            }
             
             let needClip: boolean;
             const colWidth = colItem.width * this.r - offsetLeft * 2;
-            if (data === null) {
+            if (data === null || data === undefined) {
                 return;
             }
             if (colWidth > data.length*this.maxFontWidth) {
@@ -1136,7 +1175,7 @@ export abstract class CustomCanvasTable implements Drawable {
             }
 
             let x;
-            switch (colItem.align) {
+            switch (customStyle.align === undefined ? colItem.align : customStyle.align) {
                 case Align.left:
                 default:
                     x = colItem.leftPos + offsetLeft;
@@ -1158,25 +1197,43 @@ export abstract class CustomCanvasTable implements Drawable {
                     break;
             }
 
-            if (this.overRowValue === indexId) {
-                this.context.fillStyle = this.config.howerBackgroundColor;
+            if (customStyle.backgroundColor !== undefined) {
+                this.context.fillStyle = customStyle.backgroundColor;
             } else {
-                this.context.fillStyle = i % 2 === 0 ?  this.config.sepraBackgroundColor : this.config.backgroundColor ;
+                if (isOver) {
+                    this.context.fillStyle = this.config.howerBackgroundColor;
+                } else {
+                    this.context.fillStyle = isSepra ?  this.config.sepraBackgroundColor : this.config.backgroundColor ;
+                }
             }
 
+            let lastFont;
+            if (customStyle.font !== undefined || customStyle.fontSize !== undefined || customStyle.fontStyle !== undefined) {
+                lastFont = this.context.font;
+                this.context.font = 
+                    (customStyle.fontStyle === undefined ? this.config.fontStyle :customStyle.fontStyle)
+                     + " " + 
+                    (customStyle.fontSize === undefined ? this.config.fontSize : customStyle.fontSize) * this.r + "px " + 
+                    (customStyle.font === undefined ? this.config.font : customStyle.font);
+
+            }
+            
             if (needClip) {
                 this.context.fillRect( -this.scrollView.posX + colItem.leftPos + 1, pos - height+4*this.r+1, colItem.width * this.r - 1 * 2, height-3);
                 this.context.save();
                 this.context.beginPath();
                 this.context.rect( -this.scrollView.posX + colItem.leftPos + offsetLeft, pos - height, colItem.width * this.r - offsetLeft * 2, height);
                 this.context.clip();
-                this.context.fillStyle = this.config.fontColor;
+                this.context.fillStyle = customStyle.fontColor === undefined ? this.config.fontColor : customStyle.fontColor;
                 this.context.fillText(data, -this.scrollView.posX + x, pos);
                 this.context.restore();
             } else {
                 this.context.fillRect( -this.scrollView.posX + colItem.leftPos + 1, pos - height+4*this.r+1, colItem.width * this.r - 1 * 2, height-3);
-                this.context.fillStyle = this.config.fontColor;
+                this.context.fillStyle = customStyle.fontColor === undefined ? this.config.fontColor : customStyle.fontColor;
                 this.context.fillText(data,  -this.scrollView.posX + x, pos);
+            }
+            if (lastFont){
+                this.context.font = lastFont;
             }
         }
         if (drawConf === undefined) {

@@ -100,6 +100,13 @@ declare let data: { country: string, geonameid: number, name: string, subcountry
 
 const filter = <HTMLInputElement>document.getElementById("filter");
 const canvasTable = new CanvasTable("canvas", data, col);
+canvasTable.setRowColStyle(function(data:any, row: any, col: CanvasTableColumnConf, isOver: boolean, isSepra: boolean, dataRowCol: string){
+    if (dataRowCol === "Iceland") {
+        return { fontStyle: "bold", fontColor: "red",align:Align.center };
+    }
+
+    return null;
+});
 canvasTable.setFilter(function(data: any, row: any, col: CanvasTableColumnConf[]) {
     if (filter === null) { return true; }
     return !((row.country||'').indexOf(filter.value) === -1 && (row.name||'').indexOf(filter.value) === -1 && (row.subcountry||'').indexOf(filter.value) === -1);
