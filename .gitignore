@@ -3,3 +3,4 @@ dist
 lib
 share/*.js
 share/*.d.ts
+Testing/docs

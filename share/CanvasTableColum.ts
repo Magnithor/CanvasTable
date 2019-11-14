@@ -5,15 +5,46 @@ export type CustomData = (canvasTable: CustomCanvasTable, dataValue: any, row: a
 export type RenderValue = (canvasTable: CustomCanvasTable, context: CanvasContext2D, rowIndex: number, col: CanvasTableColumnConf, left: number, top: number, right: number, bottom: number, width: number, height: number, r: number, dataValue: any, row: any, data: any) => void;
 export type CustomFilter = (data: any, row: any, col: CanvasTableColumnConf[]) => boolean;
 export type CustomRowColStyle = (data:any, row: any, col: CanvasTableColumnConf, isOver: boolean, isSepra: boolean, dataRowCol: string) => CanvasTableRowColStyle|undefined|null;
-export type CustomSort = (data: any, rowA: any, rowB: any) => number;
+/**
+ * function pointer to custom sort
+ * @param data  data Same array that was sent to CanvasTable, this array is not modified
+ * @param rowA  row A
+ * @param rowB  row B
+ * @returns 
+ *      if rowA > rowB then return 1
+ *      if rowA < rowB then return -1 
+ *      if rowA == rowB then return 0
+ */
+export type CustomSort = (data: any[], rowA: any, rowB: any) => number;
 
 
+/**
+ * CanvasTableRowColStyle interface is return in [[CustomRowColStyle]]
+ */
 export interface CanvasTableRowColStyle {
+    /**
+     * Font name
+     */
     font?: string,
+    /**
+     * Font style example bold
+     */
     fontStyle?: string,
+    /**
+     * Font size in px
+     */
     fontSize?: number,
+    /**
+     * Font color
+     */
     fontColor?: CanvasColor,
+    /**
+     * background color in the cell
+     */
     backgroundColor?: CanvasColor,
+    /**
+     * Text align: left, center, right
+     */
     align?: Align
 }
 

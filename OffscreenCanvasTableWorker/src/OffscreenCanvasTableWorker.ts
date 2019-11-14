@@ -1,9 +1,10 @@
-import { CustomCanvasTable, CanvasTableConfig, CanvasTableColumn } from "../../share/CustomCanvasTable";
+import { CustomCanvasTable, CanvasTableConfig } from "../../share/CustomCanvasTable";
 import { ScrollView } from "../../share/ScrollView";
 import { OffscreenCanvasMesssage, OffscreenCanvasMesssageType } from "../../share/OffscreenCanvasTableMessage";
 import { CanvasTableColumnConf } from "../../share/CanvasTableColum";
 import { CanvasContext2D } from "../../share/CanvasContext2D";
-import { RowItem } from "../../share/CustomCanvasIndex";
+
+declare function postMessage(message: any):void;
 
 export class OffscreenCanvasTableWorker extends CustomCanvasTable {
     protected drawCanvas(): void {

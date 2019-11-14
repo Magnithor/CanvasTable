@@ -2,6 +2,8 @@ import { OffscreenCanvasTableWorker } from '../OffscreenCanvasTableWorker/src/Of
 import { CustomCanvasTable } from '../share/CustomCanvasTable';
 import { CanvasTableColumnConf, Align, Sort } from '../share/CanvasTableColum';
 
+declare function postMessage(message: any):void;
+
 function customDraw(canvasTable: CustomCanvasTable, context: CanvasRenderingContext2D, rowIndex: number, col: CanvasTableColumnConf, left: number, top: number, right: number, bottom: number, width: number, height: number, r: number, dataValue: any, row: any, data: any): void {
     context.fillStyle = "lightgreen";
     context.fillRect(left, top, width, height);

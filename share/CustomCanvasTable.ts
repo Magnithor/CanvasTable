@@ -128,16 +128,24 @@ export abstract class CustomCanvasTable implements Drawable {
     private canvasHeight: number = 0;
     private canvasWidth: number = 0;
     protected config: CanvasTableConf = defaultConfig;
+
     constructor (config: CanvasTableConfig | undefined) {
         this.updateConfig(config);
     }
     
+    /**
+     * To customize style of CanvasTable
+     * @param config config
+     */
     public updateConfig(config:CanvasTableConfig | undefined){
         this.config = {
             ...defaultConfig, ...config };
 
     }
 
+    /**
+     * Is CanvasTable goging to redraw in next frame
+     */
     public isPlanToRedraw(): boolean {
         if (!this.requestAnimationFrame) {
             return false;
@@ -146,6 +154,10 @@ export abstract class CustomCanvasTable implements Drawable {
         return (this.drawconf !== undefined && this.drawconf.fulldraw);
     }
 
+    /**
+     * Let CanvasTable redraw
+     * @param config 
+     */
     public askForReDraw(config?: DrawConfig) {
         if (config === undefined || (this.drawconf !== undefined && this.drawconf.fulldraw)) {
             this.drawconf = { fulldraw: true };
@@ -166,11 +178,15 @@ export abstract class CustomCanvasTable implements Drawable {
                 this.drawCanvas()
             });
     }
-
+    /**
+     * Recalc index and then redraw
+     * You need to call this if size of the data was change or columns witch was change is in active groupby or sort
+     */
     public askForReIndex() {
         this.calcIndex();
         this.askForReDraw();
     }
+
     public setRowColStyle(style?: CustomRowColStyle | null) {
         if (style === null) {
             style = undefined;
@@ -180,26 +196,31 @@ export abstract class CustomCanvasTable implements Drawable {
             this.askForReDraw();
         }
     }
+
     public setFilter(filter?: CustomFilter | null) {
         if (filter === null) {
             filter = undefined;
         }
+
         if (this.customFilter !== filter) {
             this.customFilter = filter;
             this.askForReIndex();
         }
     }
+
     public setCustomSort(customSort?: CustomSort | null) {
         if (customSort === null) { customSort = undefined; }
         this.customSort = customSort;
         this.sortCol = undefined;
         this.askForReIndex();
     }
+
     public setSort(sortCol?: CanvasTableColumnSort[]) {
         this.sortCol = sortCol;
         this.customSort = undefined;
         this.askForReIndex();        
     }
+
     public setGroupBy(col?:(string|CanvasTableGroup)[]) {
         if (!col) { col = []; }
         let list:CanvasTableGroup[] = [];
@@ -212,24 +233,42 @@ export abstract class CustomCanvasTable implements Drawable {
                 list.push(item);
             }
         }
+
         this.groupByCol = list;
         this.askForReIndex();        
     }
+
     public setData(data?:any[]) {
         if (data !== undefined) {
             this.data = data;
         }
         this.askForReIndex();
     }
-    public setColumnVisible(col: number, visible: boolean) {
-        if (col < 0 || col >= this.orgColum.length) {
-            throw "out of range";
-        }
 
-        if (visible && this.orgColum[col].visible === true) { return; }
-        if (!visible && !this.orgColum[col].visible) { return; }
-        this.orgColum[col].visible = visible;
-        this.UpdateColumns(this.orgColum);
+    /**
+     * Change the visibility of the column
+     * @param col index of colum or the column it self
+     * @param visible show or hide the colum
+     */
+    public setColumnVisible(col: number|CanvasTableColumnConf, visible: boolean): void {
+        if (typeof col === "number") {
+            if (col < 0 || col >= this.orgColum.length) {
+                throw "out of range";
+            }
+
+            if (visible && this.orgColum[col].visible === true) { return; }
+            if (!visible && !this.orgColum[col].visible) { return; }
+            this.orgColum[col].visible = visible;
+            this.UpdateColumns(this.orgColum);
+            return;
+        }
+        const v = col.visible === undefined ? true : false;
+
+        if (v !== visible) {
+            col.visible = v;
+            this.UpdateColumns(this.orgColum);
+            return;
+        }
     }
     public UpdateColumns(col: CanvasTableColumnConf[]) {
         this.orgColum = col;

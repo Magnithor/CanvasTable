@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack",
-    "start": "webpack-dev-server"
+    "start": "webpack-dev-server",
+    "typedoc": "typedoc --out docs --excludePrivate --excludeNotExported --excludeProtected ..\\CanvasTable\\src ..\\OffscreenCanvasTable\\src ..\\OffscreenCanvasTableWorker\\src"
   },
   "repository": {
     "type": "git",
@@ -26,6 +27,7 @@
   "homepage": "https://github.com/Magnithor/CanvasTable/blob/master/README.md",
   "devDependencies": {
     "ts-loader": "^6.2.1",
+    "typedoc": "^0.15.1",
     "typescript": "^3.6.4",
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.9",
