@@ -90,5 +90,31 @@ export interface CanvasTableColumnSort {
 /**
  * Align text 
  */
-export enum Align { left, center, right }
-export enum Sort { ascending = 1, descending = -1 }
+export enum Align { 
+    /**
+     * Left = 0
+     */
+    left = 0, 
+    /**
+     * Center = 1
+     */
+    center = 1, 
+    /**
+     * Right = 2
+     */
+    right = 2 
+}
+
+/**
+ * Sort direction
+ */
+export enum Sort { 
+    /**
+     * sort accending  = 1
+     */
+    ascending = 1, 
+    /**
+     * sort descending = -1
+     */
+    descending = -1 
+}

@@ -1,5 +1,5 @@
 import { CanvasTable, CanvasTableColumnConf, Align } from "mthb-canvas-table";
-//import {Align, CanvasTableColumnConf} from "mthb-canvas-table";
+
 const col:CanvasTableColumnConf[] = [
     {
         header: "Id",
@@ -11,9 +11,14 @@ const col:CanvasTableColumnConf[] = [
         header: "Name",
         field: "name",
         width: 200
+    },
+    {
+        header: "LastName",
+        field: "lastName",
+        width: 200
     }
 ];
-let data = [{name:'magni'},{name:'dagrún'}];
-let canvasTable = new CanvasTable("canvas", data, col);
+let data = [{name: 'Magni', lastName: 'Birgisson'}, {name: 'Dagrún', lastName: 'Þorsteinsdóttir'}];
+const canvasTable = new CanvasTable("canvas", data, col);
 let w = <any>window;
 w.align = Align;

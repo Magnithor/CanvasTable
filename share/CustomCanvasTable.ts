@@ -221,6 +221,10 @@ export abstract class CustomCanvasTable implements Drawable {
         this.askForReIndex();        
     }
 
+    /**
+     * Set group by data
+     * @param col 
+     */
     public setGroupBy(col?:(string|CanvasTableGroup)[]) {
         if (!col) { col = []; }
         let list:CanvasTableGroup[] = [];
@@ -238,6 +242,10 @@ export abstract class CustomCanvasTable implements Drawable {
         this.askForReIndex();        
     }
 
+    /**
+     * Set new Data and then reindex and redraw
+     * @param data new Data
+     */
     public setData(data?:any[]) {
         if (data !== undefined) {
             this.data = data;

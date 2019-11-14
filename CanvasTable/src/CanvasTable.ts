@@ -6,6 +6,38 @@ import { GroupItem } from '../../share/CustomCanvasIndex';
 
 export { CanvasTableColumnConf, Align, Sort, GroupItem, CanvasTableGroup, CanvasTableColumnSort, CustomSort, CustomFilter}
 
+/**
+ * CanvasTable 
+ * draw table in canvas
+ * 
+ *  ```typescript
+ * import { CanvasTable, Align } from "mthb-canvas-table";
+ *  
+ * const col:CanvasTableColumnConf[] = [
+ *   {
+ *       header: "Id",
+ *       field: "__rownum__",
+ *       width: 80,
+ *       align: Align.center
+ *   },
+ *   {
+ *       header: "Name",
+ *       field: "name",
+ *       width: 200
+ *   },
+ *   {
+ *       header: "LastName",
+ *       field: "lastName",
+ *       width: 200
+ *   }
+ * ];
+ * 
+ * let data = [{name: "Magni", lastName: "Birgisson"}, {name: "Dagrún", lastName: "Þorsteinsdóttir"}];
+ *
+ *  /// <canvas id="canvas" style="width:400px; height: 400px"> </canvas>
+ * const canvasTable = new CanvasTable("canvas", data, col);
+ * ```
+ */
 export class CanvasTable extends CustomCanvasTable {
     private canvas: HTMLCanvasElement;
    
