@@ -5,6 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "tlint": "tslint -p tsconfig.json",
+    "lint": "tslint",
     "build": "webpack",
     "start": "webpack-dev-server",
     "typedoc": "typedoc --out docs --excludePrivate --excludeNotExported --excludeProtected ..\\CanvasTable\\src ..\\OffscreenCanvasTable\\src ..\\OffscreenCanvasTableWorker\\src"
@@ -27,6 +29,8 @@
   "homepage": "https://github.com/Magnithor/CanvasTable/blob/master/README.md",
   "devDependencies": {
     "ts-loader": "^6.2.1",
+    "tslint": "^5.20.1",
+    "tslint-config-prettier": "^1.18.0",
     "typedoc": "^0.15.1",
     "typescript": "^3.6.4",
     "webpack": "^4.41.2",

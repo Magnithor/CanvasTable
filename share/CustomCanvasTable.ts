@@ -18,25 +18,86 @@ export interface CanvasTableGroup {
     field: string,
     aggregate?:(data:GroupItem) => string
 }
+
+/**
+ * Interface to config style of CanvasTable
+ */
 export interface CanvasTableConfig {
+    /**
+     * ScollView config
+     */
     scrollView?: ScrollViewConfig,
+    /**
+     * FontName
+     */
     font?: string,
+    /**
+     * Font Style 
+     */
     fontStyle?: string,
+    /**
+     * Font size in px
+     */
     fontSize?: number,
+    /**
+     * Font color
+     */
     fontColor?: CanvasColor,
+    /**
+     * Header font name
+     */
     headerFont?: string,
+    /**
+     * Header font style
+     */
     headerFontStyle?: string,
+    /**
+     * Header font size in px
+     */
     headerFontSize?: number,
+    /**
+     * Header front color
+     */
     headerFontColor?: CanvasColor,
+    /**
+     * Header Draw sort arrow
+     */
     headerDrawSortArrow?: boolean,
+    /**
+     * Header draw sort arrow color
+     */
     headerDrawSortArrowColor?: CanvasColor,
+    /**
+     * Header: background color in header
+     */
     headerBackgroundColor?: CanvasColor,
+    /**
+     * Group item: font color
+     */
     groupItemFontColor?: CanvasColor,
+    /**
+     * Group item: arrow color
+     */
     groupItemArrowColor?: CanvasColor,
+    /**
+     * Group item: background color in group 
+     */
     groupItemBackgroundColor?: CanvasColor,
+    /**
+     * Background color
+     */
     backgroundColor?: CanvasColor,
+    /**
+     * color line in grid in CanvasTable
+     */
     lineColor?: CanvasColor,
+    /**
+     * Backgroud color when mouse is hover the row
+     */
     howerBackgroundColor?: CanvasColor,
+    /**
+     * Every secound row can have another backgound color sepra
+     */
     sepraBackgroundColor?: CanvasColor
 }
 
@@ -95,6 +156,7 @@ export interface CanvasTableColumn {
 }
 
 export abstract class CustomCanvasTable implements Drawable {
+    private eventDblClick: EventManagerClick[] = [];
     private eventClick: EventManagerClick[] = [];
     private eventClickHeader: EventManagerClickHeader[] = [];
 
@@ -105,6 +167,7 @@ export abstract class CustomCanvasTable implements Drawable {
     protected drawconf?: DrawConfig & { fulldraw: boolean };
     protected r: number = 1;
     protected data: any[] = [];
+    protected allowEdit: boolean = false;
 
     private minFontWidth: number = 1;
     private maxFontWidth: number = 1;
@@ -185,6 +248,10 @@ export abstract class CustomCanvasTable implements Drawable {
     public askForReIndex() {
         this.calcIndex();
         this.askForReDraw();
+    }
+
+    public setAllowEdit(allowEdit:boolean) {
+        this.allowEdit = allowEdit;
     }
 
     public setRowColStyle(style?: CustomRowColStyle | null) {
@@ -320,11 +387,22 @@ export abstract class CustomCanvasTable implements Drawable {
     protected abstract setCursor(cusor: string): void;
     protected abstract askForExtentedMouseMoveAndMaouseUp():void;
     protected abstract askForNormalMouseMoveAndMaouseUp():void;
+    protected abstract scrollViewChange():void
     private updateCursor(cursor: string = ""): void {
         if (this.lastCursor === cursor) { return; }
         this.lastCursor = cursor;
         this.setCursor(cursor);
     }
+    protected getColumnByCanvasTableColumnConf(column:CanvasTableColumnConf):CanvasTableColumn|undefined {
+        for (let i = 0; i < this.column.length; i++) {
+            if(this.column[i].orginalCol === column) {
+                return this.column[i];
+            }
+        }
+
+        return undefined;
+    }
+
 
     /**
      * Expend All data in tree mode
@@ -353,12 +431,14 @@ export abstract class CustomCanvasTable implements Drawable {
     
     public addEvent(eventName: "clickHeader", event:EventManagerClickHeader): void;
     public addEvent(eventName: "click", event:EventManagerClick): void;
+    public addEvent(eventName: "dblClick", event:EventManagerClick): void;
     public addEvent(eventName: string, event:any):void {
         this.getEvent(eventName).push(event);
     }
 
     public removeEvent(eventName:"clickHeader", event:EventManagerClickHeader): void;
     public removeEvent(eventName:"click", event:EventManagerClick): void;
+    public removeEvent(eventName:"dblClick", event:EventManagerClick): void;
     public removeEvent(eventName:string, event:any): void {
         const e = this.getEvent(eventName);
         const index = e.indexOf(event);
@@ -370,10 +450,21 @@ export abstract class CustomCanvasTable implements Drawable {
         switch(eventName) {
             case "click":
                 return this.eventClick;
+            case "dblClick":
+                return this.eventDblClick;
             case "clickHeader":
                 return this.eventClickHeader;
             default:
                 throw "unknown;"
+        }
+    }
+    protected fireDblClick(row: RowItem, col: CanvasTableColumn | null) {        
+        for (var i = 0; i < this.eventDblClick.length; i++) {
+            try {
+                this.eventDblClick[i](row, col === null ? null : col.orginalCol);
+            } catch {
+                console.log("fireClick")
+            }
         }
     }
     protected fireClick(row: RowItem, col:CanvasTableColumn | null) {        
@@ -411,9 +502,9 @@ export abstract class CustomCanvasTable implements Drawable {
     protected clickOnHeader(col:CanvasTableColumn | null){
         if (col) {
             if (this.sortCol && this.sortCol.length == 1 && this.sortCol[0].col == col && this.sortCol[0].sort == Sort.ascending){
-                this.setSort([{col: col, sort:Sort.descending}]);
+                this.setSort([{col: col.orginalCol, sort:Sort.descending}]);
             } else {
-                this.setSort([{col: col, sort:Sort.ascending}]);
+                this.setSort([{col: col.orginalCol, sort:Sort.ascending}]);
             }
         }
     }
@@ -422,6 +513,15 @@ export abstract class CustomCanvasTable implements Drawable {
         if (this.scrollView) {
             this.scrollView.onScroll(deltaMode, deltaX, deltaY); 
         }
+    }
+
+    protected dblClick(x: number, y: number) {
+        const col = this.findColByPos(x);
+        if (y <= 18) {
+            return;
+        }
+        const row =  this.findRowByPos(y);
+        this.fireDblClick(row, col);
     }
 
     protected mouseDown(x: number, y: number) {
@@ -632,13 +732,13 @@ export abstract class CustomCanvasTable implements Drawable {
                     pos += h;
                 } 
                 else {
-                    i = Math.trunc((-pos+y) / cellHeight);       
-                    pos += i*cellHeight;
+                    i = Math.trunc((-pos + y) / cellHeight);       
+                    pos += i * cellHeight;
                     return i < items.list.length ? items.list[i] : null;
                 }
             } else {
                 for (i = 0; i < items.list.length; i++) {
-                    if (pos < y && y < pos+cellHeight) {
+                    if (pos < y && y < pos + cellHeight) {
                         return items.list[i];
                     }
                     pos += cellHeight;
@@ -1016,7 +1116,7 @@ export abstract class CustomCanvasTable implements Drawable {
                 var sort:Sort|undefined = undefined;
                 if (this.sortCol){
                     for (let i = 0; i < this.sortCol.length; i++){
-                        if (this.sortCol[i].col === this.column[col]){
+                        if (this.sortCol[i].col === this.column[col].orginalCol){
                             sort = this.sortCol[i].sort;
                             break;
                         }

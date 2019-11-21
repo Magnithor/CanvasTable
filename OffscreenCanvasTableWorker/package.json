@@ -1,6 +1,6 @@
 {
   "name": "mthb-offscreen-canvas-table-worker",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Canvas Table Webworker offscreencanvas",
   "main": "lib/OffscreenCanvasTableWorker/src/OffscreenCanvasTableWorker.js",
   "types": "lib/OffscreenCanvasTableWorker/src/OffscreenCanvasTableWorker.d.ts",
@@ -31,7 +31,10 @@
   "license": "MIT",
   "homepage": "https://github.com/Magnithor/CanvasTable/blob/master/README.md",
   "devDependencies": {
-    "typescript": "^3.6.4"
+    "typescript": "^3.6.4",
+    "ts-loader": "^6.2.1",
+    "tslint": "^5.20.1",
+    "tslint-config-prettier": "^1.18.0"
   },
   "dependencies": {}
 }

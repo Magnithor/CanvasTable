@@ -11,9 +11,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "mthb-canvas-table": "^0.0.21",
-    "mthb-offscreen-canvas-table": "^0.0.8",
-    "mthb-offscreen-canvas-table-worker": "^0.0.8"
+    "mthb-canvas-table": "^0.0.22",
+    "mthb-offscreen-canvas-table": "^0.0.9",
+    "mthb-offscreen-canvas-table-worker": "^0.0.9"
   },
   "devDependencies": {
     "ts-loader": "^6.2.1",

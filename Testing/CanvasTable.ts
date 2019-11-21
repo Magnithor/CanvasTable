@@ -1,7 +1,7 @@
-import { CanvasTable as canvasTable, Sort, Align } from '../CanvasTable/src/CanvasTable';
+import {  Align, CanvasTable as canvasTable, Sort } from "../CanvasTable/src/CanvasTable";
 
-var CanvasTable = {
-    canvasTable: canvasTable,
+const CanvasTable = {
     align: Align,
+    canvasTable,
     sort: Sort,
-}
+};

@@ -1,8 +1,8 @@
-import { CanvasTable } from './../CanvasTable/src/CanvasTable';
-import { CanvasTableColumnConf, Sort, Align } from '../share/CanvasTableColum';
+import { Align, CanvasTableColumnConf, Sort } from "../share/CanvasTableColum";
+import { CanvasTable } from "./../CanvasTable/src/CanvasTable";
 
-var isGroup = true;
-const group = function() {
+let isGroup = true;
+const group = () => {
     const expendedAll = document.getElementById("expendedAll");
     const collapseAll = document.getElementById("collapseAll");
     const groupDom = document.getElementById("group");
@@ -19,117 +19,117 @@ const group = function() {
        groupDom.innerText = "Ungroup";
     }
     isGroup = !isGroup;
-}
+};
 
-const col: CanvasTableColumnConf[] = [
+const column: CanvasTableColumnConf[] = [
     {
-        header: "Id",
+        align: Align.right,
         field: "__rownum__",
+        header: "Id",
         width: 80,
-        align: Align.right
     },
     {
-        header: "TaxonName",
         field: "TaxonName",
-        width: 100
+        header: "TaxonName",
+        width: 100,
     },
     {
-        header: "ClassName",
         field: "ClassName",
-        width: 100
+        header: "ClassName",
+        width: 100,
     },
     {
-        header: "FamilyName",
         field: "FamilyName",
-        width: 30
+        header: "FamilyName",
+        width: 30,
     },
     {
-        header: "GenusName",
         field: "GenusName",
-        width: 200
+        header: "GenusName",
+        width: 200,
     },
     {
-        header: "KingdomName",
         field: "KingdomName",
-        width: 200
+        header: "KingdomName",
+        width: 200,
     },
     {
-        header: "OrderName",
         field: "OrderName",
-        width: 100
+        header: "OrderName",
+        width: 100,
     },
     {
-        header: "PhylumName",
         field: "PhylumName",
-        width: 100
+        header: "PhylumName",
+        width: 100,
     },
     {
-        header: "SubClassName",
         field: "SubClassName",
-        width: 100
+        header: "SubClassName",
+        width: 100,
     },
     {
-        header: "SubPhylumName",
         field: "SubPhylumName",
-        width: 100
+        header: "SubPhylumName",
+        width: 100,
     },
     {
-        header: "SuperDomainName",
         field: "SuperDomainName",
-        width: 100
+        header: "SuperDomainName",
+        width: 100,
     },
     {
-        header: "SuperFamilyName",
         field: "SuperFamilyName",
-        width: 100
-    }
+        header: "SuperFamilyName",
+        width: 100,
+    },
 ];
 
-const filter = <HTMLInputElement>document.getElementById("filter");
-const canvasTable = new CanvasTable("canvas", [], col);
-canvasTable.setFilter(function(data: any, row: any, col: CanvasTableColumnConf[]) {
+const filter = document.getElementById("filter") as HTMLInputElement;
+const canvasTable = new CanvasTable("canvas", column, []);
+canvasTable.setFilter((data: any, row: any, col: CanvasTableColumnConf[]) => {
     if (filter === null || filter.value === "") { return true; }
-    let f = filter.value.toLowerCase();
+    const f = filter.value.toLowerCase();
     for (const key in row) {
         if (row.hasOwnProperty(key)) {
             const element = row[key];
             if (typeof element === "string") {
-                if (element.toLowerCase().indexOf(f) >=0) { return true; }
-            }                       
+                if (element.toLowerCase().indexOf(f) >= 0) { return true; }
+            }
         }
     }
     return false;
 });
-let data:any[] = [];
+let dbData: any[] = [];
 
 group();
-canvasTable.addEvent("click", (row,col) => { 
-    if (typeof row === "number"){
-        console.log(data[row], row, col);
+canvasTable.addEvent("click", (row, col) => {
+    if (typeof row === "number") {
+        console.log(dbData[row], row, col);
         return;
     }
-    console.log(row,col);
+    console.log(row, col);
  });
 canvasTable.addEvent("clickHeader", (col) => { console.log(col); });
 
 if (filter != null) {
-    filter.addEventListener("keyup", function(){
+    filter.addEventListener("keyup", () => {
         canvasTable.askForReIndex();
     });
 }
 
 const httpRequest = new XMLHttpRequest();
-httpRequest.onreadystatechange = function() {
+httpRequest.onreadystatechange = () => {
     if (httpRequest.readyState === XMLHttpRequest.DONE) {
-        data = JSON.parse(httpRequest.responseText);
-        canvasTable.setData(data);
+        dbData = JSON.parse(httpRequest.responseText);
+        canvasTable.setData(dbData);
     }
 };
 
-httpRequest.open('GET', 'Taxonomy.json', true);
+httpRequest.open("GET", "Taxonomy.json", true);
 httpRequest.send();
 
-var w = (<any>window);
+const w = window as any;
 w.canvasTable = canvasTable;
-w.col = col;
+w.col = column;
 w.group = group;

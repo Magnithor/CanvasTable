@@ -16,6 +16,10 @@ export class OffscreenCanvasTableWorker extends CustomCanvasTable {
 
         super.drawCanvas();
     }
+    
+    protected scrollViewChange():void {
+        
+    }
 
     protected setCanvasSize(width: number, height: number): void {
         if (this.canvas === undefined) { return; }
@@ -42,7 +46,7 @@ export class OffscreenCanvasTableWorker extends CustomCanvasTable {
                 this.setR(data.r);
                 const context = <CanvasContext2D>this.canvas.getContext('2d');
                 if (context === null) { return; }
-                this.scrollView = new ScrollView(context, this, this.config ? this.config.scrollView : undefined, this.askForExtentedMouseMoveAndMaouseUp, this.askForNormalMouseMoveAndMaouseUp);
+                this.scrollView = new ScrollView(context, this, this.config ? this.config.scrollView : undefined, this.askForExtentedMouseMoveAndMaouseUp, this.askForNormalMouseMoveAndMaouseUp, this.scrollViewChange);
 
                 this.context = context; 
                 this.doReize(data.width, data.height);                   

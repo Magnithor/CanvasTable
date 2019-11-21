@@ -19,6 +19,6 @@ const col:CanvasTableColumnConf[] = [
     }
 ];
 let data = [{name: 'Magni', lastName: 'Birgisson'}, {name: 'Dagrún', lastName: 'Þorsteinsdóttir'}];
-const canvasTable = new CanvasTable("canvas", data, col);
+const canvasTable = new CanvasTable("canvas", col, data);
 let w = <any>window;
 w.align = Align;

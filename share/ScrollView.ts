@@ -24,9 +24,11 @@ interface ScrollViewConf {
  }
 
 export class ScrollView {
-    private drawable: Drawable;
-    private askForExtentedMouseMoveAndMaouseUp: () => void;
-    private askForNormalMouseMoveAndMaouseUp: () => void;
+    private readonly drawable: Drawable;
+    private readonly askForExtentedMouseMoveAndMaouseUp: () => void;
+    private readonly askForNormalMouseMoveAndMaouseUp: () => void;
+    private readonly scrollViewChange: ()=> void;
+
     private canvasWidth: number = -1;
     private canvasHeight: number = -1;
     private context: CanvasContext2D;
@@ -70,7 +72,8 @@ export class ScrollView {
     private scrollViewConfig: ScrollViewConf;
 
 
-    public constructor(context: CanvasContext2D, drawable: Drawable, config:ScrollViewConfig|undefined, askForExtentedMouseMoveAndMaouseUp: () => void, askForNormalMouseMoveAndMaouseUp: () => void) {
+    public constructor(context: CanvasContext2D, drawable: Drawable, config:ScrollViewConfig|undefined, askForExtentedMouseMoveAndMaouseUp: () => void, askForNormalMouseMoveAndMaouseUp: () => void, scrollViewChange: () => void) {
+        this.scrollViewChange = scrollViewChange;
         this.askForExtentedMouseMoveAndMaouseUp = askForExtentedMouseMoveAndMaouseUp;
         this.askForNormalMouseMoveAndMaouseUp = askForNormalMouseMoveAndMaouseUp;
         this.drawable = drawable;
@@ -103,6 +106,7 @@ export class ScrollView {
 
         if (this.posYvalue != value) {
             this.posYvalue = value;
+            this.scrollViewChange.call(this.drawable);
             this.drawable.askForReDraw();
         }
     }
@@ -126,6 +130,7 @@ export class ScrollView {
 
         if (this.posXvalue != value) {
             this.posXvalue = value;
+            this.scrollViewChange.call(this.drawable);
             this.drawable.askForReDraw();
         }
     }
