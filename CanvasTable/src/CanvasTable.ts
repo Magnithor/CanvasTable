@@ -1,19 +1,20 @@
-﻿import { ScrollView } from './../../share/ScrollView';
-import { CanvasTableEdit } from './../../share/CanvasTableEdit';
-import { CustomCanvasTable, CanvasTableConfig, CanvasTableGroup, CanvasTableColumn } from './../../share/CustomCanvasTable';
-import { TouchEventToCanvasTableTouchEvent } from './../../share/CanvasTableTouchEvent';
-import { CanvasTableColumnConf, Align, Sort, CanvasTableColumnSort, CustomFilter, CustomSort } from '../../share/CanvasTableColum';
-import { GroupItem, RowItem } from '../../share/CustomCanvasIndex';
+﻿import { Align, CustomFilter, CustomSort, ICanvasTableColumnConf, ICanvasTableColumnSort, Sort } from "../../share/CanvasTableColum";
+import { IGroupItem, RowItem } from "../../share/CustomCanvasIndex";
+import { CanvasTableEdit } from "./../../share/CanvasTableEdit";
+import { TouchEventToCanvasTableTouchEvent } from "./../../share/CanvasTableTouchEvent";
+import { CustomCanvasTable, ICanvasTableColumn, ICanvasTableConfig, ICanvasTableGroup } from "./../../share/CustomCanvasTable";
+import { ScrollView } from "./../../share/ScrollView";
 
-export { CanvasTableColumnConf, Align, Sort, GroupItem, CanvasTableGroup, CanvasTableColumnSort, CustomSort, CustomFilter }
+export { ICanvasTableColumnConf, Align, Sort, IGroupItem,
+    ICanvasTableGroup, ICanvasTableColumnSort, CustomSort, CustomFilter };
 
 /**
- * CanvasTable 
+ * CanvasTable
  * draw table in canvas
- * 
+ *
  *  ```typescript
  * import { CanvasTable, Align } from "mthb-canvas-table";
- *  
+ *
  * const col:CanvasTableColumnConf[] = [
  *   {
  *       header: "Id",
@@ -32,7 +33,7 @@ export { CanvasTableColumnConf, Align, Sort, GroupItem, CanvasTableGroup, Canvas
  *       width: 200
  *   }
  * ];
- * 
+ *
  * let data = [{name: "Magni", lastName: "Birgisson"}, {name: "Dagrún", lastName: "Þorsteinsdóttir"}];
  *
  *  /// <canvas id="canvas" style="width:400px; height: 400px"> </canvas>
@@ -42,8 +43,7 @@ export { CanvasTableColumnConf, Align, Sort, GroupItem, CanvasTableGroup, Canvas
 export class CanvasTable extends CustomCanvasTable {
     private readonly canvas: HTMLCanvasElement;
     private canvasTableEdit?: CanvasTableEdit;
-   
-   
+
     /**
      * Constructor of CanvasTable
      * @param canvas id of canvas or htmlCanvasElemnt
@@ -51,20 +51,24 @@ export class CanvasTable extends CustomCanvasTable {
      * @param data array of data
      * @param config config
      */
-    constructor(canvas: string|HTMLCanvasElement, col: CanvasTableColumnConf[], data: any[] = [], config?: CanvasTableConfig) {
+    constructor(canvas: string|HTMLCanvasElement, col: ICanvasTableColumnConf[],
+                data: any[] = [], config?: ICanvasTableConfig) {
         super(config);
         this.canvasTableEdit = undefined;
         this.data = data;
-        this.canvas = (typeof canvas === "string") ? <HTMLCanvasElement>document.getElementById(canvas) : canvas; 
+        this.canvas = (typeof canvas === "string") ? document.getElementById(canvas) as HTMLCanvasElement : canvas;
         const context = this.canvas.getContext("2d");
-        if (context === null) { throw "context is null"; }
+        if (context === null) { throw new Error("context is null"); }
         this.setR(window.devicePixelRatio);
         this.doReize(this.canvas.clientWidth, this.canvas.clientHeight);
         this.context = context;
-        
-        this.scrollView = new ScrollView(this.context, this, config ? config.scrollView : undefined, this.askForExtentedMouseMoveAndMaouseUp, this.askForNormalMouseMoveAndMaouseUp, this.scrollViewChange);
+
+        this.scrollView = new ScrollView(
+            this.context, this,
+            config ? config.scrollView : undefined, this.askForExtentedMouseMoveAndMaouseUp,
+            this.askForNormalMouseMoveAndMaouseUp, this.scrollViewChange);
         this.calcIndex();
-        
+
         this.canvas.addEventListener("wheel", this.canvasWheel);
         this.canvas.addEventListener("dblclick", this.canvasDblClick);
         this.canvas.addEventListener("mousedown", this.canvasMouseDown);
@@ -78,42 +82,25 @@ export class CanvasTable extends CustomCanvasTable {
         this.UpdateColumns(col);
         window.addEventListener("resize", () => {
             this.resize();
-        });                
+        });
     }
-    // #region override
-    public UpdateColumns(col: CanvasTableColumnConf[]) {
+
+    public UpdateColumns(col: ICanvasTableColumnConf[]) {
         super.UpdateColumns(col);
         if (this.canvasTableEdit) {
             this.canvasTableEdit.doRemove(true);
         }
     }
-    protected update(col:CanvasTableColumnConf, i:number) {
+    protected update(col: ICanvasTableColumnConf, i: number) {
         const column = this.getColumnByCanvasTableColumnConf(col);
         if (!column) { return; }
-        this.canvasTableEdit = new CanvasTableEdit(column, i, this.data[i][column.field], this.cellHeight, this.onEditRemove);
-       
+        this.canvasTableEdit = new CanvasTableEdit(column, i, this.data[i][column.field],
+            this.cellHeight, this.onEditRemove);
+
         this.updateEditLocation();
-          
-    }
-    private onEditRemove = (cancel:boolean, newData: string) => {
-        if (!this.canvasTableEdit) { return; }
-        const old = this.canvasTableEdit;
-        this.canvasTableEdit = undefined;
-        if (cancel) {
-            return;
-        }
-
-        this.data[old.getRow()][old.getColumn().field] = newData;    
-        this.askForReDraw();
-    }
-    private updateEditLocation() {
-        if (!this.canvasTableEdit || !this.scrollView ) { return; }
-        this.canvasTableEdit.updateEditLocation(this.r, this.scrollView.posX, this.scrollView.posY,
-            this.canvas.offsetTop, this.canvas.offsetLeft, this.cellHeight);
-
 
     }
-    protected scrollViewChange():void {
+    protected scrollViewChange(): void {
         this.updateEditLocation();
     }
     protected askForExtentedMouseMoveAndMaouseUp() {
@@ -139,43 +126,37 @@ export class CanvasTable extends CustomCanvasTable {
     protected setCursor(cursor: string): void {
         this.canvas.style.cursor = cursor;
     }
-    protected setCanvasSize(width:number, height:number) {
+    protected setCanvasSize(width: number, height: number) {
         this.canvas.width = width;
         this.canvas.height = height;
         super.setCanvasSize(width, height);
     }
-    protected fireDblClick(row: RowItem, col: CanvasTableColumn | null) {  
+    protected fireDblClick(row: RowItem, col: ICanvasTableColumn | null) {
         if (this.allowEdit && typeof row === "number" && col !== null) {
             this.update(col.orginalCol, row);
         }
 
         super.fireDblClick(row, col);
     }
-    // #endregion
-
-    // #region key Event
     private canvasKeydown = (e: KeyboardEvent) => {
         this.keydown(e.keyCode);
     }
-    // #endregion
-    // #region Touch Event
+
     private canvasTouchStart = (e: TouchEvent) => {
         e.preventDefault();
         this.TouchStart(TouchEventToCanvasTableTouchEvent(e), this.canvas.offsetLeft, this.canvas.offsetTop);
     }
     private canvasTouchMove = (e: TouchEvent) => {
         e.preventDefault();
-        this.TouchMove(TouchEventToCanvasTableTouchEvent(e), this.canvas.offsetLeft, this.canvas.offsetTop);    
+        this.TouchMove(TouchEventToCanvasTableTouchEvent(e), this.canvas.offsetLeft, this.canvas.offsetTop);
     }
     private canvasTouchEnd = (e: TouchEvent) => {
         e.preventDefault();
         this.TouchEnd(TouchEventToCanvasTableTouchEvent(e), this.canvas.offsetLeft, this.canvas.offsetTop);
     }
-    // #endregion
-    // #region Mouse Event
-    private canvasDblClick = (e:MouseEvent) => {
+    private canvasDblClick = (e: MouseEvent) => {
         e.preventDefault();
-        this.dblClick(e.clientX - this.canvas.offsetLeft, e.clientY - this.canvas.offsetTop);        
+        this.dblClick(e.clientX - this.canvas.offsetLeft, e.clientY - this.canvas.offsetTop);
     }
     private canvasWheel = (e: WheelEvent) => {
         e.preventDefault();
@@ -206,5 +187,21 @@ export class CanvasTable extends CustomCanvasTable {
         const y = e.clientY - this.canvas.offsetTop;
         this.mouseMove(x, y);
     }
-    // #endregion    
+
+    private onEditRemove = (cancel: boolean, newData: string) => {
+        if (!this.canvasTableEdit) { return; }
+        const old = this.canvasTableEdit;
+        this.canvasTableEdit = undefined;
+        if (cancel) {
+            return;
+        }
+
+        this.data[old.getRow()][old.getColumn().field] = newData;
+        this.askForReDraw();
+    }
+    private updateEditLocation() {
+        if (!this.canvasTableEdit || !this.scrollView ) { return; }
+        this.canvasTableEdit.updateEditLocation(this.r, this.scrollView.posX, this.scrollView.posY,
+            this.canvas.offsetTop, this.canvas.offsetLeft, this.cellHeight);
+    }
 }

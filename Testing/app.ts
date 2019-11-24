@@ -1,10 +1,10 @@
-﻿import { Align, CanvasTableColumnConf, Sort } from "../share/CanvasTableColum";
-import { GroupItem } from "../share/CustomCanvasIndex";
+﻿import { Align, ICanvasTableColumnConf, Sort } from "../share/CanvasTableColum";
+import { IGroupItem } from "../share/CustomCanvasIndex";
 import { CanvasTable } from "./../CanvasTable/src/CanvasTable";
 import { CustomCanvasTable } from "./../share/CustomCanvasTable";
 
 function customDraw(canvasTable1: CustomCanvasTable, context: CanvasRenderingContext2D,
-                    rowIndex: number, col: CanvasTableColumnConf, left: number, top: number,
+                    rowIndex: number, col: ICanvasTableColumnConf, left: number, top: number,
                     right: number, bottom: number, width: number, height: number, r: number,
                     dataValue: any, row: any, dbData: any): void {
     context.fillStyle = "lightgreen";
@@ -20,15 +20,15 @@ function customDraw(canvasTable1: CustomCanvasTable, context: CanvasRenderingCon
     context.stroke();
 }
 
-function g1(v: GroupItem): string {
+function g1(v: IGroupItem): string {
     return v.child.list.length.toString();
 }
 
-function g2(v: GroupItem): string {
+function g2(v: IGroupItem): string {
     return v.child.list.length.toString();
 }
 
-const onlyIceland = (dbData: any, row: any, col: CanvasTableColumnConf[]): boolean => {
+const onlyIceland = (dbData: any, row: any, col: ICanvasTableColumnConf[]): boolean => {
     return row.country === "Iceland";
 };
 const sortName = (dbData: any, rowA: any, rowB: any) => {
@@ -61,7 +61,7 @@ const group = () => {
     isGroup = !isGroup;
 };
 
-const column: CanvasTableColumnConf[] = [
+const column: ICanvasTableColumnConf[] = [
     {
         align: Align.center,
         field: "__rownum__",
@@ -110,7 +110,7 @@ declare let data: Array<{ country: string, geonameid: number, name: string, subc
 const filter = document.getElementById("filter") as HTMLInputElement;
 const canvasTable = new CanvasTable("canvas", column, data);
 canvasTable.setAllowEdit(true);
-canvasTable.setRowColStyle( (dbData: any, row: any, col: CanvasTableColumnConf, isOver: boolean,
+canvasTable.setRowColStyle( (dbData: any, row: any, col: ICanvasTableColumnConf, isOver: boolean,
                              isSepra: boolean, dataRowCol: string) => {
     if (dataRowCol === "Iceland") {
         return { fontStyle: "bold", fontColor: "red", align: Align.center };
@@ -118,7 +118,7 @@ canvasTable.setRowColStyle( (dbData: any, row: any, col: CanvasTableColumnConf, 
 
     return null;
 });
-canvasTable.setFilter((dbData: any, row: any, col: CanvasTableColumnConf[]) => {
+canvasTable.setFilter((dbData: any, row: any, col: ICanvasTableColumnConf[]) => {
     if (filter === null) { return true; }
     return !((row.country || "").indexOf(filter.value) === -1 &&
              (row.name || "").indexOf(filter.value) === -1 &&

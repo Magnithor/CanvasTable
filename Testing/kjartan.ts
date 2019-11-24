@@ -1,4 +1,4 @@
-import { Align, CanvasTableColumnConf, Sort } from "../share/CanvasTableColum";
+import { Align, ICanvasTableColumnConf, Sort } from "../share/CanvasTableColum";
 import { CanvasTable } from "./../CanvasTable/src/CanvasTable";
 
 let isGroup = true;
@@ -21,7 +21,7 @@ const group = () => {
     isGroup = !isGroup;
 };
 
-const column: CanvasTableColumnConf[] = [
+const column: ICanvasTableColumnConf[] = [
     {
         align: Align.right,
         field: "__rownum__",
@@ -87,7 +87,7 @@ const column: CanvasTableColumnConf[] = [
 
 const filter = document.getElementById("filter") as HTMLInputElement;
 const canvasTable = new CanvasTable("canvas", column, []);
-canvasTable.setFilter((data: any, row: any, col: CanvasTableColumnConf[]) => {
+canvasTable.setFilter((data: any, row: any, col: ICanvasTableColumnConf[]) => {
     if (filter === null || filter.value === "") { return true; }
     const f = filter.value.toLowerCase();
     for (const key in row) {

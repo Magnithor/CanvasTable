@@ -1,37 +1,38 @@
-export interface CanvasTableTouchEvent {
-    changedTouches: {pageX:number, pageY:number}[],
-    touches: {pageX:number, pageY:number}[]
-};
+export interface ICanvasTableTouchEvent {
+    changedTouches: Array<{pageX: number, pageY: number}>;
+    touches: Array<{pageX: number, pageY: number}>;
+}
 
-interface MyTouchEvent {
+interface IMyTouchEvent {
     readonly altKey: boolean;
-    readonly changedTouches: MyTouchList;
+    readonly changedTouches: IMyTouchList;
     readonly ctrlKey: boolean;
     readonly metaKey: boolean;
     readonly shiftKey: boolean;
-    readonly touches: MyTouchList;
+    readonly touches: IMyTouchList;
 }
-interface MyTouchList {
+interface IMyTouchList {
     readonly length: number;
-    item(index: number): MyTouch | null;
-    [index: number]: MyTouch;
+    item(index: number): IMyTouch | null;
+    [index: number]: IMyTouch;
 }
-interface MyTouch {
+interface IMyTouch {
     readonly pageX: number;
     readonly pageY: number;
 }
 
-export function TouchEventToCanvasTableTouchEvent(e: MyTouchEvent):CanvasTableTouchEvent{
-    const x: CanvasTableTouchEvent = { changedTouches:[], touches:[] };
-    for (var i = 0; i< e.changedTouches.length; i++){
+export function TouchEventToCanvasTableTouchEvent(e: IMyTouchEvent): ICanvasTableTouchEvent {
+    const x: ICanvasTableTouchEvent = { changedTouches: [], touches: [] };
+    let i;
+    for (i = 0; i < e.changedTouches.length; i++) {
         x.changedTouches.push({
-            pageX : e.changedTouches[i].pageX, 
-            pageY : e.changedTouches[i].pageY})
+            pageX : e.changedTouches[i].pageX,
+            pageY : e.changedTouches[i].pageY});
     }
-    for (var i = 0; i< e.touches.length; i++){
+    for (i = 0; i < e.touches.length; i++) {
         x.touches.push({
-            pageX : e.touches[i].pageX, 
-            pageY : e.touches[i].pageY})
+            pageX : e.touches[i].pageX,
+            pageY : e.touches[i].pageY});
     }
     return x;
 }

@@ -1,37 +1,17 @@
-import { CustomCanvasTable, CanvasTableConfig } from "../../share/CustomCanvasTable";
-import { ScrollView } from "../../share/ScrollView";
+import { ICanvasContext2D } from "../../share/CanvasContext2D";
+import { ICanvasTableColumnConf } from "../../share/CanvasTableColum";
+import { CustomCanvasTable, ICanvasTableConfig } from "../../share/CustomCanvasTable";
 import { OffscreenCanvasMesssage, OffscreenCanvasMesssageType } from "../../share/OffscreenCanvasTableMessage";
-import { CanvasTableColumnConf } from "../../share/CanvasTableColum";
-import { CanvasContext2D } from "../../share/CanvasContext2D";
+import { ScrollView } from "../../share/ScrollView";
 
-declare function postMessage(message: any):void;
+declare function postMessage(message: any): void;
 
 export class OffscreenCanvasTableWorker extends CustomCanvasTable {
-    protected drawCanvas(): void {
-        if (this.context === undefined || this.dataIndex === undefined) { 
-            this.requestAnimationFrame = undefined;
-            this.askForReDraw(this.drawconf);
-            return; 
-        }
-
-        super.drawCanvas();
-    }
-    
-    protected scrollViewChange():void {
-        
-    }
-
-    protected setCanvasSize(width: number, height: number): void {
-        if (this.canvas === undefined) { return; }
-        this.canvas.width = width;
-        this.canvas.height = height;
-        super.setCanvasSize(width, height);
-    }
 
     private id: number;
     private canvas?: OffscreenCanvas;
 
-    constructor (offscreenCanvasTableId: number, col: CanvasTableColumnConf[], config?: CanvasTableConfig){
+    constructor(offscreenCanvasTableId: number, col: ICanvasTableColumnConf[], config?: ICanvasTableConfig) {
         super(config);
         this.id = offscreenCanvasTableId;
         this.UpdateColumns(col);
@@ -42,19 +22,22 @@ export class OffscreenCanvasTableWorker extends CustomCanvasTable {
 
         switch (data.type) {
             case OffscreenCanvasMesssageType.create:
-                this.canvas = data.offscreen;                    
+                this.canvas = data.offscreen;
                 this.setR(data.r);
-                const context = <CanvasContext2D>this.canvas.getContext('2d');
+                const context =  this.canvas.getContext("2d") as ICanvasContext2D;
                 if (context === null) { return; }
-                this.scrollView = new ScrollView(context, this, this.config ? this.config.scrollView : undefined, this.askForExtentedMouseMoveAndMaouseUp, this.askForNormalMouseMoveAndMaouseUp, this.scrollViewChange);
+                this.scrollView = new ScrollView(context, this,
+                    this.config ? this.config.scrollView : undefined,
+                    this.askForExtentedMouseMoveAndMaouseUp, this.askForNormalMouseMoveAndMaouseUp,
+                    this.scrollViewChange);
 
-                this.context = context; 
-                this.doReize(data.width, data.height);                   
+                this.context = context;
+                this.doReize(data.width, data.height);
                 this.askForReDraw();
                 break;
             case OffscreenCanvasMesssageType.resize:
                 this.setR(data.r);
-                this.doReize(data.width, data.height);                   
+                this.doReize(data.width, data.height);
                 this.askForReDraw();
                 break;
             case OffscreenCanvasMesssageType.collapseAll:
@@ -101,18 +84,43 @@ export class OffscreenCanvasTableWorker extends CustomCanvasTable {
                 break;
         }
     }
+    protected drawCanvas(): void {
+        if (this.context === undefined || this.dataIndex === undefined) {
+            this.requestAnimationFrame = undefined;
+            this.askForReDraw(this.drawconf);
+            return;
+        }
 
-    protected resize() {}
+        super.drawCanvas();
+    }
+
+    protected scrollViewChange(): void {
+        /** */
+     }
+
+    protected setCanvasSize(width: number, height: number): void {
+        if (this.canvas === undefined) { return; }
+        this.canvas.width = width;
+        this.canvas.height = height;
+        super.setCanvasSize(width, height);
+    }
+
+    protected resize() {
+        /** */
+    }
     protected setCursor(cursor: string): void {
-        const data:OffscreenCanvasMesssage = { mthbCanvasTable:this.id, type:OffscreenCanvasMesssageType.setCursor, cursor: cursor };
+        const data: OffscreenCanvasMesssage = { cursor, mthbCanvasTable: this.id,
+              type: OffscreenCanvasMesssageType.setCursor };
         postMessage(data);
     }
     protected askForExtentedMouseMoveAndMaouseUp() {
-        const data:OffscreenCanvasMesssage = { mthbCanvasTable:this.id, type:OffscreenCanvasMesssageType.askForExtentedMouseMoveAndMaouseUp };
+        const data: OffscreenCanvasMesssage = { mthbCanvasTable: this.id,
+              type: OffscreenCanvasMesssageType.askForExtentedMouseMoveAndMaouseUp };
         postMessage(data);
     }
     protected askForNormalMouseMoveAndMaouseUp() {
-        const data:OffscreenCanvasMesssage = { mthbCanvasTable:this.id, type:OffscreenCanvasMesssageType.askForNormalMouseMoveAndMaouseUp };
+        const data: OffscreenCanvasMesssage = { mthbCanvasTable: this.id,
+              type: OffscreenCanvasMesssageType.askForNormalMouseMoveAndMaouseUp };
         postMessage(data);
-    }   
+    }
 }

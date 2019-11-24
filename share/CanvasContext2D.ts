@@ -1,19 +1,18 @@
-export interface CanvasContext2D extends 
-    CanvasState, 
-    CanvasTransform, 
-    CanvasCompositing, 
-    CanvasImageSmoothing, 
-    CanvasFillStrokeStyles, 
-    CanvasShadowStyles, 
-    CanvasFilters, 
-    CanvasRect, 
-    CanvasDrawPath, 
-    CanvasText, 
-    CanvasDrawImage, 
-    CanvasImageData, 
-    CanvasPathDrawingStyles, 
-    CanvasTextDrawingStyles, 
-    CanvasPath
-{};
+export interface ICanvasContext2D extends
+    CanvasState,
+    CanvasTransform,
+    CanvasCompositing,
+    CanvasImageSmoothing,
+    CanvasFillStrokeStyles,
+    CanvasShadowStyles,
+    CanvasFilters,
+    CanvasRect,
+    CanvasDrawPath,
+    CanvasText,
+    CanvasDrawImage,
+    CanvasImageData,
+    CanvasPathDrawingStyles,
+    CanvasTextDrawingStyles,
+    CanvasPath {}
 
-export type CanvasColor = string;// | CanvasGradient | CanvasPattern;
+export type CanvasColor = string; // | CanvasGradient | CanvasPattern;

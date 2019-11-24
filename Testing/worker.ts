@@ -1,11 +1,11 @@
 import { OffscreenCanvasTableWorker } from "../OffscreenCanvasTableWorker/src/OffscreenCanvasTableWorker";
-import { Align, CanvasTableColumnConf, Sort } from "../share/CanvasTableColum";
+import { Align, ICanvasTableColumnConf, Sort } from "../share/CanvasTableColum";
 import { CustomCanvasTable } from "../share/CustomCanvasTable";
 
 declare function postMessage(message: any): void;
 
 function customDraw(canvasTable: CustomCanvasTable, context: CanvasRenderingContext2D, rowIndex: number,
-                    col: CanvasTableColumnConf, left: number, top: number, right: number, bottom: number,
+                    col: ICanvasTableColumnConf, left: number, top: number, right: number, bottom: number,
                     width: number, height: number, r: number, dataValue: any, row: any, data: any): void {
     context.fillStyle = "lightgreen";
     context.fillRect(left, top, width, height);
@@ -20,7 +20,7 @@ function customDraw(canvasTable: CustomCanvasTable, context: CanvasRenderingCont
     context.stroke();
 }
 
-const column: CanvasTableColumnConf[] = [
+const column: ICanvasTableColumnConf[] = [
     {
         align: Align.center,
         field: "__rownum__",
@@ -69,7 +69,7 @@ offscreenCanvasTableWorker.setSort([
     { col: column[2], sort: Sort.ascending },
     { col: column[5], sort: Sort.ascending },
 ]);
-offscreenCanvasTableWorker.setFilter( (data: any, row: any, col: CanvasTableColumnConf[]) => {
+offscreenCanvasTableWorker.setFilter( (data: any, row: any, col: ICanvasTableColumnConf[]) => {
     if (filter === null) { return true; }
     return !((row.country || "").indexOf(filter) === -1 && (row.name || "").indexOf(filter) === -1 && (row.subcountry || "").indexOf(filter) === -1);
 });

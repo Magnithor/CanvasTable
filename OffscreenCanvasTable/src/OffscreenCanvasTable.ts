@@ -1,14 +1,14 @@
-import { OffscreenCanvasMesssage, OffscreenCanvasMesssageType } from "../../share/OffscreenCanvasTableMessage";
 import { TouchEventToCanvasTableTouchEvent } from "../../share/CanvasTableTouchEvent";
+import { OffscreenCanvasMesssage, OffscreenCanvasMesssageType } from "../../share/OffscreenCanvasTableMessage";
 
 export class OffscreenCanvasTable {
+    public readonly offscreenCanvasTableId: number;
     private canvas: HTMLCanvasElement;
     private worker: Worker;
-    readonly offscreenCanvasTableId: number;
 
-    constructor(offscreenCanvasTableId:number, worker: Worker, canvas: HTMLCanvasElement|string) {
-        if(typeof canvas === "string") {
-            this.canvas = <HTMLCanvasElement>document.getElementById(canvas);
+    constructor(offscreenCanvasTableId: number, worker: Worker, canvas: HTMLCanvasElement|string) {
+        if (typeof canvas === "string") {
+            this.canvas = (document.getElementById(canvas) as HTMLCanvasElement);
         } else {
             this.canvas = canvas;
         }
@@ -17,15 +17,15 @@ export class OffscreenCanvasTable {
         this.worker = worker;
         this.offscreenCanvasTableId = offscreenCanvasTableId;
         this.worker.postMessage(
-            { 
-                mthbCanvasTable: offscreenCanvasTableId, 
-                type: OffscreenCanvasMesssageType.create, 
-                offscreen: offscreen,
-                width: this.canvas.clientWidth,
+            {
                 height: this.canvas.clientHeight,
-                r: window.devicePixelRatio
-            }, 
-            [ <any>offscreen ]);
+                mthbCanvasTable: offscreenCanvasTableId,
+                offscreen,
+                r: window.devicePixelRatio,
+                type: OffscreenCanvasMesssageType.create,
+                width: this.canvas.clientWidth,
+            },
+            [  offscreen as any ]);
 
         this.canvas.addEventListener("wheel", this.canvasWheel);
         this.canvas.addEventListener("mousedown", this.canvasMouseDown);
@@ -39,164 +39,164 @@ export class OffscreenCanvasTable {
         window.addEventListener("resize", () => {
             this.resize();
         });
-        worker.addEventListener('message', this.workerMessage);
+        worker.addEventListener("message", this.workerMessage);
     }
-    public expendAll():void {
+    public expendAll(): void {
         this.postMessage({
-            mthbCanvasTable: this.offscreenCanvasTableId, 
-            type: OffscreenCanvasMesssageType.expendAll
+            mthbCanvasTable: this.offscreenCanvasTableId,
+            type: OffscreenCanvasMesssageType.expendAll,
         });
     }
-    public collapseAll():void {
+    public collapseAll(): void {
         this.postMessage({
-            mthbCanvasTable: this.offscreenCanvasTableId, 
-            type: OffscreenCanvasMesssageType.collapseAll
+            mthbCanvasTable: this.offscreenCanvasTableId,
+            type: OffscreenCanvasMesssageType.collapseAll,
         });
     }
-    public setGroupBy(col?:string[]) {
+    public setGroupBy(col?: string[]) {
         this.postMessage({
-            mthbCanvasTable: this.offscreenCanvasTableId, 
+            groupBy: col,
+            mthbCanvasTable: this.offscreenCanvasTableId,
             type: OffscreenCanvasMesssageType.setGroupBy,
-            groupBy: col
         });
     }
 
     private resize() {
         this.postMessage({
-            mthbCanvasTable: this.offscreenCanvasTableId, 
-            type: OffscreenCanvasMesssageType.resize, 
-            width: this.canvas.clientWidth,
             height: this.canvas.clientHeight,
-            r: window.devicePixelRatio
+            mthbCanvasTable: this.offscreenCanvasTableId,
+            r: window.devicePixelRatio,
+            type: OffscreenCanvasMesssageType.resize,
+            width: this.canvas.clientWidth,
         });
     }
 
     private canvasWheel = (e: WheelEvent) => {
-        e.preventDefault(); 
+        e.preventDefault();
         this.postMessage({
-            mthbCanvasTable: this.offscreenCanvasTableId, 
-            type: OffscreenCanvasMesssageType.scroll, 
             deltaMode: e.deltaMode,
             deltaX: e.deltaX,
-            deltaY: e.deltaY        
+            deltaY: e.deltaY,
+            mthbCanvasTable: this.offscreenCanvasTableId,
+            type: OffscreenCanvasMesssageType.scroll,
         });
     }
     private canvasMouseDown = (e: MouseEvent) => {
         e.preventDefault();
         this.postMessage({
-            mthbCanvasTable: this.offscreenCanvasTableId, 
-            type: OffscreenCanvasMesssageType.mouseDown, 
+            mthbCanvasTable: this.offscreenCanvasTableId,
+            type: OffscreenCanvasMesssageType.mouseDown,
             x: e.clientX - this.canvas.offsetLeft,
-            y: e.clientY - this.canvas.offsetTop
+            y: e.clientY - this.canvas.offsetTop,
         });
     }
     private canvasMouseMove = (e: MouseEvent) => {
         e.preventDefault();
         this.postMessage({
-            mthbCanvasTable: this.offscreenCanvasTableId, 
-            type: OffscreenCanvasMesssageType.mouseMove, 
+            mthbCanvasTable: this.offscreenCanvasTableId,
+            type: OffscreenCanvasMesssageType.mouseMove,
             x: e.clientX - this.canvas.offsetLeft,
-            y: e.clientY - this.canvas.offsetTop
+            y: e.clientY - this.canvas.offsetTop,
         });
     }
     private canvasMouseUp = (e: MouseEvent) => {
         e.preventDefault();
         this.postMessage({
-            mthbCanvasTable: this.offscreenCanvasTableId, 
-            type: OffscreenCanvasMesssageType.mouseUp, 
+            mthbCanvasTable: this.offscreenCanvasTableId,
+            type: OffscreenCanvasMesssageType.mouseUp,
             x: e.clientX - this.canvas.offsetLeft,
-            y: e.clientY - this.canvas.offsetTop
+            y: e.clientY - this.canvas.offsetTop,
         });
     }
     private canvasMouseLeave = () => {
         this.postMessage({
-            mthbCanvasTable: this.offscreenCanvasTableId, 
-            type: OffscreenCanvasMesssageType.mouseLeave
+            mthbCanvasTable: this.offscreenCanvasTableId,
+            type: OffscreenCanvasMesssageType.mouseLeave,
         });
     }
 
     private canvasTouchStart = (e: TouchEvent) => {
         e.preventDefault();
         this.postMessage({
-            mthbCanvasTable: this.offscreenCanvasTableId,
-            type: OffscreenCanvasMesssageType.TouchStart,
             event: TouchEventToCanvasTableTouchEvent(e),
+            mthbCanvasTable: this.offscreenCanvasTableId,
+            offsetLeft: this.canvas.offsetLeft,
             offsetTop: this.canvas.offsetTop,
-            offsetLeft: this.canvas.offsetLeft
+            type: OffscreenCanvasMesssageType.TouchStart,
         });
     }
     private canvasTouchMove = (e: TouchEvent) => {
         e.preventDefault();
         this.postMessage({
-            mthbCanvasTable: this.offscreenCanvasTableId,
-            type: OffscreenCanvasMesssageType.TouchMove,
             event: TouchEventToCanvasTableTouchEvent(e),
+            mthbCanvasTable: this.offscreenCanvasTableId,
+            offsetLeft: this.canvas.offsetLeft,
             offsetTop: this.canvas.offsetTop,
-            offsetLeft: this.canvas.offsetLeft
+            type: OffscreenCanvasMesssageType.TouchMove,
         });
     }
     private canvasTouchEnd = (e: TouchEvent) => {
         e.preventDefault();
         this.postMessage({
-            mthbCanvasTable: this.offscreenCanvasTableId,
-            type: OffscreenCanvasMesssageType.TouchEnd,
             event: TouchEventToCanvasTableTouchEvent(e),
+            mthbCanvasTable: this.offscreenCanvasTableId,
+            offsetLeft: this.canvas.offsetLeft,
             offsetTop: this.canvas.offsetTop,
-            offsetLeft: this.canvas.offsetLeft
+            type: OffscreenCanvasMesssageType.TouchEnd,
         });
     }
 
     private canvasKeydown = (e: KeyboardEvent) => {
         this.postMessage({
-            mthbCanvasTable: this.offscreenCanvasTableId, 
+            keycode: e.keyCode,
+            mthbCanvasTable: this.offscreenCanvasTableId,
             type: OffscreenCanvasMesssageType.keyDown,
-            keycode: e.keyCode
         });
     }
 
     private canvasMouseUpExtended = (e: MouseEvent) => {
         e.preventDefault();
         this.postMessage({
-            mthbCanvasTable: this.offscreenCanvasTableId, 
-            type: OffscreenCanvasMesssageType.mouseUpExtended, 
+            mthbCanvasTable: this.offscreenCanvasTableId,
+            type: OffscreenCanvasMesssageType.mouseUpExtended,
             x: e.clientX - this.canvas.offsetLeft,
-            y: e.clientY - this.canvas.offsetTop
+            y: e.clientY - this.canvas.offsetTop,
         });
 
     }
     private canvasMouseMoveExtended = (e: MouseEvent) => {
         e.preventDefault();
         this.postMessage({
-            mthbCanvasTable: this.offscreenCanvasTableId, 
-            type: OffscreenCanvasMesssageType.mouseMoveExtended, 
+            mthbCanvasTable: this.offscreenCanvasTableId,
+            type: OffscreenCanvasMesssageType.mouseMoveExtended,
             x: e.clientX - this.canvas.offsetLeft,
-            y: e.clientY - this.canvas.offsetTop
+            y: e.clientY - this.canvas.offsetTop,
         });
     }
 
-    private workerMessage = (message:MessageEvent) => {
+    private workerMessage = (message: MessageEvent) => {
         if (message.data.mthbCanvasTable !== this.offscreenCanvasTableId) { return; }
-        var data = <OffscreenCanvasMesssage>message.data;
-        switch (data.type){
+        const data =  message.data as OffscreenCanvasMesssage;
+        switch (data.type) {
             case OffscreenCanvasMesssageType.askForExtentedMouseMoveAndMaouseUp:
                 this.canvas.removeEventListener("mousemove", this.canvasMouseMove);
                 this.canvas.removeEventListener("mouseup", this.canvasMouseUp);
                 window.addEventListener("mousemove", this.canvasMouseMoveExtended);
-                window.addEventListener("mouseup", this.canvasMouseUpExtended);            
+                window.addEventListener("mouseup", this.canvasMouseUpExtended);
                 break;
             case OffscreenCanvasMesssageType.askForNormalMouseMoveAndMaouseUp:
                 window.removeEventListener("mousemove", this.canvasMouseMoveExtended);
                 window.removeEventListener("mouseup", this.canvasMouseUpExtended);
                 this.canvas.addEventListener("mousemove", this.canvasMouseMove);
-                this.canvas.addEventListener("mouseup", this.canvasMouseUp);            
+                this.canvas.addEventListener("mouseup", this.canvasMouseUp);
                 break;
             case OffscreenCanvasMesssageType.setCursor:
                 this.canvas.style.cursor = data.cursor;
-                break;            
+                break;
         }
     }
 
-    private postMessage(data:OffscreenCanvasMesssage): void {
-        this.worker.postMessage(data);    
+    private postMessage(data: OffscreenCanvasMesssage): void {
+        this.worker.postMessage(data);
     }
 }

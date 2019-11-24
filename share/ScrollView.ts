@@ -1,37 +1,37 @@
-import { Drawable } from "./Drawable";
-import { CircularBuffer } from './CircularBuffer';
-import { CanvasContext2D, CanvasColor } from "./CanvasContext2D";
-import { CanvasTableTouchEvent } from './CanvasTableTouchEvent';
+import { CanvasColor, ICanvasContext2D } from "./CanvasContext2D";
+import { ICanvasTableTouchEvent } from "./CanvasTableTouchEvent";
+import { CircularBuffer } from "./CircularBuffer";
+import { IDrawable } from "./Drawable";
 
 declare function setTimeout(callback: (...args: any[]) => void, ms: number, ...args: any[]): number;
 
-interface MouseMove {
+interface IMouseMove {
     x: number;
     y: number;
     time: Date;
 }
 
-export interface ScrollViewConfig {
-   buttonHoverColor?: CanvasColor,
-   buttonColor?: CanvasColor,
-   backgroundColor?: CanvasColor,
+export interface IScrollViewConfig {
+   buttonHoverColor?: CanvasColor;
+   buttonColor?: CanvasColor;
+   backgroundColor?: CanvasColor;
 }
 
-interface ScrollViewConf {
-    buttonHoverColor: CanvasColor,
-    buttonColor: CanvasColor,
-    backgroundColor: CanvasColor,
+interface IScrollViewConf {
+    buttonHoverColor: CanvasColor;
+    buttonColor: CanvasColor;
+    backgroundColor: CanvasColor;
  }
 
 export class ScrollView {
-    private readonly drawable: Drawable;
+    private readonly drawable: IDrawable;
     private readonly askForExtentedMouseMoveAndMaouseUp: () => void;
     private readonly askForNormalMouseMoveAndMaouseUp: () => void;
-    private readonly scrollViewChange: ()=> void;
+    private readonly scrollViewChange: () => void;
 
     private canvasWidth: number = -1;
     private canvasHeight: number = -1;
-    private context: CanvasContext2D;
+    private context: ICanvasContext2D;
     private height?: number;
     private width?: number;
     private r: number = 1;
@@ -61,7 +61,7 @@ export class ScrollView {
     private pageX: number = -1;
     private touchStartX: number = 1;
 
-    private lastmove: CircularBuffer<MouseMove>;
+    private lastmove: CircularBuffer<IMouseMove>;
 
     private scrollbarSize = 20;
     private cellHeight = 20;
@@ -69,21 +69,22 @@ export class ScrollView {
     private runXOrY: boolean = false;
     private runStart: number = -1;
     private speed: number = 1;
-    private scrollViewConfig: ScrollViewConf;
+    private scrollViewConfig: IScrollViewConf;
 
-
-    public constructor(context: CanvasContext2D, drawable: Drawable, config:ScrollViewConfig|undefined, askForExtentedMouseMoveAndMaouseUp: () => void, askForNormalMouseMoveAndMaouseUp: () => void, scrollViewChange: () => void) {
+    public constructor(context: ICanvasContext2D, drawable: IDrawable, config: IScrollViewConfig | undefined,
+                       askForExtentedMouseMoveAndMaouseUp: () => void,
+                       askForNormalMouseMoveAndMaouseUp: () => void, scrollViewChange: () => void) {
         this.scrollViewChange = scrollViewChange;
         this.askForExtentedMouseMoveAndMaouseUp = askForExtentedMouseMoveAndMaouseUp;
         this.askForNormalMouseMoveAndMaouseUp = askForNormalMouseMoveAndMaouseUp;
         this.drawable = drawable;
-        this.lastmove = new CircularBuffer<MouseMove>(100, true);
+        this.lastmove = new CircularBuffer<IMouseMove>(100, true);
         this.context = context;
         this.scrollViewConfig = {
              ...{
-                buttonHoverColor: "#808080",
-                buttonColor: "#b0b0b0",
                 backgroundColor: "#f0f0f0",
+                buttonColor: "#b0b0b0",
+                buttonHoverColor: "#808080",
             },  ...config };
     }
 
@@ -94,17 +95,16 @@ export class ScrollView {
         if (!this.hasScrollBarY) {
             value = 0;
         }
-        
+
         if (value <= 0) {
             value = 0;
-        }
-        else {
+        } else {
             if (value > this.scrollBarPosMaxY) {
                 value = this.scrollBarPosMaxY;
             }
         }
 
-        if (this.posYvalue != value) {
+        if (this.posYvalue !== value) {
             this.posYvalue = value;
             this.scrollViewChange.call(this.drawable);
             this.drawable.askForReDraw();
@@ -118,24 +118,116 @@ export class ScrollView {
         if (!this.hasScrollBarX) {
             value = 0;
         }
-        
+
         if (value <= 0) {
             value = 0;
-        }
-        else {
+        } else  {
             if (value > this.scrollBarPosMaxX) {
                 value = this.scrollBarPosMaxX;
             }
         }
 
-        if (this.posXvalue != value) {
+        if (this.posXvalue !== value) {
             this.posXvalue = value;
             this.scrollViewChange.call(this.drawable);
             this.drawable.askForReDraw();
         }
     }
 
-    public setSize(r:number, canvasWidth:number, canvasHeight:number, width?: number, height?: number) {        
+    public draw() {
+        if (this.height === undefined || this.width === undefined) {
+            return;
+        }
+
+        if (this.hasScrollBarY) {
+            const canvasHeight = this.canvasHeight - (this.hasScrollBarX ? this.scrollbarSize * this.r : 0);
+            const height = canvasHeight - this.r * 16 * 2;
+            const ratioY = this.scrollBarPosMaxY === 0 ? 1 : (this.posY / this.scrollBarPosMaxY);
+            const scrollBarSizeY = Math.max(10 * this.r, (height / this.pageY));
+            const scrollBarPosY = 16 * this.r + ratioY * (height - scrollBarSizeY);
+            this.scrollBarThumbMinY = scrollBarPosY / this.r;
+            this.scrollBarThumbMaxY = (scrollBarPosY + scrollBarSizeY) / this.r;
+
+            this.context.fillStyle = this.scrollViewConfig.backgroundColor;
+            this.context.fillRect(this.canvasWidth - this.r * this.scrollbarSize, 0,
+                                  this.r * this.scrollbarSize, canvasHeight);
+
+            this.context.fillStyle = this.isOverScrollUpY ?
+                        this.scrollViewConfig.buttonHoverColor : this.scrollViewConfig.buttonColor;
+            this.context.beginPath();
+            this.context.moveTo(this.canvasWidth - this.r * 10, this.r * 3);
+            this.context.lineTo(this.canvasWidth - this.r * 18, this.r * 13);
+            this.context.lineTo(this.canvasWidth - this.r * 2, this.r * 13);
+            this.context.fill();
+
+            this.context.fillStyle = this.isOverScrollDownY ?
+                        this.scrollViewConfig.buttonHoverColor : this.scrollViewConfig.buttonColor;
+            this.context.beginPath();
+            this.context.moveTo(this.canvasWidth - this.r * 10, canvasHeight - this.r * 3);
+            this.context.lineTo(this.canvasWidth - this.r * 18, canvasHeight - this.r * 13);
+            this.context.lineTo(this.canvasWidth - this.r * 2, canvasHeight - this.r * 13);
+            this.context.fill();
+
+            this.context.fillStyle = this.isOverScollThumbY ?
+                        this.scrollViewConfig.buttonHoverColor : this.scrollViewConfig.buttonColor;
+
+            this.context.beginPath();
+            this.context.moveTo(this.canvasWidth - this.r * this.scrollbarSize, scrollBarPosY);
+            this.context.lineTo(this.canvasWidth, scrollBarPosY);
+            this.context.lineTo(this.canvasWidth, scrollBarPosY + scrollBarSizeY);
+            this.context.lineTo(this.canvasWidth - this.r * this.scrollbarSize, scrollBarPosY + scrollBarSizeY);
+            this.context.fill();
+        }
+
+        if (this.hasScrollBarX) {
+            const canvasWidth = this.canvasWidth - (this.hasScrollBarY ? this.scrollbarSize * this.r : 0);
+            const width = canvasWidth - this.r * 16 * 2;
+            const ratioX = this.scrollBarPosMaxX === 0 ? 1 : (this.posX / this.scrollBarPosMaxX);
+            const scrollBarSizeX = Math.max(10 * this.r, (width / this.pageX));
+            const scrollBarPosX = 16 * this.r + ratioX * (width - scrollBarSizeX);
+            this.scrollBarThumbMinX = scrollBarPosX / this.r;
+            this.scrollBarThumbMaxX = (scrollBarPosX + scrollBarSizeX) / this.r;
+
+            this.context.fillStyle = this.scrollViewConfig.backgroundColor;
+            this.context.fillRect(0, this.canvasHeight - this.r * this.scrollbarSize,
+                                  canvasWidth, this.r * this.scrollbarSize);
+
+            this.context.fillStyle = this.isOverScrollUpX ?
+                    this.scrollViewConfig.buttonHoverColor : this.scrollViewConfig.buttonColor;
+            this.context.beginPath();
+            this.context.moveTo(this.r * 3, this.canvasHeight - this.r * 10);
+            this.context.lineTo(this.r * 13, this.canvasHeight - this.r * 18);
+            this.context.lineTo(this.r * 13, this.canvasHeight - this.r * 2);
+            this.context.fill();
+
+            this.context.fillStyle = this.isOverScrollDownX ?
+                    this.scrollViewConfig.buttonHoverColor : this.scrollViewConfig.buttonColor;
+            this.context.beginPath();
+            this.context.moveTo(canvasWidth - this.r * 3, this.canvasHeight - this.r * 10);
+            this.context.lineTo(canvasWidth - this.r * 13, this.canvasHeight - this.r * 18);
+            this.context.lineTo(canvasWidth - this.r * 13, this.canvasHeight - this.r * 2);
+            this.context.fill();
+
+            this.context.fillStyle = this.isOverScollThumbX ?
+                    this.scrollViewConfig.buttonHoverColor : this.scrollViewConfig.buttonColor;
+
+            this.context.beginPath();
+            this.context.moveTo(scrollBarPosX, this.canvasHeight - this.r * this.scrollbarSize);
+            this.context.lineTo(scrollBarPosX, this.canvasHeight);
+            this.context.lineTo(scrollBarPosX + scrollBarSizeX, this.canvasHeight);
+            this.context.lineTo(scrollBarPosX + scrollBarSizeX, this.canvasHeight - this.r * this.scrollbarSize);
+            this.context.fill();
+        }
+
+        if (this.hasScrollBarX && this.hasScrollBarY) {
+            this.context.fillStyle = this.scrollViewConfig.backgroundColor;
+            this.context.fillRect(this.canvasWidth - this.r * this.scrollbarSize,
+                this.canvasHeight - this.r * this.scrollbarSize,
+                this.r * this.scrollbarSize, this.r * this.scrollbarSize);
+        }
+    }
+
+    public setSize(r: number, canvasWidth: number, canvasHeight: number, width?: number, height?: number) {
         this.canvasHeight = canvasHeight;
         this.canvasWidth = canvasWidth;
         this.width = width;
@@ -150,43 +242,44 @@ export class ScrollView {
             return;
         }
 
-        if ((this.height / (this.canvasHeight - (18 + this.scrollbarSize) * this.r) > 1) && (this.width / (this.canvasWidth - this.scrollbarSize * this.r) > 1)) {
+        if ((this.height / (this.canvasHeight - (18 + this.scrollbarSize) * this.r) > 1) &&
+            (this.width / (this.canvasWidth - this.scrollbarSize * this.r) > 1)) {
             // has X and Y
             this.pageY = this.height / (this.canvasHeight - (18 + this.scrollbarSize) * this.r);
             if (this.pageY < 1) {
                 this.hasScrollBarY = false;
-                this.scrollBarPosMaxY = 0;            
+                this.scrollBarPosMaxY = 0;
             } else {
                 this.hasScrollBarY = true;
-                this.scrollBarPosMaxY  = this.height - (this.canvasHeight - (18 + this.scrollbarSize) * this.r);        
+                this.scrollBarPosMaxY  = this.height - (this.canvasHeight - (18 + this.scrollbarSize) * this.r);
             }
 
             this.pageX = this.width / (this.canvasWidth - this.scrollbarSize * this.r);
             if (this.pageX < 1) {
                 this.hasScrollBarX = false;
-                this.scrollBarPosMaxX = 0;          
+                this.scrollBarPosMaxX = 0;
             } else {
                 this.hasScrollBarX = true;
-                this.scrollBarPosMaxX  = this.width - (this.canvasWidth - this.scrollbarSize * this.r);        
+                this.scrollBarPosMaxX  = this.width - (this.canvasWidth - this.scrollbarSize * this.r);
             }
         } else {
             // has x or Y
             this.pageY = this.height / (this.canvasHeight - 18 * this.r);
             if (this.pageY < 1) {
                 this.hasScrollBarY = false;
-                this.scrollBarPosMaxY = 0;            
+                this.scrollBarPosMaxY = 0;
             } else {
                 this.hasScrollBarY = true;
-                this.scrollBarPosMaxY  = this.height - (this.canvasHeight - 18 * this.r);        
+                this.scrollBarPosMaxY  = this.height - (this.canvasHeight - 18 * this.r);
             }
 
             this.pageX = this.width / this.canvasWidth;
             if (this.pageX < 1) {
                 this.hasScrollBarX = false;
-                this.scrollBarPosMaxX = 0;            
+                this.scrollBarPosMaxX = 0;
             } else {
                 this.hasScrollBarX = true;
-                this.scrollBarPosMaxX  = this.width - this.canvasWidth;        
+                this.scrollBarPosMaxX  = this.width - this.canvasWidth;
             }
         }
 
@@ -194,10 +287,10 @@ export class ScrollView {
         if (this.posX > this.scrollBarPosMaxX) { this.posX = this.scrollBarPosMaxX; }
     }
 
-    public beforeDraw(): boolean{
+    public beforeDraw(): boolean {
         if (this.run) {
             if (this.runStart === -1) {
-                if (this.runXOrY){
+                if (this.runXOrY) {
                     this.posY -= (this.speed * this.r);
                 } else {
                     this.posX -= (this.speed * this.r);
@@ -207,9 +300,9 @@ export class ScrollView {
             const time = (new Date()).getTime() - this.runStart;
             if (time < 1500) {
                 if (this.runXOrY) {
-                    this.posY -= (this.speed * this.r) * (1-time/1500);
+                    this.posY -= (this.speed * this.r) * (1 - time / 1500);
                 } else {
-                    this.posX -= (this.speed * this.r) * (1-time/1500);
+                    this.posX -= (this.speed * this.r) * (1 - time / 1500);
                 }
                 return true;
             }
@@ -232,14 +325,14 @@ export class ScrollView {
                 return true;
             default:
                 return false;
-        }        
+        }
     }
-    public OnTouchStart(e:CanvasTableTouchEvent, offsetLeft: number, offsetTop:number):boolean {
+    public OnTouchStart(e: ICanvasTableTouchEvent, offsetLeft: number, offsetTop: number): boolean {
         this.run = false;
         this.lastmove.clear();
         const y = e.changedTouches[0].pageY - offsetTop;
         const x = e.changedTouches[0].pageX - offsetLeft;
-        if (this.scrollClick(x, y, true)) {            
+        if (this.scrollClick(x, y, true)) {
             return true;
         }
         this.touchStartY = e.changedTouches[0].pageY;
@@ -248,7 +341,7 @@ export class ScrollView {
 
         return false;
     }
-    public OnTouchMove(e:CanvasTableTouchEvent, offsetLeft: number, offsetTop:number) {       
+    public OnTouchMove(e: ICanvasTableTouchEvent, offsetLeft: number, offsetTop: number) {
         this.run = false;
         if (this.scrollBarThumbDownY) {
             const y = e.changedTouches[0].pageY - offsetTop;
@@ -269,13 +362,13 @@ export class ScrollView {
         this.lastmove.push({ x: e.changedTouches[0].pageX, y: e.changedTouches[0].pageY, time: new Date() });
         this.posY -=  (e.changedTouches[0].pageY - this.touchStartY) * this.r;
         this.posX -=  (e.changedTouches[0].pageX - this.touchStartX) * this.r;
-        
+
         this.touchStartY = e.changedTouches[0].pageY;
         this.touchStartX = e.changedTouches[0].pageX;
     }
-    public OnTouchEnd(e:CanvasTableTouchEvent) {
+    public OnTouchEnd(e: ICanvasTableTouchEvent) {
         if (e.touches.length === 0) {
-            let needToReDraw = false;    
+            let needToReDraw = false;
             if (this.isOverScollThumbY) {
                 this.isOverScollThumbY = false;
                 needToReDraw = true;
@@ -308,20 +401,24 @@ export class ScrollView {
             if (this.run || this.timeout) {
                 clearTimeout(this.timeout);
                 this.timeout = undefined;
-                this.run = false;     
-            }       
+                this.run = false;
+            }
         }
 
         const list = this.lastmove.export();
         if (list.length > 2) {
-            var i = list.length - 2;
-            for (; i >= 0 && (list[list.length - 1].time.getTime() - list[i].time.getTime()) < 1000; i--) { }
-            if (i < 0) { i = 0;}
-            const time = list[list.length-1].time.getTime() - list[i].time.getTime();
-            const speedY = this.r * (list[list.length-1].y - list[i].y) / time;
+            let i;
+            for (i = list.length - 2;
+                 i >= 0 && (list[list.length - 1].time.getTime() - list[i].time.getTime()) < 1000;
+                 i--) {
+                /* */
+            }
 
-            if (Math.abs(speedY) > 1)
-            {
+            if (i < 0) { i = 0; }
+            const time = list[list.length - 1].time.getTime() - list[i].time.getTime();
+            const speedY = this.r * (list[list.length - 1].y - list[i].y) / time;
+
+            if (Math.abs(speedY) > 1) {
                 this.speed = speedY * 10;
                 this.runXOrY = true;
                 this.run = true;
@@ -330,10 +427,9 @@ export class ScrollView {
                 return;
             }
 
-            const speedX = this.r * (list[list.length-1].x - list[i].x) / time;
+            const speedX = this.r * (list[list.length - 1].x - list[i].x) / time;
 
-            if (Math.abs(speedX) > 1)
-            {
+            if (Math.abs(speedX) > 1) {
                 this.speed = speedX * 10;
                 this.runXOrY = false;
                 this.run = true;
@@ -343,7 +439,7 @@ export class ScrollView {
             }
         }
     }
-    public onScroll = (deltaMode:number, deltaX: number, deltaY:number) => {
+    public onScroll = (deltaMode: number, deltaX: number, deltaY: number) => {
         switch (deltaMode) {
             case 0: // DOM_DELTA_PIXEL	0x00	The delta values are specified in pixels.
                 this.posY += deltaY;
@@ -365,7 +461,7 @@ export class ScrollView {
         this.fixPos();
     }
     public onMouseLeave() {
-        var needToReDraw = false;
+        let needToReDraw = false;
         if (this.isOverScollThumbY && !this.scrollBarThumbDownY) {
             this.isOverScollThumbY = false;
             needToReDraw = true;
@@ -396,16 +492,16 @@ export class ScrollView {
             this.drawMe();
         }
     }
-    public onExtendedMouseUp(x: number, y: number): boolean{
+    public onExtendedMouseUp(x: number, y: number): boolean {
         this.askForNormalMouseMoveAndMaouseUp.call(this.drawable);
 
         this.scrollBarThumbDownY = false;
         this.scrollBarThumbDownX = false;
         if (this.isOverScollThumbY && (
             x > this.canvasWidth / this.r
-            || (x < this.canvasWidth / this.r - this.scrollbarSize) 
+            || (x < this.canvasWidth / this.r - this.scrollbarSize)
             || (this.scrollBarThumbMinY > y)
-            || (y > this.scrollBarThumbMaxY) 
+            || (y > this.scrollBarThumbMaxY)
             )) {
             this.isOverScollThumbY = false;
             this.drawMe();
@@ -413,9 +509,9 @@ export class ScrollView {
 
         if (this.isOverScollThumbX && (
             y > this.canvasHeight / this.r
-            || (y < this.canvasHeight / this.r - this.scrollbarSize) 
+            || (y < this.canvasHeight / this.r - this.scrollbarSize)
             || (this.scrollBarThumbMinX > x)
-            || (x > this.scrollBarThumbMaxX) 
+            || (x > this.scrollBarThumbMaxX)
             )) {
             this.isOverScollThumbY = false;
             this.drawMe();
@@ -441,8 +537,10 @@ export class ScrollView {
         const canvasWidth = this.canvasWidth / this.r;
         const canvasHeight = this.canvasHeight / this.r;
 
-        if (this.hasScrollBarX && this.hasScrollBarY && x > canvasWidth - this.scrollbarSize && y > canvasHeight - this.scrollbarSize) {
-            if (this.isOverScrollUpY || this.isOverScollThumbY || this.isOverScrollDownY || this.isOverScrollUpX || this.isOverScollThumbX || this.isOverScrollDownX) {
+        if (this.hasScrollBarX && this.hasScrollBarY &&
+            x > canvasWidth - this.scrollbarSize && y > canvasHeight - this.scrollbarSize) {
+            if (this.isOverScrollUpY || this.isOverScollThumbY || this.isOverScrollDownY ||
+                this.isOverScrollUpX || this.isOverScollThumbX || this.isOverScrollDownX) {
                 this.isOverScrollUpY = false;
                 this.isOverScollThumbY = false;
                 this.isOverScrollDownY = false;
@@ -453,11 +551,13 @@ export class ScrollView {
             }
             return true;
         }
-            
-        if (( this.hasScrollBarX &&  this.hasScrollBarY && x < canvasWidth - this.scrollbarSize && y < canvasHeight - this.scrollbarSize) || 
+
+        if (( this.hasScrollBarX &&  this.hasScrollBarY &&
+              x < canvasWidth - this.scrollbarSize && y < canvasHeight - this.scrollbarSize) ||
             (!this.hasScrollBarX &&  this.hasScrollBarY && x < canvasWidth - this.scrollbarSize) ||
             ( this.hasScrollBarX && !this.hasScrollBarY && y < canvasHeight - this.scrollbarSize) ) {
-            if (this.isOverScrollUpY || this.isOverScollThumbY || this.isOverScrollDownY || this.isOverScrollUpX || this.isOverScollThumbX || this.isOverScrollDownX) {
+            if (this.isOverScrollUpY || this.isOverScollThumbY || this.isOverScrollDownY ||
+                this.isOverScrollUpX || this.isOverScollThumbX || this.isOverScrollDownX) {
                 this.isOverScrollUpY = false;
                 this.isOverScollThumbY = false;
                 this.isOverScrollDownY = false;
@@ -466,22 +566,22 @@ export class ScrollView {
                 this.isOverScrollDownX = false;
                 this.drawMe();
             }
-            return false; 
-        }    
-        
+            return false;
+        }
+
         if (this.scrollBarThumbDownY) {
-            this.posY = this.scrollBarPosMaxY * ((y-20) / (this.canvasHeight / this.r-20*2));
+            this.posY = this.scrollBarPosMaxY * ((y - 20) / (this.canvasHeight / this.r - 20 * 2));
             return true;
         }
 
         if (this.scrollBarThumbDownX) {
-            this.posX = this.scrollBarPosMaxX * ((x) / (this.canvasWidth / this.r-20*2));
+            this.posX = this.scrollBarPosMaxX * ((x) / (this.canvasWidth / this.r - 20 * 2));
             return true;
         }
-        
+
         if (this.hasScrollBarY && y < 20) {
-            if (!this.isOverScrollUpY || this.isOverScollThumbY || this.isOverScrollDownY || this.isOverScrollUpX || this.isOverScollThumbX || this.isOverScrollDownX)
-            {
+            if (!this.isOverScrollUpY || this.isOverScollThumbY || this.isOverScrollDownY ||
+                this.isOverScrollUpX || this.isOverScollThumbX || this.isOverScrollDownX) {
                 this.isOverScrollUpY = true;
                 this.isOverScollThumbY = false;
                 this.isOverScrollDownY = false;
@@ -493,9 +593,10 @@ export class ScrollView {
             return true;
         }
 
-        if (this.hasScrollBarY && x >= canvasWidth - this.scrollbarSize && y > this.canvasHeight / this.r - 20 - (this.hasScrollBarX?this.scrollbarSize:0)) {
-            if (this.isOverScrollUpY || this.isOverScollThumbY || !this.isOverScrollDownY || this.isOverScrollUpX || this.isOverScollThumbX || this.isOverScrollDownX)
-            {
+        if (this.hasScrollBarY && x >= canvasWidth - this.scrollbarSize &&
+            y > this.canvasHeight / this.r - 20 - (this.hasScrollBarX ? this.scrollbarSize : 0)) {
+            if (this.isOverScrollUpY || this.isOverScollThumbY || !this.isOverScrollDownY ||
+                this.isOverScrollUpX || this.isOverScollThumbX || this.isOverScrollDownX) {
                 this.isOverScrollUpY = false;
                 this.isOverScollThumbY = false;
                 this.isOverScrollDownY = true;
@@ -508,7 +609,8 @@ export class ScrollView {
         }
 
         if (this.hasScrollBarY && this.scrollBarThumbMinY <= y && y <= this.scrollBarThumbMaxY) {
-            if (this.isOverScrollUpY || !this.isOverScollThumbY || this.isOverScrollDownY || this.isOverScrollUpX || this.isOverScollThumbX || this.isOverScrollDownX) {
+            if (this.isOverScrollUpY || !this.isOverScollThumbY || this.isOverScrollDownY ||
+                this.isOverScrollUpX || this.isOverScollThumbX || this.isOverScrollDownX) {
                 this.isOverScrollUpY = false;
                 this.isOverScollThumbY = true;
                 this.isOverScrollDownY = false;
@@ -521,8 +623,8 @@ export class ScrollView {
         }
 
         if (this.hasScrollBarX && x < 20) {
-            if (!this.isOverScrollUpX || this.isOverScollThumbX || this.isOverScrollDownX || this.isOverScrollUpY || !this.isOverScollThumbY || this.isOverScrollDownY)
-            {
+            if (!this.isOverScrollUpX || this.isOverScollThumbX || this.isOverScrollDownX ||
+                this.isOverScrollUpY || !this.isOverScollThumbY || this.isOverScrollDownY) {
                 this.isOverScrollUpX = true;
                 this.isOverScollThumbX = false;
                 this.isOverScrollDownX = false;
@@ -534,9 +636,10 @@ export class ScrollView {
             return true;
         }
 
-        if (this.hasScrollBarX && y >= canvasHeight - this.scrollbarSize && x > this.canvasWidth / this.r - 20 - (this.hasScrollBarY?this.scrollbarSize:0)) {
-            if (this.isOverScrollUpY || this.isOverScollThumbY || this.isOverScrollDownY || this.isOverScrollUpX || this.isOverScollThumbX || !this.isOverScrollDownX)
-            {
+        if (this.hasScrollBarX && y >= canvasHeight - this.scrollbarSize &&
+            x > this.canvasWidth / this.r - 20 - (this.hasScrollBarY ? this.scrollbarSize : 0)) {
+            if (this.isOverScrollUpY || this.isOverScollThumbY || this.isOverScrollDownY ||
+                this.isOverScrollUpX || this.isOverScollThumbX || !this.isOverScrollDownX) {
                 this.isOverScrollUpY = false;
                 this.isOverScollThumbY = false;
                 this.isOverScrollDownY = false;
@@ -549,7 +652,8 @@ export class ScrollView {
         }
 
         if (this.hasScrollBarX && this.scrollBarThumbMinX <= x && x <= this.scrollBarThumbMaxX) {
-            if (this.isOverScrollUpY || this.isOverScollThumbY || this.isOverScrollDownY || this.isOverScrollUpX || !this.isOverScollThumbX || this.isOverScrollDownX) {
+            if (this.isOverScrollUpY || this.isOverScollThumbY || this.isOverScrollDownY ||
+                this.isOverScrollUpX || !this.isOverScollThumbX || this.isOverScrollDownX) {
                 this.isOverScrollUpY = false;
                 this.isOverScollThumbY = false;
                 this.isOverScrollDownY = false;
@@ -561,7 +665,8 @@ export class ScrollView {
             return true;
         }
 
-        if (this.isOverScrollUpY || this.isOverScollThumbY || this.isOverScrollDownY || this.isOverScrollUpX || this.isOverScollThumbX || this.isOverScrollDownX) {
+        if (this.isOverScrollUpY || this.isOverScollThumbY || this.isOverScrollDownY ||
+            this.isOverScrollUpX || this.isOverScollThumbX || this.isOverScrollDownX) {
             this.isOverScrollUpY = false;
             this.isOverScollThumbY = false;
             this.isOverScrollDownY = false;
@@ -593,15 +698,17 @@ export class ScrollView {
 
         const canvasWidth = this.canvasWidth / this.r;
         const canvasHeight = this.canvasHeight / this.r;
-        if (this.hasScrollBarX && this.hasScrollBarY && x > canvasWidth - this.scrollbarSize && y > canvasHeight - this.scrollbarSize) {
+        if (this.hasScrollBarX && this.hasScrollBarY &&
+            x > canvasWidth - this.scrollbarSize && y > canvasHeight - this.scrollbarSize) {
             return true;
         }
-            
-        if (( this.hasScrollBarX &&  this.hasScrollBarY && x < canvasWidth - this.scrollbarSize && y < canvasHeight - this.scrollbarSize) || 
+
+        if (( this.hasScrollBarX &&  this.hasScrollBarY &&
+             x < canvasWidth - this.scrollbarSize && y < canvasHeight - this.scrollbarSize) ||
             (!this.hasScrollBarX &&  this.hasScrollBarY && x < canvasWidth - this.scrollbarSize) ||
-            ( this.hasScrollBarX && !this.hasScrollBarY && y < canvasHeight - this.scrollbarSize) ) { 
-            return false; 
-        }            
+            ( this.hasScrollBarX && !this.hasScrollBarY && y < canvasHeight - this.scrollbarSize) ) {
+            return false;
+        }
 
         if (this.hasScrollBarY && y < 20) {
             if (this.posY === 0) { return true; }
@@ -616,7 +723,8 @@ export class ScrollView {
             return true;
         }
 
-        if (this.hasScrollBarY && x >= canvasWidth - this.scrollbarSize && y > canvasHeight - 20 - (this.hasScrollBarX?this.scrollbarSize:0)) {
+        if (this.hasScrollBarY && x >= canvasWidth - this.scrollbarSize &&
+            y > canvasHeight - 20 - (this.hasScrollBarX ? this.scrollbarSize : 0)) {
             if (this.posY === this.scrollBarPosMaxY) { return true; }
             this.posY += this.cellHeight * this.r;
             this.timeout = setTimeout(() => {
@@ -630,7 +738,7 @@ export class ScrollView {
         }
 
         if (this.hasScrollBarY && x >= canvasWidth - this.scrollbarSize && y > this.scrollBarThumbMaxY) {
-            this.posY += canvasHeight - 20; 
+            this.posY += canvasHeight - 20;
             this.timeout = setTimeout(() => {
                 this.speed = -14;
                 this.runStart = -1;
@@ -653,7 +761,7 @@ export class ScrollView {
             return true;
         }
 
-        if (this.hasScrollBarY && x >= canvasWidth - this.scrollbarSize){
+        if (this.hasScrollBarY && x >= canvasWidth - this.scrollbarSize) {
             this.scrollBarThumbDownY = true;
         }
 
@@ -670,8 +778,8 @@ export class ScrollView {
             return true;
         }
 
-        
-        if (this.hasScrollBarX && y >= canvasHeight - this.scrollbarSize && x > canvasWidth - 20 - (this.hasScrollBarY?this.scrollbarSize:0)) {
+        if (this.hasScrollBarX && y >= canvasHeight - this.scrollbarSize &&
+            x > canvasWidth - 20 - (this.hasScrollBarY ? this.scrollbarSize : 0)) {
             if (this.posX === this.scrollBarPosMaxY) { return true; }
             this.posX += this.cellHeight * this.r;
             this.timeout = setTimeout(() => {
@@ -685,7 +793,7 @@ export class ScrollView {
         }
 
         if (this.hasScrollBarX && y >= canvasHeight - this.scrollbarSize && x > this.scrollBarThumbMaxX) {
-            this.posX += canvasHeight - 20; 
+            this.posX += canvasHeight - 20;
             this.timeout = setTimeout(() => {
                 this.speed = -14;
                 this.runStart = -1;
@@ -708,10 +816,9 @@ export class ScrollView {
             return true;
         }
 
-        if (this.hasScrollBarX && y >= canvasHeight - this.scrollbarSize){
+        if (this.hasScrollBarX && y >= canvasHeight - this.scrollbarSize) {
             this.scrollBarThumbDownX = true;
         }
-
 
         if (!isTouch) {
             this.askForExtentedMouseMoveAndMaouseUp.call(this.drawable);
@@ -725,102 +832,16 @@ export class ScrollView {
             this.draw();
         }
     }
-        
-    public draw() {
-        if (this.height === undefined || this.width === undefined) {
-            return;
-        }
-
-        if (this.hasScrollBarY) {
-            const canvasHeight = this.canvasHeight - (this.hasScrollBarX ? this.scrollbarSize*this.r:0);
-            const height = canvasHeight - this.r * 16 * 2;
-            const ratioY = this.scrollBarPosMaxY === 0 ? 1 : (this.posY / this.scrollBarPosMaxY);        
-            const scrollBarSizeY = Math.max(10 * this.r, (height / this.pageY));
-            const scrollBarPosY = 16 * this.r + ratioY * (height - scrollBarSizeY);            
-            this.scrollBarThumbMinY = scrollBarPosY / this.r;
-            this.scrollBarThumbMaxY = (scrollBarPosY + scrollBarSizeY) / this.r;
-                    
-
-            this.context.fillStyle = this.scrollViewConfig.backgroundColor;
-            this.context.fillRect(this.canvasWidth - this.r * this.scrollbarSize, 0, this.r * this.scrollbarSize, canvasHeight);
-
-            this.context.fillStyle = this.isOverScrollUpY ? this.scrollViewConfig.buttonHoverColor : this.scrollViewConfig.buttonColor;
-            this.context.beginPath();
-            this.context.moveTo(this.canvasWidth - this.r * 10, this.r * 3);
-            this.context.lineTo(this.canvasWidth - this.r * 18, this.r * 13);
-            this.context.lineTo(this.canvasWidth - this.r * 2, this.r * 13);
-            this.context.fill();
-
-            this.context.fillStyle = this.isOverScrollDownY ? this.scrollViewConfig.buttonHoverColor : this.scrollViewConfig.buttonColor;
-            this.context.beginPath();
-            this.context.moveTo(this.canvasWidth - this.r * 10, canvasHeight - this.r * 3);
-            this.context.lineTo(this.canvasWidth - this.r * 18, canvasHeight - this.r * 13);
-            this.context.lineTo(this.canvasWidth - this.r * 2, canvasHeight - this.r * 13);
-            this.context.fill();
-
-            this.context.fillStyle = this.isOverScollThumbY ? this.scrollViewConfig.buttonHoverColor : this.scrollViewConfig.buttonColor;
-    
-            this.context.beginPath();
-            this.context.moveTo(this.canvasWidth - this.r * this.scrollbarSize, scrollBarPosY);
-            this.context.lineTo(this.canvasWidth, scrollBarPosY);
-            this.context.lineTo(this.canvasWidth, scrollBarPosY + scrollBarSizeY);
-            this.context.lineTo(this.canvasWidth - this.r * this.scrollbarSize, scrollBarPosY + scrollBarSizeY);
-            this.context.fill();
-        }
-
-        if (this.hasScrollBarX) {
-            const canvasWidth = this.canvasWidth - (this.hasScrollBarY ? this.scrollbarSize*this.r:0);
-            const width = canvasWidth - this.r * 16 * 2;
-            const ratioX = this.scrollBarPosMaxX === 0 ? 1 : (this.posX / this.scrollBarPosMaxX);        
-            const scrollBarSizeX = Math.max(10 * this.r, (width / this.pageX));
-            const scrollBarPosX = 16 * this.r + ratioX * (width - scrollBarSizeX);
-            this.scrollBarThumbMinX = scrollBarPosX / this.r;
-            this.scrollBarThumbMaxX = (scrollBarPosX + scrollBarSizeX) / this.r;
-                    
-
-            this.context.fillStyle = this.scrollViewConfig.backgroundColor;
-            this.context.fillRect(0, this.canvasHeight - this.r * this.scrollbarSize, canvasWidth, this.r * this.scrollbarSize);
-
-            this.context.fillStyle = this.isOverScrollUpX ? this.scrollViewConfig.buttonHoverColor : this.scrollViewConfig.buttonColor;
-            this.context.beginPath();
-            this.context.moveTo(this.r * 3, this.canvasHeight - this.r * 10);
-            this.context.lineTo(this.r * 13, this.canvasHeight - this.r * 18);
-            this.context.lineTo(this.r * 13, this.canvasHeight - this.r * 2);
-            this.context.fill();
-
-            this.context.fillStyle = this.isOverScrollDownX ? this.scrollViewConfig.buttonHoverColor : this.scrollViewConfig.buttonColor;
-            this.context.beginPath();
-            this.context.moveTo(canvasWidth - this.r * 3, this.canvasHeight - this.r * 10);
-            this.context.lineTo(canvasWidth - this.r * 13, this.canvasHeight - this.r * 18);
-            this.context.lineTo(canvasWidth - this.r * 13, this.canvasHeight - this.r * 2);
-            this.context.fill();
-            
-            this.context.fillStyle = this.isOverScollThumbX ? this.scrollViewConfig.buttonHoverColor : this.scrollViewConfig.buttonColor;
-    
-            this.context.beginPath();
-            this.context.moveTo(scrollBarPosX, this.canvasHeight - this.r * this.scrollbarSize);
-            this.context.lineTo(scrollBarPosX, this.canvasHeight);
-            this.context.lineTo(scrollBarPosX + scrollBarSizeX, this.canvasHeight);
-            this.context.lineTo(scrollBarPosX + scrollBarSizeX, this.canvasHeight - this.r * this.scrollbarSize);
-            this.context.fill();
-        }
-        
-        if (this.hasScrollBarX && this.hasScrollBarY) {
-            this.context.fillStyle = this.scrollViewConfig.backgroundColor;
-            this.context.fillRect(this.canvasWidth - this.r * this.scrollbarSize, this.canvasHeight - this.r * this.scrollbarSize, this.r * this.scrollbarSize, this.r * this.scrollbarSize);   
-        }
-    }
 
     private fixPos() {
         if (!this.hasScrollBarY) {
             this.posY = 0;
             return;
         }
-        
+
         if (this.posY < 0) {
             this.posY = 0;
-        }
-        else {
+        } else {
             if (this.posY > this.scrollBarPosMaxY) {
                 this.posY = this.scrollBarPosMaxY;
             }

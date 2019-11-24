@@ -1,20 +1,21 @@
-export type RowItem = number | GroupItem | null;
-
+export type RowItem = number | IGroupItem | null;
 
 export enum ItemIndexType { GroupItems, Index }
-export interface GroupItems {
-    type: ItemIndexType.GroupItems,
-    list: GroupItem[],
+export interface IGroupItems {
+    type: ItemIndexType.GroupItems;
+    list: IGroupItem[];
 }
 
-export interface GroupItem {
-    caption: string,
-    aggregate?: string
-    child: (GroupItems|Index),
-    isExpended: boolean
+export interface IGroupItem {
+    caption: string;
+    aggregate?: string;
+    child: (IGroupItems | IIndex);
+    isExpended: boolean;
 }
-export interface Index {
-    type: ItemIndexType.Index,
-    list: number[]
+
+export interface IIndex {
+    type: ItemIndexType.Index;
+    list: number[];
 }
-export type IndexType = Index | GroupItems;
+
+export type IndexType = IIndex | IGroupItems;

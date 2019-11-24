@@ -4,7 +4,7 @@
 export class CircularBuffer<T = any> {
   private pointerWrite = 0;
   private pointerRead = 0;
-  private buffer: (T | undefined)[];
+  private buffer: Array<T | undefined>;
   private length: number;
   private count = 0;
   private allowOverFlow: boolean;
@@ -32,14 +32,14 @@ export class CircularBuffer<T = any> {
    */
   public pop(): T {
     if (this.count === 0) {
-      throw "empty";
+      throw new Error("empty");
     }
     const i = this.pointerRead;
     this.pointerRead = (this.length + this.pointerRead + 1) % this.length;
     this.count--;
     const temp = this.buffer[i];
     if (temp === undefined) {
-      throw "undefined";
+      throw new Error("undefined");
     }
     this.buffer[i] = undefined;
     return temp;
@@ -51,7 +51,7 @@ export class CircularBuffer<T = any> {
    */
   public push(item: T): void {
     if (!this.allowOverFlow && this.count === this.length) {
-      throw "overflow";
+      throw new Error("overflow");
     }
     this.buffer[this.pointerWrite] = item;
     this.pointerWrite = (this.length + this.pointerWrite + 1) % this.length;
@@ -76,7 +76,7 @@ export class CircularBuffer<T = any> {
    * @returns {T[]} list
    */
   public export(): T[] {
-    let result: T[] = [];
+    const result: T[] = [];
     while (this.size() > 0) {
       result[result.length] = this.pop();
     }
