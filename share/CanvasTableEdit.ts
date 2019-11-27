@@ -1,12 +1,18 @@
 import { ICanvasTableColumn } from "./CustomCanvasTable";
+export enum CanvasTableEditAction {
+    moveNext,
+    movePrev,
+}
+
 export class CanvasTableEdit {
+    private hasBeenRemoved: boolean = false;
     private readonly column: ICanvasTableColumn;
     private readonly row: number;
     private readonly inputeElement: HTMLInputElement;
-    private readonly onRemove: (cancel: boolean, newData: string) => void;
+    private onRemove?: (cancel: boolean, newData: string, action: CanvasTableEditAction | undefined) => void;
 
-    constructor(col: ICanvasTableColumn, row: number, data: string,
-                cellHeight: number, onRemve: (cancel: boolean, newData: string) => void) {
+    constructor(col: ICanvasTableColumn, row: number, data: string, cellHeight: number,
+                onRemve: (cancel: boolean, newData: string, action: CanvasTableEditAction | undefined) => void) {
         this.column = col;
         this.row = row;
         this.onRemove = onRemve;
@@ -25,63 +31,83 @@ export class CanvasTableEdit {
         this.inputeElement.focus();
 
         this.inputeElement.addEventListener("blur", this.onBlur);
-        this.inputeElement.addEventListener("keyup", this.onKeyup);
+        this.inputeElement.addEventListener("keydown", this.onKeydown);
     }
     public getRow() { return this.row; }
     public getColumn() {return this.column; }
 
-    public updateEditLocation(r: number, posX: number, posY: number,
-                              offsetTop: number, offsetLeft: number, cellHeight: number) {
-        const y = -(posY / r) + this.row * cellHeight;
-        const x = -(posX / r) + (this.column.leftPos / r);
-
-        this.inputeElement.style.top = offsetTop + 18 + y + "px";
-        this.inputeElement.style.left = offsetLeft + x + "px";
-        // console.log(x, y, this.inputeElement.style.left, this.inputeElement.style.top);
-        if (y < 0) {
-            // rect(<top>, <right>, <bottom>, <left>)
-            if (x < 0) {
-                this.inputeElement.style.clip = "rect(" + (-y) + "px, auto,auto," + (-x) + "px)";
-            } else {
-                this.inputeElement.style.clip = "rect(" + (-y) + "px, auto,auto,auto)";
-            }
-        } else if (x < 0) {
-            this.inputeElement.style.clip = "rect(auto,auto,auto," + (-x) + "px)";
-        } else {
+    public updateEditLocation(top: number, left: number, width: number, height: number,
+                              clipTop?: number, clipRight?: number, clipBottom?: number, clipLeft?: number) {
+        this.inputeElement.style.top = top + "px";
+        this.inputeElement.style.left = left + "px";
+        this.inputeElement.style.width = (width - 7) + "px";
+        this.inputeElement.style.height = height + "px";
+        if (clipTop === undefined && clipRight === undefined && clipBottom === undefined && clipLeft === undefined) {
             this.inputeElement.style.clip = "";
+        }  else {
+            this.inputeElement.style.clip = "rect(" +
+                (clipTop === undefined    ? "auto," : clipTop + "px," ) +
+                (clipRight === undefined  ? "auto," : clipRight + "px," ) +
+                (clipBottom === undefined ? "auto," : clipBottom + "px," ) +
+                (clipLeft === undefined   ? "auto"  : clipLeft + "px" ) +
+                ")";
         }
     }
 
-    public doRemove(cancel: boolean) {
+    public doRemove(cancel: boolean, action: CanvasTableEditAction | undefined) {
+        let error;
         try {
-            this.onRemove(cancel, this.inputeElement.value);
-        } catch {
-            console.log("doRemove");
+            if (this.onRemove) {
+                this.onRemove(cancel, this.inputeElement.value, action);
+            }
+        } catch (e) {
+            error = e;
         }
+
+        this.onRemove = undefined;
 
         this.inputeElement.removeEventListener("blur", this.onBlur);
-        this.inputeElement.removeEventListener("keyup", this.onKeyup);
-        document.body.removeChild(this.inputeElement);
+        this.inputeElement.removeEventListener("keydown", this.onKeydown);
+        if (!this.hasBeenRemoved) {
+            document.body.removeChild(this.inputeElement);
+            this.hasBeenRemoved = true;
+        }
+        if (error) {
+            throw error;
+        }
     }
 
-    private onKeyup = (ev: KeyboardEvent) => {
+    private onKeydown = (ev: KeyboardEvent) => {
+        let cancel: boolean | undefined;
+        let action: CanvasTableEditAction | undefined;
         switch (ev.code) {
             case "Escape":
-                setTimeout(() => {
-                    this.doRemove(true);
-                }, 1);
+                cancel = true;
                 break;
             case "Enter":
-                setTimeout(() => {
-                    this.doRemove(false);
-                }, 1);
+                cancel = false;
+                break;
+            case "Tab":
+                cancel = false;
+                action = ev.shiftKey ? CanvasTableEditAction.movePrev : CanvasTableEditAction.moveNext;
+                ev.preventDefault();
                 break;
         }
+
+        if (cancel !== undefined) {
+            const cancelArg = cancel;
+            setTimeout(() => {
+                this.doRemove(cancelArg, action);
+            }, 1);
+        }
+
     }
 
     private onBlur = () => {
-        setTimeout(() => {
-            this.doRemove(false);
-        }, 1);
+        if (!this.hasBeenRemoved) {
+            setTimeout(() => {
+                this.doRemove(false, undefined);
+            }, 1);
+        }
     }
 }

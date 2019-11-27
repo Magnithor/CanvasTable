@@ -124,7 +124,7 @@ canvasTable.setFilter((dbData: any, row: any, col: ICanvasTableColumnConf[]) => 
              (row.name || "").indexOf(filter.value) === -1 &&
              (row.subcountry || "").indexOf(filter.value) === -1);
 });
-// canvasTable.setSort([{ col: col[2], sort: Sort.ascending }, {col:col[5], sort:Sort.ascending}]);
+canvasTable.setSort([{ col: column[0], sort: Sort.descending }]);
 group();
 canvasTable.addEvent("click", (row, col) => { console.log(row, col); });
 canvasTable.addEvent("clickHeader", (col) => { console.log(col); });

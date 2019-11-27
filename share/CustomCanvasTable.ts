@@ -147,6 +147,7 @@ export interface ICanvasTableColumn {
     field: string;
     width: number;
     align: Align;
+    index: number;
     leftPos: number;
     rightPos: number;
     renderer?: RenderValue;
@@ -185,9 +186,11 @@ export abstract class CustomCanvasTable implements IDrawable {
 
     protected scrollView?: ScrollView;
 
+    protected headerHeight = 18;
     protected cellHeight = 20;
     protected dataIndex?: IndexType = undefined;
     protected config: ICanvasTableConf = defaultConfig;
+    protected column: ICanvasTableColumn[] = [];
     private eventDblClick: EventManagerClick[] = [];
     private eventClick: EventManagerClick[] = [];
     private eventClickHeader: EventManagerClickHeader[] = [];
@@ -197,7 +200,6 @@ export abstract class CustomCanvasTable implements IDrawable {
 
     private minFontWidth: number = 1;
     private maxFontWidth: number = 1;
-    private column: ICanvasTableColumn[] = [];
     private orgColum: ICanvasTableColumnConf[] = [];
     private customRowColStyle?: CustomRowColStyle;
     private customFilter?: CustomFilter;
@@ -374,6 +376,7 @@ export abstract class CustomCanvasTable implements IDrawable {
             this.column[this.column.length] = {
                 ...{
                     align: Align.left,
+                    index: this.column.length,
                     leftPos: 0,
                     orginalCol: col[i],
                     rightPos: 0,
@@ -426,6 +429,7 @@ export abstract class CustomCanvasTable implements IDrawable {
             e.splice(index, 1);
         }
     }
+
     protected setR(r: number) {
         if (this.r === r) { return; }
         this.r = r;
@@ -481,7 +485,7 @@ export abstract class CustomCanvasTable implements IDrawable {
     protected clickOnHeader(col: ICanvasTableColumn | null) {
         if (col) {
             if (this.sortCol && this.sortCol.length === 1 &&
-                this.sortCol[0].col === col && this.sortCol[0].sort === Sort.ascending) {
+                this.sortCol[0].col === col.orginalCol && this.sortCol[0].sort === Sort.ascending) {
                 this.setSort([{col: col.orginalCol, sort: Sort.descending}]);
             } else {
                 this.setSort([{col: col.orginalCol, sort: Sort.ascending}]);
@@ -497,7 +501,7 @@ export abstract class CustomCanvasTable implements IDrawable {
 
     protected dblClick(x: number, y: number) {
         const col = this.findColByPos(x);
-        if (y <= 18) {
+        if (y <= this.headerHeight) {
             return;
         }
         const row =  this.findRowByPos(y);
@@ -511,7 +515,7 @@ export abstract class CustomCanvasTable implements IDrawable {
         }
 
         const col = this.findColByPos(x);
-        if (y <= 18) {
+        if (y <= this.headerHeight) {
             const colSplit = this.findColSplit(x);
             if (colSplit !== null) {
                 this.columnResize = {x, col: this.column[colSplit]};
@@ -547,7 +551,7 @@ export abstract class CustomCanvasTable implements IDrawable {
             return;
         }
 
-        if (y < 18) {
+        if (y < this.headerHeight) {
             this.overRow = undefined;
             if (this.findColSplit(x) === null) {
                 this.updateCursor();
@@ -614,7 +618,7 @@ export abstract class CustomCanvasTable implements IDrawable {
                 const row = this.findRowByPos(y);
                 const col = this.findColByPos(x);
 
-                if (y > 18) {
+                if (y > this.headerHeight) {
                     if (row !== null && typeof row === "object") {
                         row.isExpended = !row.isExpended;
                         this.askForReDraw();
@@ -693,7 +697,7 @@ export abstract class CustomCanvasTable implements IDrawable {
     }
     protected findRowByPos(y: number): RowItem {
         if (this.dataIndex === undefined || this.scrollView === undefined) { return null; }
-        let pos = -this.scrollView.posY / this.r + 18;
+        let pos = -this.scrollView.posY / this.r + this.headerHeight;
         const cellHeight = this.cellHeight;
 
         const find = (items: IGroupItems | IIndex): number | IGroupItem | null => {
@@ -724,6 +728,61 @@ export abstract class CustomCanvasTable implements IDrawable {
         };
 
         return find(this.dataIndex);
+    }
+    protected findTopPosByRow(row: number): number | undefined {
+        if (this.dataIndex === undefined || this.scrollView === undefined) { return undefined; }
+        let pos = this.headerHeight * this.r;
+        const cellHeight = this.cellHeight * this.r;
+
+        const find = (items: IGroupItems | IIndex): number | undefined => {
+            let i;
+            if (items.type === ItemIndexType.Index) {
+                for (i = 0; i < items.list.length; i++) {
+                    if (items.list[i] === row) {
+                        return pos;
+                    }
+
+                    pos += cellHeight;
+                }
+            } else {
+                for (i = 0; i < items.list.length; i++) {
+                    pos += cellHeight;
+                    if (!items.list[i].isExpended) { continue; }
+                    const f = find(items.list[i].child);
+                    if (f !== undefined) {
+                        return f;
+                    }
+                }
+            }
+            return undefined;
+        };
+
+        return find(this.dataIndex);
+    }
+    protected reCalcIndexIfNeed(field: string) {
+        let i;
+        if (this.customFilter || this.customSort) {
+            this.calcIndex();
+            return;
+        }
+
+        if (this.groupByCol) {
+            for (i = 0; i < this.groupByCol.length; i++) {
+                if (this.groupByCol[i].field === field) {
+                    this.calcIndex();
+                    return;
+                }
+            }
+        }
+
+        if (this.sortCol) {
+            for (i = 0; i < this.sortCol.length; i++) {
+                if (this.sortCol[i].col.field === field) {
+                    this.calcIndex();
+                    return;
+                }
+            }
+        }
     }
 
     protected calcIndex() {
@@ -888,7 +947,7 @@ export abstract class CustomCanvasTable implements IDrawable {
             this.askForReDraw();
         }
 
-        const headderHeight = 18 * this.r;
+        const headderHeight = this.headerHeight * this.r;
         const offsetLeft = 5 * this.r;
         if (drawConf === undefined) {
             this.context.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
@@ -1106,7 +1165,6 @@ export abstract class CustomCanvasTable implements IDrawable {
                   groupByCol: ICanvasTableGroup[], old: IGroupItems | undefined) {
         const r = new Map<string, number>();
         let i;
-        // console.log(level);
         const groupItem = groupByCol[level];
         for (i = 0; i < index.length; i++) {
             const id = index[i];

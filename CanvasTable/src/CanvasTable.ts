@@ -1,6 +1,6 @@
 ﻿import { Align, CustomFilter, CustomSort, ICanvasTableColumnConf, ICanvasTableColumnSort, Sort } from "../../share/CanvasTableColum";
 import { IGroupItem, RowItem } from "../../share/CustomCanvasIndex";
-import { CanvasTableEdit } from "./../../share/CanvasTableEdit";
+import { CanvasTableEdit, CanvasTableEditAction } from "./../../share/CanvasTableEdit";
 import { TouchEventToCanvasTableTouchEvent } from "./../../share/CanvasTableTouchEvent";
 import { CustomCanvasTable, ICanvasTableColumn, ICanvasTableConfig, ICanvasTableGroup } from "./../../share/CustomCanvasTable";
 import { ScrollView } from "./../../share/ScrollView";
@@ -88,17 +88,20 @@ export class CanvasTable extends CustomCanvasTable {
     public UpdateColumns(col: ICanvasTableColumnConf[]) {
         super.UpdateColumns(col);
         if (this.canvasTableEdit) {
-            this.canvasTableEdit.doRemove(true);
+            this.canvasTableEdit.doRemove(true, undefined);
         }
     }
     protected update(col: ICanvasTableColumnConf, i: number) {
         const column = this.getColumnByCanvasTableColumnConf(col);
         if (!column) { return; }
+
+        if (this.canvasTableEdit) {
+            this.canvasTableEdit.doRemove(true, undefined);
+        }
+
         this.canvasTableEdit = new CanvasTableEdit(column, i, this.data[i][column.field],
             this.cellHeight, this.onEditRemove);
-
         this.updateEditLocation();
-
     }
     protected scrollViewChange(): void {
         this.updateEditLocation();
@@ -138,6 +141,7 @@ export class CanvasTable extends CustomCanvasTable {
 
         super.fireDblClick(row, col);
     }
+
     private canvasKeydown = (e: KeyboardEvent) => {
         this.keydown(e.keyCode);
     }
@@ -156,7 +160,8 @@ export class CanvasTable extends CustomCanvasTable {
     }
     private canvasDblClick = (e: MouseEvent) => {
         e.preventDefault();
-        this.dblClick(e.clientX - this.canvas.offsetLeft, e.clientY - this.canvas.offsetTop);
+        //  this.dblClick(e.clientX - this.canvas.offsetLeft, e.clientY - this.canvas.offsetTop);
+        this.dblClick(e.offsetX, e.offsetY);
     }
     private canvasWheel = (e: WheelEvent) => {
         e.preventDefault();
@@ -164,14 +169,16 @@ export class CanvasTable extends CustomCanvasTable {
     }
     private canvasMouseDown = (e: MouseEvent) => {
         e.preventDefault();
-        this.mouseDown(e.clientX - this.canvas.offsetLeft, e.clientY - this.canvas.offsetTop);
+        // this.mouseDown(e.clientX - this.canvas.offsetLeft, e.clientY - this.canvas.offsetTop);
+        this.mouseDown(e.offsetX, e.offsetY);
     }
     private canvasMouseLeave = () => {
         this.mouseLeave();
     }
     private canvasMouseUp = (e: MouseEvent) => {
         e.preventDefault();
-        this.mouseUp(e.clientX - this.canvas.offsetLeft, e.clientY - this.canvas.offsetTop);
+        // this.mouseUp(e.clientX - this.canvas.offsetLeft, e.clientY - this.canvas.offsetTop);
+        this.mouseUp(e.offsetX, e.offsetY);
     }
     private canvasMouseUpExtended = (e: MouseEvent) => {
         e.preventDefault();
@@ -179,29 +186,91 @@ export class CanvasTable extends CustomCanvasTable {
     }
     private canvasMouseMoveExtended = (e: MouseEvent) => {
         e.preventDefault();
-        this.mouseMoveExtended(e.clientX - this.canvas.offsetLeft, e.clientY - this.canvas.offsetTop);
+        // this.mouseMoveExtended(e.clientX - this.canvas.offsetLeft, e.clientY - this.canvas.offsetTop);
+        this.mouseMoveExtended(e.offsetX, e.offsetY);
     }
     private canvasMouseMove = (e: MouseEvent) => {
         e.preventDefault();
-        const x = e.clientX - this.canvas.offsetLeft;
-        const y = e.clientY - this.canvas.offsetTop;
-        this.mouseMove(x, y);
+        // this.mouseMove(e.clientX - this.canvas.offsetLeft, e.clientY - this.canvas.offsetTop);
+        this.mouseMove(e.offsetX, e.offsetY);
     }
 
-    private onEditRemove = (cancel: boolean, newData: string) => {
-        if (!this.canvasTableEdit) { return; }
+    private onEditRemove = (cancel: boolean, newData: string, action: CanvasTableEditAction | undefined) => {
+        if (!this.canvasTableEdit) {
+            return;
+        }
+
         const old = this.canvasTableEdit;
         this.canvasTableEdit = undefined;
         if (cancel) {
             return;
         }
 
-        this.data[old.getRow()][old.getColumn().field] = newData;
+        const columnField = old.getColumn().field;
+
+        this.data[old.getRow()][columnField] = newData;
+        this.reCalcIndexIfNeed(columnField);
         this.askForReDraw();
+
+        if (action !== undefined) {
+            switch (action) {
+                case CanvasTableEditAction.moveNext:
+                    if (this.column.length > old.getColumn().index + 1) {
+                        const column = this.column[old.getColumn().index + 1];
+                        const i = old.getRow();
+                        this.canvasTableEdit = new CanvasTableEdit(column, i, this.data[i][column.field],
+                            this.cellHeight, this.onEditRemove);
+                        this.updateEditLocation();
+                    }
+                    break;
+                case CanvasTableEditAction.movePrev:
+                        if (0 < old.getColumn().index) {
+                            const column = this.column[old.getColumn().index - 1];
+                            const i = old.getRow();
+                            this.canvasTableEdit = new CanvasTableEdit(column, i, this.data[i][column.field],
+                                this.cellHeight, this.onEditRemove);
+                            this.updateEditLocation();
+                        }
+                        break;
+            }
+        }
     }
     private updateEditLocation() {
-        if (!this.canvasTableEdit || !this.scrollView ) { return; }
-        this.canvasTableEdit.updateEditLocation(this.r, this.scrollView.posX, this.scrollView.posY,
-            this.canvas.offsetTop, this.canvas.offsetLeft, this.cellHeight);
+        if (!this.canvasTableEdit || !this.scrollView ) {
+            return;
+        }
+
+        const row = this.canvasTableEdit.getRow();
+        const topPos = this.findTopPosByRow(row);
+        if (topPos === undefined) {
+            return;
+        }
+
+        const column = this.canvasTableEdit.getColumn();
+
+        const y = (topPos - this.scrollView.posY) / this.r;
+        const x = -(this.scrollView.posX / this.r) + (column.leftPos / this.r);
+        const top = this.canvas.offsetTop + y;
+        const left = this.canvas.offsetLeft + x;
+
+        let clipTop: number | undefined;
+        const clipRight: number | undefined = undefined;
+        const clipBottom: number | undefined = undefined;
+        let clipLeft: number | undefined;
+
+        if (y < this.headerHeight) {
+            // rect(<top>, <right>, <bottom>, <left>)
+            if (x < 0) {
+                clipTop = -y + this.headerHeight;
+                clipLeft = -x;
+            } else {
+                clipTop = -y + this.headerHeight;
+            }
+        } else if (x < 0) {
+            clipLeft = -x;
+        }
+
+        this.canvasTableEdit.updateEditLocation(top, left, column.width , this.cellHeight,
+                                                clipTop, clipRight, clipBottom, clipLeft);
     }
 }
