@@ -103,14 +103,14 @@ canvasTable.setFilter((data: any, row: any, col: ICanvasTableColumnConf[]) => {
 let dbData: any[] = [];
 
 group();
-canvasTable.addEvent("click", (row, col) => {
+canvasTable.addEvent("click", (table, row, col) => {
     if (typeof row === "number") {
         console.log(dbData[row], row, col);
         return;
     }
     console.log(row, col);
  });
-canvasTable.addEvent("clickHeader", (col) => { console.log(col); });
+canvasTable.addEvent("clickHeader", (table, col) => { console.log(col); });
 
 if (filter != null) {
     filter.addEventListener("keyup", () => {

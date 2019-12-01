@@ -6,7 +6,7 @@ export type CustomData = (canvasTable: CustomCanvasTable, dataValue: any, row: a
 export type RenderValue = (canvasTable: CustomCanvasTable, context: ICanvasContext2D, rowIndex: number,
                            col: ICanvasTableColumnConf, left: number, top: number, right: number, bottom: number,
                            width: number, height: number, r: number, dataValue: any, row: any, data: any) => void;
-export type CustomFilter = (data: any, row: any, col: ICanvasTableColumnConf[]) => boolean;
+export type CustomFilter = (data: any, row: any, col: ICanvasTableColumnConf[], index: number) => boolean;
 export type CustomRowColStyle = (data: any, row: any, col: ICanvasTableColumnConf,
                                  isOver: boolean, isSepra: boolean, dataRowCol: string)
                                  => ICanvasTableRowColStyle | undefined | null;
@@ -20,7 +20,7 @@ export type CustomRowColStyle = (data: any, row: any, col: ICanvasTableColumnCon
  *      if rowA < rowB then return -1
  *      if rowA == rowB then return 0
  */
-export type CustomSort = (data: any[], rowA: any, rowB: any) => number;
+export type CustomSort = (data: any[], rowA: any, rowB: any, a: number, b: number) => number;
 
 /**
  * CanvasTableRowColStyle interface is return in [[CustomRowColStyle]]

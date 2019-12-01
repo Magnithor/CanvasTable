@@ -83,6 +83,7 @@ export class OffscreenCanvasTable {
     }
     private canvasMouseDown = (e: MouseEvent) => {
         e.preventDefault();
+        this.canvas.focus();
         this.postMessage({
             mthbCanvasTable: this.offscreenCanvasTableId,
             type: OffscreenCanvasMesssageType.mouseDown,

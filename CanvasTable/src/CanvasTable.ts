@@ -93,7 +93,7 @@ export class CanvasTable extends CustomCanvasTable {
     }
     protected update(col: ICanvasTableColumnConf, i: number) {
         const column = this.getColumnByCanvasTableColumnConf(col);
-        if (!column) { return; }
+        if (!column || column.allowEdit) { return; }
 
         if (this.canvasTableEdit) {
             this.canvasTableEdit.doRemove(true, undefined);
@@ -169,6 +169,7 @@ export class CanvasTable extends CustomCanvasTable {
     }
     private canvasMouseDown = (e: MouseEvent) => {
         e.preventDefault();
+        this.canvas.focus();
         // this.mouseDown(e.clientX - this.canvas.offsetLeft, e.clientY - this.canvas.offsetTop);
         this.mouseDown(e.offsetX, e.offsetY);
     }
@@ -207,10 +208,13 @@ export class CanvasTable extends CustomCanvasTable {
         }
 
         const columnField = old.getColumn().field;
+        const row = old.getRow();
 
-        this.data[old.getRow()][columnField] = newData;
-        this.reCalcIndexIfNeed(columnField);
-        this.askForReDraw();
+        if (String(this.getUpdateDataOrData(row, columnField)) !== String(newData)) {
+            this.setUpdateData(row, columnField, newData);
+            this.reCalcIndexIfNeed(columnField);
+            this.askForReDraw();
+        }
 
         if (action !== undefined) {
             switch (action) {

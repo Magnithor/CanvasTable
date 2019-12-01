@@ -126,8 +126,8 @@ canvasTable.setFilter((dbData: any, row: any, col: ICanvasTableColumnConf[]) => 
 });
 canvasTable.setSort([{ col: column[0], sort: Sort.descending }]);
 group();
-canvasTable.addEvent("click", (row, col) => { console.log(row, col); });
-canvasTable.addEvent("clickHeader", (col) => { console.log(col); });
+canvasTable.addEvent("click", (table, row, col) => { console.log(row, col); });
+canvasTable.addEvent("clickHeader", (table, col) => { console.log(col); });
 
 if (filter != null) {
     filter.addEventListener("keyup", () => {

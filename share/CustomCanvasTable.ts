@@ -4,7 +4,7 @@ import { Align, CustomData, CustomFilter, CustomRowColStyle, CustomSort,
 import { ICanvasTableTouchEvent } from "./CanvasTableTouchEvent";
 import { IGroupItem, IGroupItems, IIndex, IndexType, ItemIndexType, RowItem } from "./CustomCanvasIndex";
 import { IDrawable } from "./Drawable";
-import { EventManagerClick, EventManagerClickHeader } from "./EventManager";
+import { EventManagerClick, EventManagerClickHeader, EventManagerReCalcForScrollView } from "./EventManager";
 import { IScrollViewConfig, ScrollView } from "./ScrollView";
 
 export interface IDrawConfig {
@@ -143,6 +143,7 @@ const defaultConfig: ICanvasTableConf = {
 };
 
 export interface ICanvasTableColumn {
+    allowEdit: boolean;
     header: string;
     field: string;
     width: number;
@@ -157,26 +158,6 @@ export interface ICanvasTableColumn {
 
 export abstract class CustomCanvasTable implements IDrawable {
 
-    protected set overRow(value: number | undefined) {
-        if (value !== this.overRowValue) {
-            const temp = this.overRowValue;
-            this.overRowValue = value;
-            if (value !== undefined && temp !== undefined) {
-                this.askForReDraw({ drawOnly: [temp, value] });
-                return;
-            }
-
-            if (value !== undefined) {
-                this.askForReDraw({ drawOnly: [value] });
-                return;
-            }
-
-            if (temp !== undefined) {
-                this.askForReDraw({ drawOnly: [temp] });
-                return;
-            }
-        }
-    }
     protected context?: ICanvasContext2D;
     protected requestAnimationFrame?: number;
     protected drawconf?: IDrawConfig & { fulldraw: boolean };
@@ -194,6 +175,7 @@ export abstract class CustomCanvasTable implements IDrawable {
     private eventDblClick: EventManagerClick[] = [];
     private eventClick: EventManagerClick[] = [];
     private eventClickHeader: EventManagerClickHeader[] = [];
+    private eventReCalcForScrollView: EventManagerReCalcForScrollView[] = [];
 
     private needToCalc: boolean = true;
     private needToCalcFont: boolean = true;
@@ -213,9 +195,14 @@ export abstract class CustomCanvasTable implements IDrawable {
     private lastCursor: string = "";
     private canvasHeight: number = 0;
     private canvasWidth: number = 0;
+    private editData: { [index: number]: { [field: string]: any } } = {};
 
     constructor(config: ICanvasTableConfig | undefined) {
         this.updateConfig(config);
+    }
+
+    public getScrollView(): ScrollView | undefined {
+        return this.scrollView;
     }
 
     /**
@@ -373,16 +360,22 @@ export abstract class CustomCanvasTable implements IDrawable {
         let i;
         for (i = 0; i < col.length; i++) {
             if (col[i].visible === false) { continue; }
-            this.column[this.column.length] = {
+            const index = this.column.length;
+            this.column[index] = {
                 ...{
                     align: Align.left,
-                    index: this.column.length,
+                    allowEdit: true,
+                    index,
                     leftPos: 0,
                     orginalCol: col[i],
                     rightPos: 0,
                     width: 50,
                 }, ...col[i],
             };
+
+            if (!(this.column[index].field === "__idxnum__" || this.column[index].field === "__rownum__")) {
+                this.column[index].allowEdit = false;
+            }
         }
         this.needToCalc = true;
 
@@ -416,17 +409,70 @@ export abstract class CustomCanvasTable implements IDrawable {
 
     public addEvent(eventName: "clickHeader", event: EventManagerClickHeader): void;
     public addEvent(eventName: "click" | "dblClick", event: EventManagerClick): void;
+    public addEvent(eventName: "reCalcForScrollView", event: EventManagerReCalcForScrollView): void;
     public addEvent(eventName: string, event: any): void {
         this.getEvent(eventName).push(event);
     }
 
     public removeEvent(eventName: "clickHeader", event: EventManagerClickHeader): void;
     public removeEvent(eventName: "click" | "dblClick", event: EventManagerClick): void;
+    public removeEvent(eventName: "reCalcForScrollView", event: EventManagerReCalcForScrollView): void;
     public removeEvent(eventName: string, event: any): void {
         const e = this.getEvent(eventName);
         const index = e.indexOf(event);
         if (index !== -1) {
             e.splice(index, 1);
+        }
+    }
+    public setUpdateData(row: number, field: string, data: any) {
+        if (!this.editData[row]) {
+            this.editData[row] = {};
+        }
+
+        this.editData[row][field] = data;
+    }
+    public getUpdateData(row: number, field: string): {data: any} | undefined {
+        const rowData = this.editData[row];
+        if (!rowData) { return undefined; }
+        if (rowData.hasOwnProperty(field)) {
+            return { data: rowData[field] };
+        }
+        return undefined;
+    }
+    public getUpdateDataOrData(row: number, field: string): any {
+        const rowData = this.editData[row];
+        if (!rowData) { return this.data[row][field]; }
+        if (rowData.hasOwnProperty(field)) {
+            return rowData[field];
+        }
+
+        return this.data[row][field];
+    }
+    public getEditData() {
+        return this.editData;
+    }
+    public clearEditData() {
+        this.editData = {};
+        this.askForReIndex();
+    }
+    protected set overRow(value: number | undefined) {
+        if (value !== this.overRowValue) {
+            const temp = this.overRowValue;
+            this.overRowValue = value;
+            if (value !== undefined && temp !== undefined) {
+                this.askForReDraw({ drawOnly: [temp, value] });
+                return;
+            }
+
+            if (value !== undefined) {
+                this.askForReDraw({ drawOnly: [value] });
+                return;
+            }
+
+            if (temp !== undefined) {
+                this.askForReDraw({ drawOnly: [temp] });
+                return;
+            }
         }
     }
 
@@ -455,7 +501,7 @@ export abstract class CustomCanvasTable implements IDrawable {
         let i;
         for (i = 0; i < this.eventDblClick.length; i++) {
             try {
-                this.eventDblClick[i](row, col === null ? null : col.orginalCol);
+                this.eventDblClick[i](this, row, col === null ? null : col.orginalCol);
             } catch {
                 console.log("fireClick");
             }
@@ -465,7 +511,7 @@ export abstract class CustomCanvasTable implements IDrawable {
         let i;
         for (i = 0; i < this.eventClick.length; i++) {
             try {
-                this.eventClick[i](row, col === null ? null : col.orginalCol);
+                this.eventClick[i](this, row, col === null ? null : col.orginalCol);
             } catch {
                 console.log("fireClick");
             }
@@ -475,9 +521,22 @@ export abstract class CustomCanvasTable implements IDrawable {
         let i;
         for (i = 0; i < this.eventClick.length; i++) {
             try {
-                this.eventClickHeader[i](col === null ? null : col.orginalCol);
+                this.eventClickHeader[i](this, col === null ? null : col.orginalCol);
             } catch {
                 console.log("fireClickHeader");
+            }
+        }
+    }
+    protected fireReCalcForScrollView() {
+        const scrollView = this.scrollView;
+        if (scrollView) {
+            let i ;
+            for (i = 0; i < this.eventReCalcForScrollView.length; i++) {
+                try {
+                    this.eventReCalcForScrollView[i](this, scrollView);
+                } catch {
+                    console.log("fireReCalcForScrollView");
+                }
             }
         }
     }
@@ -793,7 +852,7 @@ export abstract class CustomCanvasTable implements IDrawable {
         let i;
         if (this.customFilter) {
             for (i = 0; i < this.data.length; i++) {
-                if (this.customFilter(this.data, this.data[i], this.orgColum)) {
+                if (this.customFilter(this.data, this.data[i], this.orgColum, i)) {
                     index[index.length] = i;
                 }
             }
@@ -806,7 +865,7 @@ export abstract class CustomCanvasTable implements IDrawable {
         if (this.customSort) {
             const customSort = this.customSort;
             index.sort((a: number , b: number) => {
-                return customSort(this.data, this.data[a], this.data[b]);
+                return customSort(this.data, this.data[a], this.data[b], a, b);
             });
         } else {
             const sortCol = this.sortCol;
@@ -822,8 +881,8 @@ export abstract class CustomCanvasTable implements IDrawable {
                                 if (d !== 0) { return d * col.sort; }
                                 break;
                             default:
-                                const da = this.data[a][col.col.field];
-                                const db = this.data[b][col.col.field];
+                                const da = this.getUpdateDataOrData(a, col.col.field);
+                                const db = this.getUpdateDataOrData(b, col.col.field);
                                 if (da === undefined || da === null) {
                                     if (db === undefined || db === null) {
                                         continue;
@@ -909,6 +968,7 @@ export abstract class CustomCanvasTable implements IDrawable {
         calc(this.dataIndex);
         if (this.scrollView) {
             this.scrollView.setSize(this.r, this.canvasWidth, this.canvasHeight, w, h * this.r);
+            this.fireReCalcForScrollView();
         }
     }
     protected setCanvasSize(width: number, height: number): void {
@@ -1123,6 +1183,8 @@ export abstract class CustomCanvasTable implements IDrawable {
                 return this.eventDblClick;
             case "clickHeader":
                 return this.eventClickHeader;
+            case "reCalcForScrollView":
+                return this.eventReCalcForScrollView;
             default:
                 throw new Error("unknown;");
         }
@@ -1168,7 +1230,7 @@ export abstract class CustomCanvasTable implements IDrawable {
         const groupItem = groupByCol[level];
         for (i = 0; i < index.length; i++) {
             const id = index[i];
-            const c = String(this.data[id][groupItem.field]);
+            const c = String(this.getUpdateDataOrData(id, groupItem.field));
             const d = r.get(c);
             if (d !== undefined) {
                 const item = g.list[d];
@@ -1357,7 +1419,7 @@ export abstract class CustomCanvasTable implements IDrawable {
                     data = i.toString();
                     break;
                 default:
-                    data = this.data[indexId][colItem.field];
+                    data = this.getUpdateDataOrData(indexId, colItem.field);
             }
 
             if (colItem.customData) {
