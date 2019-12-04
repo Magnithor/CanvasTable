@@ -1,7 +1,8 @@
 
-import { OffscreenCanvasTableWorker, CanvasTableColumnConf, Align, CustomCanvasTable, Sort, CanvasContext2D } from 'mthb-offscreen-canvas-table-worker';
+import { Align, OffscreenCanvasTableWorker, ICanvasTableColumnConf, CustomCanvasTable, Sort, ICanvasContext2D } from 'mthb-offscreen-canvas-table-worker';
 
-function customDraw(canvasTable: CustomCanvasTable, context: CanvasContext2D, rowIndex: number, col: CanvasTableColumnConf, left: number, top: number, right: number, bottom: number, width: number, height: number, r: number, dataValue: any, row: any, data: any): void {
+
+function customDraw(canvasTable: CustomCanvasTable, context: ICanvasContext2D, rowIndex: number, col: ICanvasTableColumnConf, left: number, top: number, right: number, bottom: number, width: number, height: number, r: number, dataValue: any, row: any, data: any): void {
     context.fillStyle = "lightgreen";
     context.fillRect(left, top, width, height);
     context.strokeStyle = "red";
@@ -15,7 +16,7 @@ function customDraw(canvasTable: CustomCanvasTable, context: CanvasContext2D, ro
     context.stroke();
 }
 
-const col: CanvasTableColumnConf[] = [
+const col: ICanvasTableColumnConf[] = [
     {
         header: "Id",
         field: "__rownum__",

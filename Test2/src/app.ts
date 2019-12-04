@@ -1,6 +1,6 @@
-import { CanvasTable, CanvasTableColumnConf, Align } from "mthb-canvas-table";
+import { CanvasTable, ICanvasTableColumnConf, Align } from "mthb-canvas-table";
 
-const col:CanvasTableColumnConf[] = [
+const col:ICanvasTableColumnConf[] = [
     {
         header: "Id",
         field: "__rownum__",

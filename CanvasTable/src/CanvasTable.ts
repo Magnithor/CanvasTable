@@ -1,4 +1,5 @@
-﻿import { Align, CustomFilter, CustomSort, ICanvasTableColumnConf, ICanvasTableColumnSort, Sort } from "../../share/CanvasTableColum";
+﻿import { ICanvasContext2D } from "../../share/CanvasContext2D";
+import { Align, CustomFilter, CustomSort, ICanvasTableColumnConf, ICanvasTableColumnSort, Sort } from "../../share/CanvasTableColum";
 import { IGroupItem, RowItem } from "../../share/CustomCanvasIndex";
 import { CanvasTableEdit, CanvasTableEditAction } from "./../../share/CanvasTableEdit";
 import { TouchEventToCanvasTableTouchEvent } from "./../../share/CanvasTableTouchEvent";
@@ -6,7 +7,8 @@ import { CustomCanvasTable, ICanvasTableColumn, ICanvasTableConfig, ICanvasTable
 import { ScrollView } from "./../../share/ScrollView";
 
 export { ICanvasTableColumnConf, Align, Sort, IGroupItem,
-    ICanvasTableGroup, ICanvasTableColumnSort, CustomSort, CustomFilter };
+    ICanvasTableGroup, ICanvasTableColumnSort, CustomSort, CustomFilter,
+    CustomCanvasTable, ICanvasContext2D };
 
 /**
  * CanvasTable

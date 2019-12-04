@@ -91,6 +91,10 @@ export interface ICanvasTableConfig {
      */
     lineColor?: CanvasColor;
     /**
+     * select line color in grid in CanvasTable
+     */
+    selectLineColor: CanvasColor;
+    /**
      * Backgroud color when mouse is hover the row
      */
     howerBackgroundColor?: CanvasColor;
@@ -118,9 +122,11 @@ interface ICanvasTableConf {
     groupItemBackgroundColor: CanvasColor;
     backgroundColor: CanvasColor;
     lineColor: CanvasColor;
+    selectLineColor: CanvasColor;
     howerBackgroundColor: CanvasColor;
     sepraBackgroundColor: CanvasColor;
 }
+
 const defaultConfig: ICanvasTableConf = {
     backgroundColor: "white",
     font: "arial",
@@ -139,6 +145,7 @@ const defaultConfig: ICanvasTableConf = {
     headerFontStyle: "bold",
     howerBackgroundColor: "#DCDCDC",
     lineColor: "black",
+    selectLineColor: "green",
     sepraBackgroundColor: "#ECECEC",
 };
 
@@ -189,6 +196,8 @@ export abstract class CustomCanvasTable implements IDrawable {
     private sortCol?: ICanvasTableColumnSort[];
     private groupByCol?: ICanvasTableGroup[];
     private overRowValue?: number;
+    private selectRowValue: RowItem = null;
+    private selectColValue?: ICanvasTableColumn;
     private columnResize?: {x: number, col: ICanvasTableColumn};
     private touchClick?: {timeout: number, x: number, y: number};
 
@@ -588,12 +597,19 @@ export abstract class CustomCanvasTable implements IDrawable {
         }
 
         const row =  this.findRowByPos(y);
-
-        if (this.dataIndex.type === ItemIndexType.GroupItems) {
-            if (row !== null && typeof row === "object") {
-                row.isExpended = !row.isExpended;
+        if (typeof row === "number" && col !== null) {
+            if (this.selectColValue !== col || this.selectRowValue !== row) {
+                this.selectColValue = col;
+                this.selectRowValue = row;
                 this.askForReDraw();
-                this.reCalcForScrollView();
+            }
+        } else {
+            if (this.dataIndex.type === ItemIndexType.GroupItems) {
+                if (row !== null && typeof row === "object") {
+                    row.isExpended = !row.isExpended;
+                    this.askForReDraw();
+                    this.reCalcForScrollView();
+                }
             }
         }
         this.fireClick(row, col);
@@ -1550,6 +1566,24 @@ export abstract class CustomCanvasTable implements IDrawable {
                                 Math.min(-this.scrollView.posX + this.column[this.column.length - 1].rightPos,
                                 this.canvasWidth), pos + 4 * this.r);
             this.context.stroke();
+        }
+
+        if (this.selectRowValue === indexId && this.selectColValue !== undefined) {
+            for (let col = colStart; col < colEnd; col++) {
+                if (this.selectColValue.index === col) {
+                    const lastStroke = this.context.strokeStyle;
+                    const lastLineWidth = this.context.lineWidth;
+                    this.context.strokeStyle = this.config.selectLineColor;
+                    this.context.lineWidth = 3;
+                    this.context.beginPath();
+                    this.context.rect(this.selectColValue.leftPos + 2, pos + 4 * this.r - this.cellHeight * this.r + 2,
+                         this.selectColValue.width * this.r - 4, this.cellHeight * this.r - 4);
+                    this.context.stroke();
+                    this.context.strokeStyle = lastStroke;
+                    this.context.lineWidth = lastLineWidth;
+                    break;
+                }
+            }
         }
     }
 }
