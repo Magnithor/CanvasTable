@@ -3,6 +3,13 @@ import { IGroupItem } from "../share/CustomCanvasIndex";
 import { CanvasTable } from "./../CanvasTable/src/CanvasTable";
 import { CustomCanvasTable } from "./../share/CustomCanvasTable";
 
+interface IData {
+    country: string;
+    geonameid: number;
+    name: string;
+    subcountry: string;
+ }
+
 function customDraw(canvasTable1: CustomCanvasTable, context: CanvasRenderingContext2D,
                     rowIndex: number, col: ICanvasTableColumnConf, left: number, top: number,
                     right: number, bottom: number, width: number, height: number, r: number,
@@ -104,13 +111,16 @@ const column: ICanvasTableColumnConf[] = [
     },
 ];
 
-declare let data: Array<{ country: string, geonameid: number, name: string, subcountry: string }>;
+declare let data: IData[];
 // data = data.splice(1, 20);
 
 const filter = document.getElementById("filter") as HTMLInputElement;
-const canvasTable = new CanvasTable("canvas", column, data);
+const canvasTable = new CanvasTable<IData>("canvas", column, data);
+canvasTable.addEvent("reCalcForScrollView", (a: any, width: number, height: number) => {
+    console.log({width, height});
+});
 canvasTable.setAllowEdit(true);
-canvasTable.setRowColStyle( (dbData: any, row: any, col: ICanvasTableColumnConf, isOver: boolean,
+canvasTable.setRowColStyle( (dbData: IData[], row: IData, col: ICanvasTableColumnConf, isOver: boolean,
                              isSepra: boolean, dataRowCol: string) => {
     if (dataRowCol === "Iceland") {
         return { fontStyle: "bold", fontColor: "red", align: Align.center };

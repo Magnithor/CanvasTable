@@ -88,10 +88,10 @@ export class ScrollView {
             },  ...config };
     }
 
-    get posY(): number {
+    public getPosY(): number {
         return this.posYvalue;
     }
-    set posY(value: number) {
+    public setPosY(value: number) {
         if (!this.hasScrollBarY) {
             value = 0;
         }
@@ -111,10 +111,10 @@ export class ScrollView {
         }
     }
 
-    get posX(): number {
+    public getPosX(): number {
         return this.posXvalue;
     }
-    set posX(value: number) {
+    public setPosX(value: number) {
         if (!this.hasScrollBarX) {
             value = 0;
         }
@@ -134,6 +134,13 @@ export class ScrollView {
         }
     }
 
+    public getScrollBarPosMaxY(): number {
+        return this.scrollBarPosMaxY;
+    }
+    public getScrollBarPosMaxX(): number {
+        return this.scrollBarPosMaxX;
+    }
+
     public draw() {
         if (this.height === undefined || this.width === undefined) {
             return;
@@ -142,7 +149,7 @@ export class ScrollView {
         if (this.hasScrollBarY) {
             const canvasHeight = this.canvasHeight - (this.hasScrollBarX ? this.scrollbarSize * this.r : 0);
             const height = canvasHeight - this.r * 16 * 2;
-            const ratioY = this.scrollBarPosMaxY === 0 ? 1 : (this.posY / this.scrollBarPosMaxY);
+            const ratioY = this.scrollBarPosMaxY === 0 ? 1 : (this.posYvalue / this.scrollBarPosMaxY);
             const scrollBarSizeY = Math.max(10 * this.r, (height / this.pageY));
             const scrollBarPosY = 16 * this.r + ratioY * (height - scrollBarSizeY);
             this.scrollBarThumbMinY = scrollBarPosY / this.r;
@@ -182,7 +189,7 @@ export class ScrollView {
         if (this.hasScrollBarX) {
             const canvasWidth = this.canvasWidth - (this.hasScrollBarY ? this.scrollbarSize * this.r : 0);
             const width = canvasWidth - this.r * 16 * 2;
-            const ratioX = this.scrollBarPosMaxX === 0 ? 1 : (this.posX / this.scrollBarPosMaxX);
+            const ratioX = this.scrollBarPosMaxX === 0 ? 1 : (this.posXvalue / this.scrollBarPosMaxX);
             const scrollBarSizeX = Math.max(10 * this.r, (width / this.pageX));
             const scrollBarPosX = 16 * this.r + ratioX * (width - scrollBarSizeX);
             this.scrollBarThumbMinX = scrollBarPosX / this.r;
@@ -283,26 +290,26 @@ export class ScrollView {
             }
         }
 
-        if (this.posY > this.scrollBarPosMaxY) { this.posY = this.scrollBarPosMaxY; }
-        if (this.posX > this.scrollBarPosMaxX) { this.posX = this.scrollBarPosMaxX; }
+        if (this.posYvalue > this.scrollBarPosMaxY) { this.setPosY(this.scrollBarPosMaxY); }
+        if (this.posXvalue > this.scrollBarPosMaxX) { this.setPosX(this.scrollBarPosMaxX); }
     }
 
     public beforeDraw(): boolean {
         if (this.run) {
             if (this.runStart === -1) {
                 if (this.runXOrY) {
-                    this.posY -= (this.speed * this.r);
+                    this.posYvalue -= (this.speed * this.r);
                 } else {
-                    this.posX -= (this.speed * this.r);
+                    this.posXvalue -= (this.speed * this.r);
                 }
                 return true;
             }
             const time = (new Date()).getTime() - this.runStart;
             if (time < 1500) {
                 if (this.runXOrY) {
-                    this.posY -= (this.speed * this.r) * (1 - time / 1500);
+                    this.posYvalue -= (this.speed * this.r) * (1 - time / 1500);
                 } else {
-                    this.posX -= (this.speed * this.r) * (1 - time / 1500);
+                    this.posXvalue -= (this.speed * this.r) * (1 - time / 1500);
                 }
                 return true;
             }
@@ -312,16 +319,16 @@ export class ScrollView {
     public OnKeydown(keyCode: number): boolean {
         switch (keyCode) {
             case 33: // pagedown
-                this.posY -= this.canvasHeight;
+                this.posYvalue -= this.canvasHeight;
                 return true;
             case 34: // pageup
-                this.posY += this.canvasHeight;
+                this.posYvalue += this.canvasHeight;
                 return true;
             case 38: // up
-                this.posY -= this.cellHeight * this.r;
+                this.posYvalue -= this.cellHeight * this.r;
                 return true;
             case 40: // down
-                this.posY += this.cellHeight * this.r;
+                this.posYvalue += this.cellHeight * this.r;
                 return true;
             default:
                 return false;
@@ -345,13 +352,13 @@ export class ScrollView {
         this.run = false;
         if (this.scrollBarThumbDownY) {
             const y = e.changedTouches[0].pageY - offsetTop;
-            this.posY = this.scrollBarPosMaxY * ((y - 20) / (this.canvasHeight / this.r - 20 * 2));
+            this.setPosY(this.scrollBarPosMaxY * ((y - 20) / (this.canvasHeight / this.r - 20 * 2)));
             return;
         }
 
         if (this.scrollBarThumbDownX) {
             const x = e.changedTouches[0].pageX - offsetLeft;
-            this.posX = this.scrollBarPosMaxX * (x / (this.canvasWidth / this.r - 20 * 2));
+            this.setPosX(this.scrollBarPosMaxX * (x / (this.canvasWidth / this.r - 20 * 2)));
             return;
         }
 
@@ -360,8 +367,8 @@ export class ScrollView {
         }
 
         this.lastmove.push({ x: e.changedTouches[0].pageX, y: e.changedTouches[0].pageY, time: new Date() });
-        this.posY -=  (e.changedTouches[0].pageY - this.touchStartY) * this.r;
-        this.posX -=  (e.changedTouches[0].pageX - this.touchStartX) * this.r;
+        this.posYvalue -=  (e.changedTouches[0].pageY - this.touchStartY) * this.r;
+        this.posXvalue -=  (e.changedTouches[0].pageX - this.touchStartX) * this.r;
 
         this.touchStartY = e.changedTouches[0].pageY;
         this.touchStartX = e.changedTouches[0].pageX;
@@ -442,16 +449,16 @@ export class ScrollView {
     public onScroll = (deltaMode: number, deltaX: number, deltaY: number) => {
         switch (deltaMode) {
             case 0: // DOM_DELTA_PIXEL	0x00	The delta values are specified in pixels.
-                this.posY += deltaY;
-                this.posX += deltaX;
+                this.setPosY(this.posYvalue + deltaY);
+                this.setPosX(this.posXvalue + deltaX);
                 break;
             case 1: // DOM_DELTA_LINE	0x01	The delta values are specified in lines.
-                this.posY += deltaY * this.cellHeight * this.r;
-                this.posX += deltaX * this.cellHeight * this.r;
+                this.setPosY(this.posYvalue + deltaY * this.cellHeight * this.r);
+                this.setPosX(this.posXvalue + deltaX * this.cellHeight * this.r);
                 break;
             case 2: // DOM_DELTA_PAGE	0x02	The delta values are specified in pages.
-                this.posY += deltaY * this.canvasHeight * this.r;
-                this.posX += deltaX * this.canvasWidth * this.r;
+                this.setPosY(this.posYvalue + deltaY * this.canvasHeight * this.r);
+                this.setPosX(this.posXvalue + deltaX * this.canvasWidth * this.r);
                 break;
             default:
                 // uups
@@ -521,10 +528,10 @@ export class ScrollView {
     }
     public onExtendedMouseMove(x: number, y: number): boolean {
         if (this.scrollBarThumbDownY) {
-            this.posY = this.scrollBarPosMaxY * ((y - 20) / (this.canvasHeight / this.r - 20 * 2));
+            this.setPosY(this.scrollBarPosMaxY * ((y - 20) / (this.canvasHeight / this.r - 20 * 2)));
         }
         if (this.scrollBarThumbDownX) {
-            this.posX = this.scrollBarPosMaxX * (x / (this.canvasWidth / this.r - 20 * 2));
+            this.setPosX( this.scrollBarPosMaxX * (x / (this.canvasWidth / this.r - 20 * 2)));
         }
         return true;
     }
@@ -570,12 +577,12 @@ export class ScrollView {
         }
 
         if (this.scrollBarThumbDownY) {
-            this.posY = this.scrollBarPosMaxY * ((y - 20) / (this.canvasHeight / this.r - 20 * 2));
+            this.setPosY(this.scrollBarPosMaxY * ((y - 20) / (this.canvasHeight / this.r - 20 * 2)));
             return true;
         }
 
         if (this.scrollBarThumbDownX) {
-            this.posX = this.scrollBarPosMaxX * ((x) / (this.canvasWidth / this.r - 20 * 2));
+            this.setPosX( this.scrollBarPosMaxX * ((x) / (this.canvasWidth / this.r - 20 * 2)));
             return true;
         }
 
@@ -711,8 +718,8 @@ export class ScrollView {
         }
 
         if (this.hasScrollBarY && y < 20) {
-            if (this.posY === 0) { return true; }
-            this.posY -= this.cellHeight * this.r;
+            if (this.posYvalue === 0) { return true; }
+            this.posYvalue -= this.cellHeight * this.r;
             this.timeout = setTimeout(() => {
                 this.speed = +7;
                 this.runStart = -1;
@@ -725,8 +732,8 @@ export class ScrollView {
 
         if (this.hasScrollBarY && x >= canvasWidth - this.scrollbarSize &&
             y > canvasHeight - 20 - (this.hasScrollBarX ? this.scrollbarSize : 0)) {
-            if (this.posY === this.scrollBarPosMaxY) { return true; }
-            this.posY += this.cellHeight * this.r;
+            if (this.posYvalue === this.scrollBarPosMaxY) { return true; }
+            this.posYvalue += this.cellHeight * this.r;
             this.timeout = setTimeout(() => {
                 this.speed = -7;
                 this.runStart = -1;
@@ -738,7 +745,7 @@ export class ScrollView {
         }
 
         if (this.hasScrollBarY && x >= canvasWidth - this.scrollbarSize && y > this.scrollBarThumbMaxY) {
-            this.posY += canvasHeight - 20;
+            this.posYvalue += canvasHeight - 20;
             this.timeout = setTimeout(() => {
                 this.speed = -14;
                 this.runStart = -1;
@@ -750,7 +757,7 @@ export class ScrollView {
         }
 
         if (this.hasScrollBarY && x >= canvasWidth - this.scrollbarSize && y < this.scrollBarThumbMinY) {
-            this.posY -= canvasHeight - 20 ;
+            this.posYvalue -= canvasHeight - 20 ;
             this.timeout = setTimeout(() => {
                 this.speed = +14;
                 this.runStart = -1;
@@ -766,8 +773,8 @@ export class ScrollView {
         }
 
         if (this.hasScrollBarX && x < 20) {
-            if (this.posX === 0) { return true; }
-            this.posX -= this.cellHeight * this.r;
+            if (this.posXvalue === 0) { return true; }
+            this.posXvalue -= this.cellHeight * this.r;
             this.timeout = setTimeout(() => {
                 this.speed = +7;
                 this.runStart = -1;
@@ -780,8 +787,8 @@ export class ScrollView {
 
         if (this.hasScrollBarX && y >= canvasHeight - this.scrollbarSize &&
             x > canvasWidth - 20 - (this.hasScrollBarY ? this.scrollbarSize : 0)) {
-            if (this.posX === this.scrollBarPosMaxY) { return true; }
-            this.posX += this.cellHeight * this.r;
+            if (this.posXvalue === this.scrollBarPosMaxY) { return true; }
+            this.posXvalue += this.cellHeight * this.r;
             this.timeout = setTimeout(() => {
                 this.speed = -7;
                 this.runStart = -1;
@@ -793,7 +800,7 @@ export class ScrollView {
         }
 
         if (this.hasScrollBarX && y >= canvasHeight - this.scrollbarSize && x > this.scrollBarThumbMaxX) {
-            this.posX += canvasHeight - 20;
+            this.posXvalue += canvasHeight - 20;
             this.timeout = setTimeout(() => {
                 this.speed = -14;
                 this.runStart = -1;
@@ -805,7 +812,7 @@ export class ScrollView {
         }
 
         if (this.hasScrollBarX && y >= canvasHeight - this.scrollbarSize && x < this.scrollBarThumbMinX) {
-            this.posX -= canvasHeight - 20 ;
+            this.posXvalue -= canvasHeight - 20 ;
             this.timeout = setTimeout(() => {
                 this.speed = +14;
                 this.runStart = -1;
@@ -835,15 +842,15 @@ export class ScrollView {
 
     private fixPos() {
         if (!this.hasScrollBarY) {
-            this.posY = 0;
+            this.setPosY(0);
             return;
         }
 
-        if (this.posY < 0) {
-            this.posY = 0;
+        if (this.posYvalue < 0) {
+            this.setPosY(0);
         } else {
-            if (this.posY > this.scrollBarPosMaxY) {
-                this.posY = this.scrollBarPosMaxY;
+            if (this.posYvalue > this.scrollBarPosMaxY) {
+                this.setPosY(this.scrollBarPosMaxY);
             }
         }
     }

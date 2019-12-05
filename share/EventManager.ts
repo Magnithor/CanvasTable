@@ -3,8 +3,9 @@ import { RowItem } from "./CustomCanvasIndex";
 import { CustomCanvasTable } from "./CustomCanvasTable";
 import { ScrollView } from "./ScrollView";
 
-export type EventManagerClick = (customCanvasTable: CustomCanvasTable,
-                                 row: RowItem, col: ICanvasTableColumnConf | null) => void;
-export type EventManagerClickHeader = (customCanvasTable: CustomCanvasTable,
-                                       col: ICanvasTableColumnConf | null) => void;
-export type EventManagerReCalcForScrollView = (customCanvasTable: CustomCanvasTable, scrollView: ScrollView) => void;
+export type EventManagerClick<T> = (customCanvasTable: CustomCanvasTable,
+                                    row: RowItem, col: ICanvasTableColumnConf<T> | null) => void;
+export type EventManagerClickHeader<T> = (customCanvasTable: CustomCanvasTable,
+                                          col: ICanvasTableColumnConf<T> | null) => void;
+export type EventManagerReCalcForScrollView = (
+    customCanvasTable: CustomCanvasTable, width: number, height: number, scrollView: ScrollView) => void;

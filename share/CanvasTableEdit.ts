@@ -4,14 +4,14 @@ export enum CanvasTableEditAction {
     movePrev,
 }
 
-export class CanvasTableEdit {
+export class CanvasTableEdit<T = any> {
     private hasBeenRemoved: boolean = false;
-    private readonly column: ICanvasTableColumn;
+    private readonly column: ICanvasTableColumn<T>;
     private readonly row: number;
     private readonly inputeElement: HTMLInputElement;
     private onRemove?: (cancel: boolean, newData: string, action: CanvasTableEditAction | undefined) => void;
 
-    constructor(col: ICanvasTableColumn, row: number, data: string, cellHeight: number,
+    constructor(col: ICanvasTableColumn<T>, row: number, data: string, cellHeight: number,
                 onRemve: (cancel: boolean, newData: string, action: CanvasTableEditAction | undefined) => void) {
         this.column = col;
         this.row = row;

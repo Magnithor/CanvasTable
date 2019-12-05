@@ -1,6 +1,6 @@
 {
   "name": "mthb-offscreen-canvas-table-worker",
-  "version": "0.0.11",
+  "version": "0.0.16",
   "description": "Canvas Table Webworker offscreencanvas",
   "main": "lib/OffscreenCanvasTableWorker/src/OffscreenCanvasTableWorker.js",
   "types": "lib/OffscreenCanvasTableWorker/src/OffscreenCanvasTableWorker.d.ts",

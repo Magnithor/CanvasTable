@@ -1,14 +1,16 @@
 import { CanvasColor, ICanvasContext2D } from "./CanvasContext2D";
 import { CustomCanvasTable } from "./CustomCanvasTable";
 
-export type CustomData = (canvasTable: CustomCanvasTable, dataValue: any, row: any,
-                          data: any, rowIndex: number, col: ICanvasTableColumnConf) => string;
-export type RenderValue = (canvasTable: CustomCanvasTable, context: ICanvasContext2D, rowIndex: number,
-                           col: ICanvasTableColumnConf, left: number, top: number, right: number, bottom: number,
-                           width: number, height: number, r: number, dataValue: any, row: any, data: any) => void;
-export type CustomFilter = (data: any, row: any, col: ICanvasTableColumnConf[], index: number) => boolean;
-export type CustomRowColStyle = (data: any, row: any, col: ICanvasTableColumnConf,
-                                 isOver: boolean, isSepra: boolean, dataRowCol: string)
+export type CustomData<T = any> = (canvasTable: CustomCanvasTable, dataValue: any, row: T,
+                                   data: T[], rowIndex: number, col: ICanvasTableColumnConf<T>) => string;
+export type RenderValue<T = any> = (
+    canvasTable: CustomCanvasTable, context: ICanvasContext2D, rowIndex: number,
+    col: ICanvasTableColumnConf<T>, left: number, top: number, right: number, bottom: number,
+    width: number, height: number, r: number, dataValue: any, row: T, data: T[]) => void;
+export type CustomFilter<T = any> = (
+    data: any, row: any, col: Array<ICanvasTableColumnConf<T>>, index: number) => boolean;
+export type CustomRowColStyle<T = any> = (data: any, row: T, col: ICanvasTableColumnConf<T>,
+                                          isOver: boolean, isSepra: boolean, dataRowCol: string)
                                  => ICanvasTableRowColStyle | undefined | null;
 /**
  * function pointer to custom sort
@@ -20,7 +22,7 @@ export type CustomRowColStyle = (data: any, row: any, col: ICanvasTableColumnCon
  *      if rowA < rowB then return -1
  *      if rowA == rowB then return 0
  */
-export type CustomSort = (data: any[], rowA: any, rowB: any, a: number, b: number) => number;
+export type CustomSort<T = any> = (data: T[], rowA: T, rowB: T, a: number, b: number) => number;
 
 /**
  * CanvasTableRowColStyle interface is return in [[CustomRowColStyle]]
@@ -55,7 +57,7 @@ export interface ICanvasTableRowColStyle {
 /**
  * Canvas Table Column Config
  */
-export interface ICanvasTableColumnConf {
+export interface ICanvasTableColumnConf<T = any> {
     /**
      * Text in header
      */
@@ -79,15 +81,15 @@ export interface ICanvasTableColumnConf {
     /**
      * function pointer to render the data with canvas
      */
-    renderer?: RenderValue;
+    renderer?: RenderValue<T>;
     /**
      * function pointer to render string.
      */
-    customData?: CustomData;
+    customData?: CustomData<T>;
 }
 
-export interface ICanvasTableColumnSort {
-    col: ICanvasTableColumnConf;
+export interface ICanvasTableColumnSort<T = any> {
+    col: ICanvasTableColumnConf<T>;
     sort: Sort;
 }
 

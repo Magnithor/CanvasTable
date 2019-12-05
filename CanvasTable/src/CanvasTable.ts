@@ -42,7 +42,7 @@ export { ICanvasTableColumnConf, Align, Sort, IGroupItem,
  * const canvasTable = new CanvasTable("canvas", col, data);
  * ```
  */
-export class CanvasTable extends CustomCanvasTable {
+export class CanvasTable<T = any> extends CustomCanvasTable<T> {
     private readonly canvas: HTMLCanvasElement;
     private canvasTableEdit?: CanvasTableEdit;
 
@@ -53,8 +53,8 @@ export class CanvasTable extends CustomCanvasTable {
      * @param data array of data
      * @param config config
      */
-    constructor(canvas: string|HTMLCanvasElement, col: ICanvasTableColumnConf[],
-                data: any[] = [], config?: ICanvasTableConfig) {
+    constructor(canvas: string|HTMLCanvasElement, col: Array<ICanvasTableColumnConf<T>>,
+                data: T[] = [], config?: ICanvasTableConfig) {
         super(config);
         this.canvasTableEdit = undefined;
         this.data = data;
@@ -71,6 +71,8 @@ export class CanvasTable extends CustomCanvasTable {
             this.askForNormalMouseMoveAndMaouseUp, this.scrollViewChange);
         this.calcIndex();
 
+        this.canvas.addEventListener("blur", this.canvasBlur);
+        this.canvas.addEventListener("focus", this.canvasFocus);
         this.canvas.addEventListener("wheel", this.canvasWheel);
         this.canvas.addEventListener("dblclick", this.canvasDblClick);
         this.canvas.addEventListener("mousedown", this.canvasMouseDown);
@@ -87,13 +89,20 @@ export class CanvasTable extends CustomCanvasTable {
         });
     }
 
-    public UpdateColumns(col: ICanvasTableColumnConf[]) {
+    public UpdateColumns(col: Array<ICanvasTableColumnConf<T>>) {
         super.UpdateColumns(col);
         if (this.canvasTableEdit) {
             this.canvasTableEdit.doRemove(true, undefined);
         }
     }
-    protected update(col: ICanvasTableColumnConf, i: number) {
+
+    public resize() {
+        this.setR(window.devicePixelRatio);
+        this.doReize(this.canvas.clientWidth, this.canvas.clientHeight);
+
+        this.askForReDraw();
+    }
+    protected update(col: ICanvasTableColumnConf<T>, i: number) {
         const column = this.getColumnByCanvasTableColumnConf(col);
         if (!column || column.allowEdit) { return; }
 
@@ -101,7 +110,7 @@ export class CanvasTable extends CustomCanvasTable {
             this.canvasTableEdit.doRemove(true, undefined);
         }
 
-        this.canvasTableEdit = new CanvasTableEdit(column, i, this.data[i][column.field],
+        this.canvasTableEdit = new CanvasTableEdit(column, i, (this.data[i] as any)[column.field],
             this.cellHeight, this.onEditRemove);
         this.updateEditLocation();
     }
@@ -120,14 +129,6 @@ export class CanvasTable extends CustomCanvasTable {
         this.canvas.addEventListener("mousemove", this.canvasMouseMove);
         this.canvas.addEventListener("mouseup", this.canvasMouseUp);
     }
-
-    protected resize() {
-        this.setR(window.devicePixelRatio);
-        this.doReize(this.canvas.clientWidth, this.canvas.clientHeight);
-
-        this.reCalcForScrollView();
-        this.askForReDraw();
-    }
     protected setCursor(cursor: string): void {
         this.canvas.style.cursor = cursor;
     }
@@ -136,12 +137,20 @@ export class CanvasTable extends CustomCanvasTable {
         this.canvas.height = height;
         super.setCanvasSize(width, height);
     }
-    protected fireDblClick(row: RowItem, col: ICanvasTableColumn | null) {
+    protected fireDblClick(row: RowItem, col: ICanvasTableColumn<T> | null) {
         if (this.allowEdit && typeof row === "number" && col !== null) {
             this.update(col.orginalCol, row);
         }
 
         super.fireDblClick(row, col);
+    }
+
+    private canvasFocus = (ev: FocusEvent) => {
+        this.setIsFocus(true);
+    }
+
+    private canvasBlur = (ev: FocusEvent) => {
+        this.setIsFocus(false);
     }
 
     private canvasKeydown = (e: KeyboardEvent) => {
@@ -224,7 +233,7 @@ export class CanvasTable extends CustomCanvasTable {
                     if (this.column.length > old.getColumn().index + 1) {
                         const column = this.column[old.getColumn().index + 1];
                         const i = old.getRow();
-                        this.canvasTableEdit = new CanvasTableEdit(column, i, this.data[i][column.field],
+                        this.canvasTableEdit = new CanvasTableEdit(column, i, (this.data[i] as any)[column.field],
                             this.cellHeight, this.onEditRemove);
                         this.updateEditLocation();
                     }
@@ -233,7 +242,7 @@ export class CanvasTable extends CustomCanvasTable {
                         if (0 < old.getColumn().index) {
                             const column = this.column[old.getColumn().index - 1];
                             const i = old.getRow();
-                            this.canvasTableEdit = new CanvasTableEdit(column, i, this.data[i][column.field],
+                            this.canvasTableEdit = new CanvasTableEdit(column, i, (this.data[i] as any)[column.field],
                                 this.cellHeight, this.onEditRemove);
                             this.updateEditLocation();
                         }
@@ -254,8 +263,8 @@ export class CanvasTable extends CustomCanvasTable {
 
         const column = this.canvasTableEdit.getColumn();
 
-        const y = (topPos - this.scrollView.posY) / this.r;
-        const x = -(this.scrollView.posX / this.r) + (column.leftPos / this.r);
+        const y = (topPos - this.scrollView.getPosY()) / this.r;
+        const x = -(this.scrollView.getPosX() / this.r) + (column.leftPos / this.r);
         const top = this.canvas.offsetTop + y;
         const left = this.canvas.offsetLeft + x;
 
