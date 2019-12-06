@@ -1,15 +1,15 @@
 import { CanvasColor, ICanvasContext2D } from "./CanvasContext2D";
 import { CustomCanvasTable } from "./CustomCanvasTable";
 
-export type CustomData<T = any> = (canvasTable: CustomCanvasTable, dataValue: any, row: T,
+export type CustomData<T = any> = (canvasTable: CustomCanvasTable, dataValue: string, row: T,
                                    data: T[], rowIndex: number, col: ICanvasTableColumnConf<T>) => string;
 export type RenderValue<T = any> = (
     canvasTable: CustomCanvasTable, context: ICanvasContext2D, rowIndex: number,
     col: ICanvasTableColumnConf<T>, left: number, top: number, right: number, bottom: number,
-    width: number, height: number, r: number, dataValue: any, row: T, data: T[]) => void;
+    width: number, height: number, r: number, dataValue: string, row: T, data: T[]) => void;
 export type CustomFilter<T = any> = (
-    data: any, row: any, col: Array<ICanvasTableColumnConf<T>>, index: number) => boolean;
-export type CustomRowColStyle<T = any> = (data: any, row: T, col: ICanvasTableColumnConf<T>,
+    data: T[], row: T, col: Array<ICanvasTableColumnConf<T>>, index: number) => boolean;
+export type CustomRowColStyle<T = any> = (data: T[], row: T, col: ICanvasTableColumnConf<T>,
                                           isOver: boolean, isSepra: boolean, dataRowCol: string)
                                  => ICanvasTableRowColStyle | undefined | null;
 /**

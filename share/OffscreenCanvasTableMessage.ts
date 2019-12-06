@@ -4,9 +4,10 @@ export enum OffscreenCanvasMesssageType {
     create = 0,
     resize = 1,
     expendAll = 2, collapseAll = 3, setGroupBy = 4,
-    scroll = 10,
+    scroll = 10, focus = 15,
     mouseDown = 20, mouseMove = 21, mouseUp = 22, mouseLeave = 23, mouseMoveExtended = 24, mouseUpExtended = 25,
-    TouchStart = 30, TouchMove = 31, TouchEnd = 32,
+    mouseDblClick = 26,
+    touchStart = 30, touchMove = 31, touchEnd = 32,
     keyDown = 40,
     askForExtentedMouseMoveAndMaouseUp = 100, askForNormalMouseMoveAndMaouseUp = 101, setCursor = 102,
     }
@@ -48,7 +49,7 @@ interface IOffscreenCanvasMessageScroll extends IOffscreenCanvasMesssageParnet {
 interface IOffscreenCanvasMessageMouse extends IOffscreenCanvasMesssageParnet {
     type: OffscreenCanvasMesssageType.mouseDown | OffscreenCanvasMesssageType.mouseMove
         | OffscreenCanvasMesssageType.mouseUp | OffscreenCanvasMesssageType.mouseMoveExtended
-        | OffscreenCanvasMesssageType.mouseUpExtended;
+        | OffscreenCanvasMesssageType.mouseUpExtended | OffscreenCanvasMesssageType.mouseDblClick;
     x: number;
     y: number;
 }
@@ -61,9 +62,9 @@ interface IOffscreenCanvasMessageKeyDown extends IOffscreenCanvasMesssageParnet 
     keycode: number;
 }
 interface IOffscreenCanvasMesssageTouch extends IOffscreenCanvasMesssageParnet {
-    type: OffscreenCanvasMesssageType.TouchStart |
-    OffscreenCanvasMesssageType.TouchMove |
-    OffscreenCanvasMesssageType.TouchEnd;
+    type: OffscreenCanvasMesssageType.touchStart |
+    OffscreenCanvasMesssageType.touchMove |
+    OffscreenCanvasMesssageType.touchEnd;
     event: ICanvasTableTouchEvent;
     offsetLeft: number;
     offsetTop: number;
@@ -79,6 +80,11 @@ interface IOffscreenCanvasMessageSetCursor extends IOffscreenCanvasMesssageParne
     cursor: string;
 }
 
+interface IOffscreenCanvasMessageFocus extends IOffscreenCanvasMesssageParnet {
+    type: OffscreenCanvasMesssageType.focus;
+    focus: boolean;
+}
+
 export type OffscreenCanvasMesssage =
       IOffscreenCanvasMessageScroll
     | IOffscreenCanvasMessageCreate
@@ -89,4 +95,5 @@ export type OffscreenCanvasMesssage =
     | IOffscreenCanvasMessageMouse
     | IOffscreenCanvasMessageMouseLeave
     | IOffscreenCanvasMessageKeyDown
-    | IOffscreenCanvasMesssageTouch;
+    | IOffscreenCanvasMesssageTouch
+    | IOffscreenCanvasMessageFocus;

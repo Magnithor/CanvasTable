@@ -222,7 +222,6 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
     public updateConfig(config: ICanvasTableConfig | undefined) {
         this.config = {
             ...defaultConfig, ...config };
-
     }
 
     /**
@@ -311,7 +310,7 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
      * Set group by data
      * @param col
      */
-    public setGroupBy(col?: Array<string|ICanvasTableGroup>) {
+    public setGroupBy(col?: Array<string | ICanvasTableGroup>) {
         if (!col) { col = []; }
         const list: ICanvasTableGroup[] = [];
         let i;
@@ -353,18 +352,18 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
             if (visible && this.orgColum[col].visible === true) { return; }
             if (!visible && !this.orgColum[col].visible) { return; }
             this.orgColum[col].visible = visible;
-            this.UpdateColumns(this.orgColum);
+            this.updateColumns(this.orgColum);
             return;
         }
         const v = col.visible === undefined ? true : false;
 
         if (v !== visible) {
             col.visible = v;
-            this.UpdateColumns(this.orgColum);
+            this.updateColumns(this.orgColum);
             return;
         }
     }
-    public UpdateColumns(col: Array<ICanvasTableColumnConf<T>>) {
+    public updateColumns(col: Array<ICanvasTableColumnConf<T>>) {
         this.orgColum = col;
         this.column = [];
         let i;
@@ -581,10 +580,19 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
             return;
         }
         const row =  this.findRowByPos(y);
+        if (this.allowEdit && typeof row === "number" && col !== null) {
+            const column = this.getColumnByCanvasTableColumnConf(col);
+            if (!column || column.allowEdit) { return; }
+
+            this.updateForEdit(column, row);
+        }
+
         this.fireDblClick(row, col);
     }
 
-    protected mouseDown(x: number, y: number) {
+    protected abstract updateForEdit(orginalCol: ICanvasTableColumn<T>, row: number): void;
+
+    protected mouseDown(x: number, y: number): void {
         if (this.dataIndex === undefined) { return; }
         if (this.scrollView && this.scrollView.onMouseDown(x, y)) {
             return;
@@ -1445,7 +1453,7 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
                     data = i.toString();
                     break;
                 default:
-                    data = this.getUpdateDataOrData(indexId, colItem.field);
+                    data = String(this.getUpdateDataOrData(indexId, colItem.field));
             }
 
             if (colItem.customData) {

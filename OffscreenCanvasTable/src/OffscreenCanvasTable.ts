@@ -27,7 +27,10 @@ export class OffscreenCanvasTable {
             },
             [  offscreen as any ]);
 
+        this.canvas.addEventListener("blur", this.canvasBlur);
+        this.canvas.addEventListener("focus", this.canvasFocus);
         this.canvas.addEventListener("wheel", this.canvasWheel);
+        this.canvas.addEventListener("dblclick", this.canvasDblClick);
         this.canvas.addEventListener("mousedown", this.canvasMouseDown);
         this.canvas.addEventListener("mousemove", this.canvasMouseMove);
         this.canvas.addEventListener("mouseup", this.canvasMouseUp);
@@ -71,6 +74,22 @@ export class OffscreenCanvasTable {
         });
     }
 
+    private canvasFocus = (ev: FocusEvent) => {
+        this.postMessage({
+            focus: true,
+            mthbCanvasTable: this.offscreenCanvasTableId,
+            type: OffscreenCanvasMesssageType.focus,
+        });
+    }
+
+    private canvasBlur = (ev: FocusEvent) => {
+        this.postMessage({
+            focus: false,
+            mthbCanvasTable: this.offscreenCanvasTableId,
+            type: OffscreenCanvasMesssageType.focus,
+        });
+    }
+
     private canvasWheel = (e: WheelEvent) => {
         e.preventDefault();
         this.postMessage({
@@ -79,6 +98,16 @@ export class OffscreenCanvasTable {
             deltaY: e.deltaY,
             mthbCanvasTable: this.offscreenCanvasTableId,
             type: OffscreenCanvasMesssageType.scroll,
+        });
+    }
+    private canvasDblClick = (e: MouseEvent) => {
+        e.preventDefault();
+        //  this.dblClick(e.clientX - this.canvas.offsetLeft, e.clientY - this.canvas.offsetTop);
+        this.postMessage({
+            mthbCanvasTable: this.offscreenCanvasTableId,
+            type: OffscreenCanvasMesssageType.mouseDblClick,
+            x: e.clientX - this.canvas.offsetLeft,
+            y: e.clientY - this.canvas.offsetTop,
         });
     }
     private canvasMouseDown = (e: MouseEvent) => {
@@ -123,7 +152,7 @@ export class OffscreenCanvasTable {
             mthbCanvasTable: this.offscreenCanvasTableId,
             offsetLeft: this.canvas.offsetLeft,
             offsetTop: this.canvas.offsetTop,
-            type: OffscreenCanvasMesssageType.TouchStart,
+            type: OffscreenCanvasMesssageType.touchStart,
         });
     }
     private canvasTouchMove = (e: TouchEvent) => {
@@ -133,7 +162,7 @@ export class OffscreenCanvasTable {
             mthbCanvasTable: this.offscreenCanvasTableId,
             offsetLeft: this.canvas.offsetLeft,
             offsetTop: this.canvas.offsetTop,
-            type: OffscreenCanvasMesssageType.TouchMove,
+            type: OffscreenCanvasMesssageType.touchMove,
         });
     }
     private canvasTouchEnd = (e: TouchEvent) => {
@@ -143,7 +172,7 @@ export class OffscreenCanvasTable {
             mthbCanvasTable: this.offscreenCanvasTableId,
             offsetLeft: this.canvas.offsetLeft,
             offsetTop: this.canvas.offsetTop,
-            type: OffscreenCanvasMesssageType.TouchEnd,
+            type: OffscreenCanvasMesssageType.touchEnd,
         });
     }
 

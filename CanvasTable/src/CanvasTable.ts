@@ -83,14 +83,14 @@ export class CanvasTable<T = any> extends CustomCanvasTable<T> {
         this.canvas.addEventListener("touchmove", this.canvasTouchMove);
         this.canvas.addEventListener("touchend", this.canvasTouchEnd);
         this.canvas.addEventListener("keydown", this.canvasKeydown);
-        this.UpdateColumns(col);
+        this.updateColumns(col);
         window.addEventListener("resize", () => {
             this.resize();
         });
     }
 
-    public UpdateColumns(col: Array<ICanvasTableColumnConf<T>>) {
-        super.UpdateColumns(col);
+    public updateColumns(col: Array<ICanvasTableColumnConf<T>>) {
+        super.updateColumns(col);
         if (this.canvasTableEdit) {
             this.canvasTableEdit.doRemove(true, undefined);
         }
@@ -102,15 +102,12 @@ export class CanvasTable<T = any> extends CustomCanvasTable<T> {
 
         this.askForReDraw();
     }
-    protected update(col: ICanvasTableColumnConf<T>, i: number) {
-        const column = this.getColumnByCanvasTableColumnConf(col);
-        if (!column || column.allowEdit) { return; }
-
+    protected updateForEdit(col: ICanvasTableColumn<T>, i: number) {
         if (this.canvasTableEdit) {
             this.canvasTableEdit.doRemove(true, undefined);
         }
 
-        this.canvasTableEdit = new CanvasTableEdit(column, i, (this.data[i] as any)[column.field],
+        this.canvasTableEdit = new CanvasTableEdit(col, i, (this.data[i] as any)[col.field],
             this.cellHeight, this.onEditRemove);
         this.updateEditLocation();
     }
@@ -137,14 +134,6 @@ export class CanvasTable<T = any> extends CustomCanvasTable<T> {
         this.canvas.height = height;
         super.setCanvasSize(width, height);
     }
-    protected fireDblClick(row: RowItem, col: ICanvasTableColumn<T> | null) {
-        if (this.allowEdit && typeof row === "number" && col !== null) {
-            this.update(col.orginalCol, row);
-        }
-
-        super.fireDblClick(row, col);
-    }
-
     private canvasFocus = (ev: FocusEvent) => {
         this.setIsFocus(true);
     }

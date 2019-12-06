@@ -65,6 +65,7 @@ const column: ICanvasTableColumnConf[] = [
 
 let filter = "";
 const offscreenCanvasTableWorker = new OffscreenCanvasTableWorker(1, column);
+offscreenCanvasTableWorker.setAllowEdit(true);
 offscreenCanvasTableWorker.setSort([
     { col: column[2], sort: Sort.ascending },
     { col: column[5], sort: Sort.ascending },
