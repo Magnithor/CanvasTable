@@ -12,6 +12,34 @@ export type CustomFilter<T = any> = (
 export type CustomRowColStyle<T = any> = (data: T[], row: T, col: ICanvasTableColumnConf<T>,
                                           isOver: boolean, isSepra: boolean, dataRowCol: string)
                                  => ICanvasTableRowColStyle | undefined | null;
+
+export interface IUpdateRect {
+    cellHeight: number;
+    clipBottom: number | undefined;
+    clipLeft: number | undefined;
+    clipRight: number | undefined;
+    clipTop: number | undefined;
+    left: number;
+    top: number;
+    width: number;
+    x: number;
+    y: number;
+}
+
+export interface ICanvasTableColumn<T> {
+    allowEdit: boolean;
+    header: string;
+    field: string;
+    width: number;
+    align: Align;
+    index: number;
+    leftPos: number;
+    rightPos: number;
+    renderer?: RenderValue<T>;
+    customData?: CustomData<T>;
+    orginalCol: ICanvasTableColumnConf<T>;
+}
+
 /**
  * function pointer to custom sort
  * @param data  data Same array that was sent to CanvasTable, this array is not modified

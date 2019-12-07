@@ -1,9 +1,11 @@
 ﻿import { ICanvasContext2D } from "../../share/CanvasContext2D";
-import { Align, CustomFilter, CustomSort, ICanvasTableColumnConf, ICanvasTableColumnSort, Sort } from "../../share/CanvasTableColum";
-import { IGroupItem, RowItem } from "../../share/CustomCanvasIndex";
-import { CanvasTableEdit, CanvasTableEditAction } from "./../../share/CanvasTableEdit";
+import { Align, CustomFilter, CustomSort, ICanvasTableColumn,
+     ICanvasTableColumnConf, ICanvasTableColumnSort, Sort } from "../../share/CanvasTableColum";
+import { CanvasTableEditAction } from "../../share/CanvasTableEditAction";
+import { IGroupItem } from "../../share/CustomCanvasIndex";
+import { CanvasTableEdit } from "./../../share/CanvasTableEdit";
 import { TouchEventToCanvasTableTouchEvent } from "./../../share/CanvasTableTouchEvent";
-import { CustomCanvasTable, ICanvasTableColumn, ICanvasTableConfig, ICanvasTableGroup } from "./../../share/CustomCanvasTable";
+import { CustomCanvasTable, ICanvasTableConfig, ICanvasTableGroup } from "./../../share/CustomCanvasTable";
 import { ScrollView } from "./../../share/ScrollView";
 
 export { ICanvasTableColumnConf, Align, Sort, IGroupItem,
@@ -240,41 +242,24 @@ export class CanvasTable<T = any> extends CustomCanvasTable<T> {
         }
     }
     private updateEditLocation() {
-        if (!this.canvasTableEdit || !this.scrollView ) {
+        if (!this.canvasTableEdit) {
             return;
         }
 
-        const row = this.canvasTableEdit.getRow();
-        const topPos = this.findTopPosByRow(row);
-        if (topPos === undefined) {
+        const rect  = this.calcRect(
+            this.canvasTableEdit.getColumn(),
+            this.canvasTableEdit.getRow(),
+        );
+
+        if (rect === undefined) {
             return;
         }
 
-        const column = this.canvasTableEdit.getColumn();
-
-        const y = (topPos - this.scrollView.getPosY()) / this.r;
-        const x = -(this.scrollView.getPosX() / this.r) + (column.leftPos / this.r);
-        const top = this.canvas.offsetTop + y;
-        const left = this.canvas.offsetLeft + x;
-
-        let clipTop: number | undefined;
-        const clipRight: number | undefined = undefined;
-        const clipBottom: number | undefined = undefined;
-        let clipLeft: number | undefined;
-
-        if (y < this.headerHeight) {
-            // rect(<top>, <right>, <bottom>, <left>)
-            if (x < 0) {
-                clipTop = -y + this.headerHeight;
-                clipLeft = -x;
-            } else {
-                clipTop = -y + this.headerHeight;
-            }
-        } else if (x < 0) {
-            clipLeft = -x;
-        }
-
-        this.canvasTableEdit.updateEditLocation(top, left, column.width , this.cellHeight,
-                                                clipTop, clipRight, clipBottom, clipLeft);
+        this.canvasTableEdit.updateEditLocation(
+            this.canvas.offsetTop + rect.top,
+            this.canvas.offsetLeft + rect.left,
+            rect.width, rect.cellHeight,
+            rect.clipTop, rect.clipRight,
+            rect.clipBottom, rect.clipLeft);
     }
 }

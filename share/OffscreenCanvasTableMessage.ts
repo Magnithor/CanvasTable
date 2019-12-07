@@ -1,3 +1,5 @@
+import { ICanvasTableColumn, IUpdateRect } from "./CanvasTableColum";
+import { CanvasTableEditAction } from "./CanvasTableEditAction";
 import { ICanvasTableTouchEvent } from "./CanvasTableTouchEvent";
 
 export enum OffscreenCanvasMesssageType {
@@ -10,6 +12,7 @@ export enum OffscreenCanvasMesssageType {
     touchStart = 30, touchMove = 31, touchEnd = 32,
     keyDown = 40,
     askForExtentedMouseMoveAndMaouseUp = 100, askForNormalMouseMoveAndMaouseUp = 101, setCursor = 102,
+    updateForEdit = 103, removeUpdateForEdit = 104, locationForEdit = 105, onEditRemoveUpdateForEdit = 106,
     }
 
 interface IOffscreenCanvasMesssageParnet {
@@ -32,11 +35,15 @@ interface IOffscreenCanvasMessageResize extends IOffscreenCanvasMesssageParnet {
     r: number;
 }
 
-interface IOffscreenCanvasMessageFunctions extends IOffscreenCanvasMesssageParnet {
+interface IOffscreenCanvasMessageFunctionsToWorker extends IOffscreenCanvasMesssageParnet {
     type: OffscreenCanvasMesssageType.expendAll
-        | OffscreenCanvasMesssageType.collapseAll
-        | OffscreenCanvasMesssageType.askForExtentedMouseMoveAndMaouseUp
-        | OffscreenCanvasMesssageType.askForNormalMouseMoveAndMaouseUp;
+        | OffscreenCanvasMesssageType.collapseAll;
+}
+
+interface IOffscreenCanvasMessageFunctionsFromWorker extends IOffscreenCanvasMesssageParnet {
+    type: OffscreenCanvasMesssageType.askForExtentedMouseMoveAndMaouseUp
+        | OffscreenCanvasMesssageType.askForNormalMouseMoveAndMaouseUp
+        | OffscreenCanvasMesssageType.removeUpdateForEdit;
 }
 
 interface IOffscreenCanvasMessageScroll extends IOffscreenCanvasMesssageParnet {
@@ -85,15 +92,46 @@ interface IOffscreenCanvasMessageFocus extends IOffscreenCanvasMesssageParnet {
     focus: boolean;
 }
 
-export type OffscreenCanvasMesssage =
+interface IOffscreenCanvasMessageUpdateForEdit<T> extends IOffscreenCanvasMesssageParnet {
+    cellHeight: number;
+    rect: IUpdateRect;
+    col: ICanvasTableColumn<T>;
+    type: OffscreenCanvasMesssageType.updateForEdit;
+    row: number;
+    value: any;
+}
+
+interface IOffscreenCanvasMessageLocationForEdit extends IOffscreenCanvasMesssageParnet {
+    rect: IUpdateRect;
+    type: OffscreenCanvasMesssageType.locationForEdit;
+}
+
+interface IOffscreenCanvasMessageOnEditRemoveForEdit<T> extends IOffscreenCanvasMesssageParnet {
+    action: CanvasTableEditAction | undefined;
+    cancel: boolean;
+    col?: ICanvasTableColumn<T>;
+    newData: string;
+    row: number | undefined;
+    type: OffscreenCanvasMesssageType.onEditRemoveUpdateForEdit;
+}
+
+export type OffscreenCanvasMesssageToWorker<T = any> =
       IOffscreenCanvasMessageScroll
     | IOffscreenCanvasMessageCreate
     | IOffscreenCanvasMessageResize
-    | IOffscreenCanvasMessageSetCursor
-    | IOffscreenCanvasMessageFunctions
+    | IOffscreenCanvasMessageFunctionsToWorker
     | IOffscreenCanvasMessageGroupBy
     | IOffscreenCanvasMessageMouse
     | IOffscreenCanvasMessageMouseLeave
     | IOffscreenCanvasMessageKeyDown
     | IOffscreenCanvasMesssageTouch
-    | IOffscreenCanvasMessageFocus;
+    | IOffscreenCanvasMessageFocus
+    | IOffscreenCanvasMessageOnEditRemoveForEdit<T>
+    ;
+
+export type OffscreenCanvasMesssageFromWorker<T = any> =
+      IOffscreenCanvasMessageSetCursor
+    | IOffscreenCanvasMessageFunctionsFromWorker
+    | IOffscreenCanvasMessageUpdateForEdit<T>
+    | IOffscreenCanvasMessageLocationForEdit
+    ;

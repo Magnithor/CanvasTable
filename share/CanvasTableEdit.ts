@@ -1,8 +1,5 @@
-import { ICanvasTableColumn } from "./CustomCanvasTable";
-export enum CanvasTableEditAction {
-    moveNext,
-    movePrev,
-}
+import { ICanvasTableColumn } from "./CanvasTableColum";
+import { CanvasTableEditAction } from "./CanvasTableEditAction";
 
 export class CanvasTableEdit<T = any> {
     private hasBeenRemoved: boolean = false;

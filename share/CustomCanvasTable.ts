@@ -1,6 +1,7 @@
 import { CanvasColor, ICanvasContext2D } from "./CanvasContext2D";
-import { Align, CustomData, CustomFilter, CustomRowColStyle, CustomSort,
-         ICanvasTableColumnConf, ICanvasTableColumnSort, ICanvasTableRowColStyle, RenderValue, Sort } from "./CanvasTableColum";
+import { Align, CustomFilter, CustomRowColStyle, CustomSort,
+         ICanvasTableColumn, ICanvasTableColumnConf, ICanvasTableColumnSort,
+         ICanvasTableRowColStyle, IUpdateRect, Sort } from "./CanvasTableColum";
 import { ICanvasTableTouchEvent } from "./CanvasTableTouchEvent";
 import { IGroupItem, IGroupItems, IIndex, IndexType, ItemIndexType, RowItem } from "./CustomCanvasIndex";
 import { IDrawable } from "./Drawable";
@@ -10,6 +11,7 @@ import { IScrollViewConfig, ScrollView } from "./ScrollView";
 export interface IDrawConfig {
     drawOnly?: number[];
 }
+
 type FrameRequestCallback = (time: number) => void;
 declare function requestAnimationFrame(callback: FrameRequestCallback): number;
 declare function setTimeout(callback: (...args: any[]) => void, ms: number, ...args: any[]): number;
@@ -148,20 +150,6 @@ const defaultConfig: ICanvasTableConf = {
     selectLineColor: "green",
     sepraBackgroundColor: "#ECECEC",
 };
-
-export interface ICanvasTableColumn<T> {
-    allowEdit: boolean;
-    header: string;
-    field: string;
-    width: number;
-    align: Align;
-    index: number;
-    leftPos: number;
-    rightPos: number;
-    renderer?: RenderValue<T>;
-    customData?: CustomData<T>;
-    orginalCol: ICanvasTableColumnConf<T>;
-}
 
 export abstract class CustomCanvasTable<T = any> implements IDrawable {
 
@@ -382,7 +370,7 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
                 }, ...col[i],
             };
 
-            if (!(this.column[index].field === "__idxnum__" || this.column[index].field === "__rownum__")) {
+            if (this.column[index].field === "__idxnum__" || this.column[index].field === "__rownum__") {
                 this.column[index].allowEdit = false;
             }
         }
@@ -581,10 +569,9 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
         }
         const row =  this.findRowByPos(y);
         if (this.allowEdit && typeof row === "number" && col !== null) {
-            const column = this.getColumnByCanvasTableColumnConf(col);
-            if (!column || column.allowEdit) { return; }
+            if (!col.allowEdit) { return; }
 
-            this.updateForEdit(column, row);
+            this.updateForEdit(col, row);
         }
 
         this.fireDblClick(row, col);
@@ -759,6 +746,53 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
         if (this.scrollView) {
             this.scrollView.OnTouchEnd(e);
         }
+    }
+
+    protected calcRect(col: ICanvasTableColumn<T>, row: number): IUpdateRect | undefined {
+        if (!this.scrollView ) {
+            return;
+        }
+
+        const topPos = this.findTopPosByRow(row);
+        if (topPos === undefined) {
+            return;
+        }
+
+        const y = (topPos - this.scrollView.getPosY()) / this.r;
+        const x = -(this.scrollView.getPosX() / this.r) + (col.leftPos / this.r);
+        const top = y;
+        const left = x;
+
+        let clipTop: number | undefined;
+        const clipRight: number | undefined = undefined;
+        const clipBottom: number | undefined = undefined;
+        let clipLeft: number | undefined;
+
+        if (y < this.headerHeight) {
+            // rect(<top>, <right>, <bottom>, <left>)
+            if (x < 0) {
+                clipTop = -y + this.headerHeight;
+                clipLeft = -x;
+            } else {
+                clipTop = -y + this.headerHeight;
+            }
+        } else if (x < 0) {
+            clipLeft = -x;
+        }
+
+        return {
+            cellHeight: this.cellHeight,
+            clipBottom,
+            clipLeft,
+            clipRight,
+            clipTop,
+            left,
+            top,
+            width: col.width,
+            x,
+            y,
+        };
+
     }
 
     protected findColSplit(x: number): number | null {

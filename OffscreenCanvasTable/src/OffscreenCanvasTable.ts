@@ -1,10 +1,14 @@
+import { ICanvasTableColumn, IUpdateRect } from "../../share/CanvasTableColum";
+import { CanvasTableEdit } from "../../share/CanvasTableEdit";
+import { CanvasTableEditAction } from "../../share/CanvasTableEditAction";
 import { TouchEventToCanvasTableTouchEvent } from "../../share/CanvasTableTouchEvent";
-import { OffscreenCanvasMesssage, OffscreenCanvasMesssageType } from "../../share/OffscreenCanvasTableMessage";
+import { OffscreenCanvasMesssageFromWorker, OffscreenCanvasMesssageToWorker, OffscreenCanvasMesssageType } from "../../share/OffscreenCanvasTableMessage";
 
-export class OffscreenCanvasTable {
+export class OffscreenCanvasTable <T = any> {
     public readonly offscreenCanvasTableId: number;
     private canvas: HTMLCanvasElement;
     private worker: Worker;
+    private canvasTableEdit?: CanvasTableEdit;
 
     constructor(offscreenCanvasTableId: number, worker: Worker, canvas: HTMLCanvasElement|string) {
         if (typeof canvas === "string") {
@@ -206,7 +210,7 @@ export class OffscreenCanvasTable {
 
     private workerMessage = (message: MessageEvent) => {
         if (message.data.mthbCanvasTable !== this.offscreenCanvasTableId) { return; }
-        const data =  message.data as OffscreenCanvasMesssage;
+        const data =  message.data as OffscreenCanvasMesssageFromWorker;
         switch (data.type) {
             case OffscreenCanvasMesssageType.askForExtentedMouseMoveAndMaouseUp:
                 this.canvas.removeEventListener("mousemove", this.canvasMouseMove);
@@ -223,10 +227,53 @@ export class OffscreenCanvasTable {
             case OffscreenCanvasMesssageType.setCursor:
                 this.canvas.style.cursor = data.cursor;
                 break;
+            case OffscreenCanvasMesssageType.updateForEdit:
+                if (this.canvasTableEdit) {
+                    this.canvasTableEdit.doRemove(true, undefined);
+                }
+
+                this.canvasTableEdit = new CanvasTableEdit(data.col, data.row, data.value,
+                    data.cellHeight, this.onEditRemove);
+                this.updateEditLocation(data.rect);
+                break;
+            case OffscreenCanvasMesssageType.locationForEdit:
+                this.updateEditLocation(data.rect);
+                break;
         }
     }
 
-    private postMessage(data: OffscreenCanvasMesssage): void {
+    private onEditRemove = (cancel: boolean, newData: string, action: CanvasTableEditAction | undefined) => {
+        let row: number | undefined;
+        let col: ICanvasTableColumn<T> | undefined;
+        if (this.canvasTableEdit !== undefined) {
+            col = this.canvasTableEdit.getColumn();
+            row = this.canvasTableEdit.getRow();
+        }
+        this.canvasTableEdit = undefined;
+        this.postMessage({
+            action,
+            cancel,
+            col,
+            mthbCanvasTable: this.offscreenCanvasTableId,
+            newData,
+            row,
+            type: OffscreenCanvasMesssageType.onEditRemoveUpdateForEdit,
+        });
+    }
+    private updateEditLocation(rect: IUpdateRect) {
+        if (!this.canvasTableEdit) {
+            return;
+        }
+
+        const top = this.canvas.offsetTop + rect.y;
+        const left = this.canvas.offsetLeft + rect.x;
+
+        this.canvasTableEdit.updateEditLocation(
+            top, left, rect.width, rect.cellHeight,
+            rect.clipTop, rect.clipRight, rect.clipBottom, rect.clipLeft);
+    }
+
+    private postMessage(data: OffscreenCanvasMesssageToWorker): void {
         this.worker.postMessage(data);
     }
 }
