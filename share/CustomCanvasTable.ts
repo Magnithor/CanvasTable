@@ -18,6 +18,9 @@ declare function setTimeout(callback: (...args: any[]) => void, ms: number, ...a
 export interface ICanvasTableGroup {
     field: string;
     aggregate?: (data: IGroupItem) => string;
+    renderer?: (data: IGroupItem, canvasTable: CustomCanvasTable, context: ICanvasContext2D,
+                left: number, top: number, right: number, bottom: number,
+                width: number, height: number, r: number) => void;
 }
 
 /**
@@ -1360,46 +1363,82 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
         }
     }
 
+    private drawGroupItemObject(pos: number, groupItem: IGroupItem, level: number, w: number, height: number) {
+        if (!this.scrollView || !this.context) {
+            return;
+        }
+        this.context.fillStyle = this.config.groupItemBackgroundColor;
+        this.context.fillRect(0 , pos - height + 4 * this.r + 1, w, height - 3);
+
+        this.context.fillStyle = this.config.groupItemArrowColor;
+        this.context.beginPath();
+        if (groupItem.isExpended) {
+            this.context.moveTo(-this.scrollView.getPosX() + (9 + 10 * (level - 1)) * this.r, pos - this.r * 10);
+            this.context.lineTo(-this.scrollView.getPosX() + (5 + 10 * (level - 1)) * this.r, pos);
+            this.context.lineTo(-this.scrollView.getPosX() + (2 + 10 * (level - 1)) * this.r, pos - this.r * 10);
+        } else {
+            this.context.moveTo(-this.scrollView.getPosX() + (9 + 10 * (level - 1)) * this.r, pos - this.r * 5);
+            this.context.lineTo(-this.scrollView.getPosX() + (2 + 10 * (level - 1)) * this.r, pos);
+            this.context.lineTo(-this.scrollView.getPosX() + (2 + 10 * (level - 1)) * this.r, pos - this.r * 10);
+        }
+        this.context.fill();
+
+        this.context.fillStyle = this.config.groupItemFontColor;
+        this.context.textAlign = "left";
+        if (groupItem.aggregate) {
+            this.context.fillText(groupItem.caption + " " + groupItem.aggregate,
+                                -this.scrollView.getPosX() + (20 + 10 * (level - 1)) * this.r, pos);
+        } else {
+            this.context.fillText(groupItem.caption + " (" + groupItem.child.list.length + ")",
+                                -this.scrollView.getPosX() + (20 + 10 * (level - 1)) * this.r, pos);
+        }
+
+        this.context.beginPath();
+        this.context.moveTo(0, pos + 4 * this.r);
+        this.context.lineTo(w, pos + 4 * this.r);
+        this.context.stroke();
+
+    }
+
     private drawGroupItem(level: number, groupItem: IGroupItem, pos: number, height: number,
                           maxPos: number, offsetLeft: number, colStart: number, colEnd: number,
                           drawConf: IDrawConfig | undefined) {
         if (!this.scrollView || !this.context) {
             return 0;
         }
+
         if (pos > 0 && drawConf === undefined) {
-            const w = Math.min(-this.scrollView.getPosX() +
-             this.column[this.column.length - 1].rightPos, this.canvasWidth);
-            this.context.fillStyle = this.config.groupItemBackgroundColor;
-            this.context.fillRect(0 , pos - height + 4 * this.r + 1, w, height - 3);
+            const w = Math.min(
+                -this.scrollView.getPosX() +
+                this.column[this.column.length - 1].rightPos, this.canvasWidth);
 
-            this.context.fillStyle = this.config.groupItemArrowColor;
-            this.context.beginPath();
-            if (groupItem.isExpended) {
-                this.context.moveTo(-this.scrollView.getPosX() + (9 + 10 * (level - 1)) * this.r, pos - this.r * 10);
-                this.context.lineTo(-this.scrollView.getPosX() + (5 + 10 * (level - 1)) * this.r, pos);
-                this.context.lineTo(-this.scrollView.getPosX() + (2 + 10 * (level - 1)) * this.r, pos - this.r * 10);
+            if (this.groupByCol && level <= this.groupByCol.length) {
+                const groupByColItem = this.groupByCol[level - 1];
+                if (groupByColItem.renderer) {
+                    const left = 0;
+                    const top = pos - height + 4 * this.r + 1;
+                    const renderer = groupByColItem.renderer;
+                    this.context.save();
+                    this.context.beginPath();
+                    this.context.rect(left, top, w, height);
+                    this.context.clip();
+                    try {
+                        const right = w;
+                        const bottom = top + height;
+                        renderer(groupItem, this, this.context,
+                                left, top, right, bottom, w, height, this.r);
+                    } catch (e) {
+                        console.log("CanvasTable drawGroupItem renderer", this.groupByCol[level], e);
+                    }
+                    this.context.restore();
+                } else {
+                    this.drawGroupItemObject(pos, groupItem, level, w, height);
+                }
             } else {
-                this.context.moveTo(-this.scrollView.getPosX() + (9 + 10 * (level - 1)) * this.r, pos - this.r * 5);
-                this.context.lineTo(-this.scrollView.getPosX() + (2 + 10 * (level - 1)) * this.r, pos);
-                this.context.lineTo(-this.scrollView.getPosX() + (2 + 10 * (level - 1)) * this.r, pos - this.r * 10);
+                this.drawGroupItemObject(pos, groupItem, level, w, height);
             }
-            this.context.fill();
-
-            this.context.fillStyle = this.config.groupItemFontColor;
-            this.context.textAlign = "left";
-            if (groupItem.aggregate) {
-                this.context.fillText(groupItem.caption + " " + groupItem.aggregate,
-                                      -this.scrollView.getPosX() + (20 + 10 * (level - 1)) * this.r, pos);
-            } else {
-                this.context.fillText(groupItem.caption + " (" + groupItem.child.list.length + ")",
-                                      -this.scrollView.getPosX() + (20 + 10 * (level - 1)) * this.r, pos);
-            }
-
-            this.context.beginPath();
-            this.context.moveTo(0, pos + 4 * this.r);
-            this.context.lineTo(w, pos + 4 * this.r);
-            this.context.stroke();
         }
+
         pos += height;
         if (groupItem.isExpended) {
             const child = groupItem.child;
@@ -1456,6 +1495,7 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
         return pos;
 
     }
+
     private drawRowItem(indexId: number, i: number, pos: number, height: number, offsetLeft: number,
                         colStart: number, colEnd: number, drawConf: IDrawConfig | undefined) {
         if (!this.scrollView || !this.context) { return 0; }

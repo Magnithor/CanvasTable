@@ -1,6 +1,6 @@
 ﻿import { Align, ICanvasTableColumnConf, Sort } from "../share/CanvasTableColum";
 import { IGroupItem } from "../share/CustomCanvasIndex";
-import { CanvasTable } from "./../CanvasTable/src/CanvasTable";
+import { CanvasTable, ICanvasContext2D } from "./../CanvasTable/src/CanvasTable";
 import { CustomCanvasTable } from "./../share/CustomCanvasTable";
 
 interface IData {
@@ -48,7 +48,9 @@ const sort = () => {
         { col: column[4], sort: Sort.ascending },
     ]);
 };
+
 let isGroup = true;
+
 const group = () => {
     const expendedAll = document.getElementById("expendedAll");
     const collapseAll = document.getElementById("collapseAll");
