@@ -298,18 +298,18 @@ export class ScrollView {
         if (this.run) {
             if (this.runStart === -1) {
                 if (this.runXOrY) {
-                    this.posYvalue -= (this.speed * this.r);
+                    this.setPosY(this.posYvalue - (this.speed * this.r));
                 } else {
-                    this.posXvalue -= (this.speed * this.r);
+                    this.setPosX(this.posXvalue - (this.speed * this.r));
                 }
                 return true;
             }
             const time = (new Date()).getTime() - this.runStart;
             if (time < 1500) {
                 if (this.runXOrY) {
-                    this.posYvalue -= (this.speed * this.r) * (1 - time / 1500);
+                    this.setPosY(this.posYvalue - (this.speed * this.r) * (1 - time / 1500));
                 } else {
-                    this.posXvalue -= (this.speed * this.r) * (1 - time / 1500);
+                    this.setPosX(this.posXvalue - (this.speed * this.r) * (1 - time / 1500));
                 }
                 return true;
             }
@@ -319,16 +319,16 @@ export class ScrollView {
     public OnKeydown(keyCode: number): boolean {
         switch (keyCode) {
             case 33: // pagedown
-                this.posYvalue -= this.canvasHeight;
+                this.setPosY(this.posYvalue - this.canvasHeight);
                 return true;
             case 34: // pageup
-                this.posYvalue += this.canvasHeight;
+                this.setPosY(this.posYvalue + this.canvasHeight);
                 return true;
             case 38: // up
-                this.posYvalue -= this.cellHeight * this.r;
+                this.setPosY(this.posYvalue - this.cellHeight * this.r);
                 return true;
             case 40: // down
-                this.posYvalue += this.cellHeight * this.r;
+                this.setPosY(this.posYvalue + this.cellHeight * this.r);
                 return true;
             default:
                 return false;
@@ -367,8 +367,8 @@ export class ScrollView {
         }
 
         this.lastmove.push({ x: e.changedTouches[0].pageX, y: e.changedTouches[0].pageY, time: new Date() });
-        this.posYvalue -=  (e.changedTouches[0].pageY - this.touchStartY) * this.r;
-        this.posXvalue -=  (e.changedTouches[0].pageX - this.touchStartX) * this.r;
+        this.setPosY(this.posYvalue - (e.changedTouches[0].pageY - this.touchStartY) * this.r);
+        this.setPosX(this.posXvalue - (e.changedTouches[0].pageX - this.touchStartX) * this.r);
 
         this.touchStartY = e.changedTouches[0].pageY;
         this.touchStartX = e.changedTouches[0].pageX;
@@ -719,7 +719,7 @@ export class ScrollView {
 
         if (this.hasScrollBarY && y < 20) {
             if (this.posYvalue === 0) { return true; }
-            this.posYvalue -= this.cellHeight * this.r;
+            this.setPosY(this.posYvalue - this.cellHeight * this.r);
             this.timeout = setTimeout(() => {
                 this.speed = +7;
                 this.runStart = -1;
@@ -733,7 +733,7 @@ export class ScrollView {
         if (this.hasScrollBarY && x >= canvasWidth - this.scrollbarSize &&
             y > canvasHeight - 20 - (this.hasScrollBarX ? this.scrollbarSize : 0)) {
             if (this.posYvalue === this.scrollBarPosMaxY) { return true; }
-            this.posYvalue += this.cellHeight * this.r;
+            this.setPosY(this.posYvalue + this.cellHeight * this.r);
             this.timeout = setTimeout(() => {
                 this.speed = -7;
                 this.runStart = -1;
@@ -745,7 +745,7 @@ export class ScrollView {
         }
 
         if (this.hasScrollBarY && x >= canvasWidth - this.scrollbarSize && y > this.scrollBarThumbMaxY) {
-            this.posYvalue += canvasHeight - 20;
+            this.setPosY(this.posYvalue + canvasHeight - 20);
             this.timeout = setTimeout(() => {
                 this.speed = -14;
                 this.runStart = -1;
@@ -757,7 +757,7 @@ export class ScrollView {
         }
 
         if (this.hasScrollBarY && x >= canvasWidth - this.scrollbarSize && y < this.scrollBarThumbMinY) {
-            this.posYvalue -= canvasHeight - 20 ;
+            this.setPosY(this.posYvalue - canvasHeight - 20);
             this.timeout = setTimeout(() => {
                 this.speed = +14;
                 this.runStart = -1;
@@ -774,7 +774,7 @@ export class ScrollView {
 
         if (this.hasScrollBarX && x < 20) {
             if (this.posXvalue === 0) { return true; }
-            this.posXvalue -= this.cellHeight * this.r;
+            this.setPosX(this.posXvalue - this.cellHeight * this.r);
             this.timeout = setTimeout(() => {
                 this.speed = +7;
                 this.runStart = -1;
@@ -788,7 +788,7 @@ export class ScrollView {
         if (this.hasScrollBarX && y >= canvasHeight - this.scrollbarSize &&
             x > canvasWidth - 20 - (this.hasScrollBarY ? this.scrollbarSize : 0)) {
             if (this.posXvalue === this.scrollBarPosMaxY) { return true; }
-            this.posXvalue += this.cellHeight * this.r;
+            this.setPosX(this.posXvalue + this.cellHeight * this.r);
             this.timeout = setTimeout(() => {
                 this.speed = -7;
                 this.runStart = -1;
@@ -800,7 +800,7 @@ export class ScrollView {
         }
 
         if (this.hasScrollBarX && y >= canvasHeight - this.scrollbarSize && x > this.scrollBarThumbMaxX) {
-            this.posXvalue += canvasHeight - 20;
+            this.setPosX(this.posXvalue + canvasHeight - 20);
             this.timeout = setTimeout(() => {
                 this.speed = -14;
                 this.runStart = -1;
@@ -812,7 +812,7 @@ export class ScrollView {
         }
 
         if (this.hasScrollBarX && y >= canvasHeight - this.scrollbarSize && x < this.scrollBarThumbMinX) {
-            this.posXvalue -= canvasHeight - 20 ;
+            this.setPosX(this.posXvalue - canvasHeight - 20);
             this.timeout = setTimeout(() => {
                 this.speed = +14;
                 this.runStart = -1;

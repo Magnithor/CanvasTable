@@ -209,19 +209,13 @@ export class OffscreenCanvasTableWorker<T = any> extends CustomCanvasTable {
                 case CanvasTableEditAction.moveNext:
                     if (this.column.length > col.index + 1) {
                         const column = this.column[col.index + 1];
-
-                        /*this.canvasTableEdit = new CanvasTableEdit(column, row, (this.data[row] as any)[column.field],
-                            this.cellHeight, this.onEditRemove);
-                            */
+                        this.updateForEdit(column, row);
                     }
                     break;
                 case CanvasTableEditAction.movePrev:
                         if (0 < col.index) {
                             const column = this.column[col.index - 1];
-                            /*
-                            this.canvasTableEdit = new CanvasTableEdit(column, row, (this.data[i] as any)[column.field],
-                                this.cellHeight, this.onEditRemove);
-                                */
+                            this.updateForEdit(column, row);
                         }
                         break;
             }
