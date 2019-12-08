@@ -2,6 +2,7 @@
 CanvasTable is Typescript library who draws a table on canvas.
 
 [Demo website where you can see component in action with table with 23.000 records](https://magni.strumpur.net/CanvasTable)
+[tsDoc](https://magni.strumpur.net/CanvasTable/docs/index.html)
 
 | npm | remarks |
 | ---- | -------- |
@@ -9,7 +10,8 @@ CanvasTable is Typescript library who draws a table on canvas.
 | mthb-offscreen-canvas-table | connect canvas and events to webworker |
 | mthb-offscreen-canvas-table-worker | draw on webworker |
 
-
+# TODO
+* Edit with commit and rollback
 
 # Supported
 * web worker

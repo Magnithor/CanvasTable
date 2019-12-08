@@ -11,9 +11,10 @@ If you like to use offscreenCanvas and/or keep the data in webworker then you us
 | mthb-offscreen-canvas-table-worker | draw on webworker |
 
 [Demo website where you can see component in action with table with 23.000 records](https://magni.strumpur.net/CanvasTable)
+[tsDoc](https://magni.strumpur.net/CanvasTable/docs/index.html)
 
 # TODO
-
+* Edit with commit and rollback
 
 # Supported
 * web worker
