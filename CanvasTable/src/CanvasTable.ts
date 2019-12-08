@@ -43,6 +43,7 @@ export { ICanvasTableColumnConf, Align, Sort, IGroupItem,
  *  /// <canvas id="canvas" style="width:400px; height: 400px"> </canvas>
  * const canvasTable = new CanvasTable("canvas", col, data);
  * ```
+ * @typeparam T - Type of objects the list contains
  */
 export class CanvasTable<T = any> extends CustomCanvasTable<T> {
     private readonly canvas: HTMLCanvasElement;
