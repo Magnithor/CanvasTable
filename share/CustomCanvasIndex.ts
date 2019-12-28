@@ -1,5 +1,11 @@
 export type RowItem = number | IGroupItem | null;
 
+export type RowItemSelect = null | {
+    path: Array<IGroupItems | IIndex>;
+    select: number | IGroupItem;
+    index: number;
+};
+
 export enum ItemIndexType { GroupItems, Index }
 export interface IGroupItems {
     type: ItemIndexType.GroupItems;

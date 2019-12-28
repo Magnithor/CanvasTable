@@ -3,7 +3,7 @@ import { Align, CustomFilter, CustomRowColStyle, CustomSort,
          ICanvasTableColumn, ICanvasTableColumnConf, ICanvasTableColumnSort,
          ICanvasTableRowColStyle, IUpdateRect, Sort } from "./CanvasTableColum";
 import { ICanvasTableTouchEvent } from "./CanvasTableTouchEvent";
-import { IGroupItem, IGroupItems, IIndex, IndexType, ItemIndexType, RowItem } from "./CustomCanvasIndex";
+import { IGroupItem, IGroupItems, IIndex, IndexType, ItemIndexType, RowItem, RowItemSelect } from "./CustomCanvasIndex";
 import { IDrawable } from "./Drawable";
 import { EventManagerClick, EventManagerClickHeader, EventManagerReCalcForScrollView } from "./EventManager";
 import { IScrollViewConfig, ScrollView } from "./ScrollView";
@@ -188,7 +188,7 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
     private sortCol?: Array<ICanvasTableColumnSort<T>>;
     private groupByCol?: ICanvasTableGroup[];
     private overRowValue?: number;
-    private selectRowValue: RowItem = null;
+    private selectRowValue: RowItemSelect = null;
     private selectColValue?: ICanvasTableColumn<T>;
     private columnResize?: {x: number, col: ICanvasTableColumn<T>};
     private touchClick?: {timeout: number, x: number, y: number};
@@ -577,7 +577,7 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
             this.updateForEdit(col, row);
         }
 
-        this.fireDblClick(row, col);
+        this.fireDblClick(row === null ? null : row.select, col);
     }
 
     protected abstract updateForEdit(orginalCol: ICanvasTableColumn<T>, row: number): void;
@@ -603,7 +603,7 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
         }
 
         const row =  this.findRowByPos(y);
-        if (typeof row === "number" && col !== null) {
+        if (row && typeof row.select === "number" && col !== null) {
             if (this.selectColValue !== col || this.selectRowValue !== row) {
                 this.selectColValue = col;
                 this.selectRowValue = row;
@@ -611,14 +611,14 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
             }
         } else {
             if (this.dataIndex.type === ItemIndexType.GroupItems) {
-                if (row !== null && typeof row === "object") {
-                    row.isExpended = !row.isExpended;
+                if (row !== null && typeof row.select === "object") {
+                    row.select.isExpended = !row.select.isExpended;
                     this.askForReDraw();
                     this.reCalcForScrollView();
                 }
             }
         }
-        this.fireClick(row, col);
+        this.fireClick(row === null ? null : row.select, col);
     }
     protected mouseMove(x: number, y: number) {
         if (!this.scrollView) { return; }
@@ -682,8 +682,32 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
     }
 
     protected keydown(keycode: number) {
-        if (this.scrollView && this.scrollView.OnKeydown(keycode)) {
-            this.setOverRow(undefined);
+        if (this.selectColValue !== undefined &&
+            this.selectRowValue !== null && typeof this.selectRowValue.select === "number") {
+                const index = this.selectRowValue.path[this.selectRowValue.path.length - 1];
+                if (index.type === ItemIndexType.Index) {
+                    switch (keycode) {
+                case 40:
+                    if (this.selectRowValue.index === index.list.length - 1) { return; }
+                    this.selectRowValue.index++;
+                    this.selectRowValue.select = index.list[this.selectRowValue.index];
+                    this.askForReDraw();
+                    break;
+                case 38:
+                    if (this.selectRowValue.index === 0) { return; }
+                    this.selectRowValue.index--;
+                    this.selectRowValue.select = index.list[this.selectRowValue.index];
+                    this.askForReDraw();
+                    break;
+                default:
+                    console.log(keycode);
+                    break;
+                }
+            }
+        } else {
+            if (this.scrollView && this.scrollView.OnKeydown(keycode)) {
+                this.setOverRow(undefined);
+            }
         }
     }
 
@@ -700,12 +724,12 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
                 const col = this.findColByPos(x);
 
                 if (y > this.headerHeight) {
-                    if (row !== null && typeof row === "object") {
-                        row.isExpended = !row.isExpended;
+                    if (row !== null && typeof row.select === "object") {
+                        row.select.isExpended = !row.select.isExpended;
                         this.askForReDraw();
                         this.reCalcForScrollView();
                     }
-                    this.fireClick(row, col);
+                    this.fireClick(row === null ? null : row.select, col);
                 } else {
                     const colSplit = this.findColSplit(x);
                     if (colSplit !== null) {
@@ -824,12 +848,12 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
 
         return null;
     }
-    protected findRowByPos(y: number): RowItem {
+    protected findRowByPos(y: number): RowItemSelect {
         if (this.dataIndex === undefined || this.scrollView === undefined) { return null; }
         let pos = -this.scrollView.getPosY() / this.r + this.headerHeight;
         const cellHeight = this.cellHeight;
 
-        const find = (items: IGroupItems | IIndex): number | IGroupItem | null => {
+        const find = (items: IGroupItems | IIndex): RowItemSelect => {
             let i;
             if (items.type === ItemIndexType.Index) {
                 const h = items.list.length * cellHeight;
@@ -838,17 +862,21 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
                 } else {
                     i = Math.trunc((-pos + y) / cellHeight);
                     pos += i * cellHeight;
-                    return i < items.list.length ? items.list[i] : null;
+                    if (i < items.list.length) {
+                        return {path: [items], select: items.list[i], index: i};
+                    }
+                    return null;
                 }
             } else {
                 for (i = 0; i < items.list.length; i++) {
                     if (pos < y && y < pos + cellHeight) {
-                        return items.list[i];
+                        return {path: [items], select: items.list[i], index: i};
                     }
                     pos += cellHeight;
                     if (!items.list[i].isExpended) { continue; }
                     const f = find(items.list[i].child);
                     if (f !== null) {
+                        f.path.unshift(items);
                         return f;
                     }
                 }
@@ -1660,7 +1688,9 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
             this.context.stroke();
         }
 
-        if (this.allowEdit && this.isFocus && this.selectRowValue === indexId && this.selectColValue !== undefined) {
+        if (this.allowEdit && this.isFocus &&
+             this.selectRowValue && this.selectRowValue.select === indexId &&
+             this.selectColValue !== undefined) {
             for (let col = colStart; col < colEnd; col++) {
                 if (this.selectColValue.index === col) {
                     const lastStroke = this.context.strokeStyle;
