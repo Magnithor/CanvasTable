@@ -119,6 +119,7 @@ declare let data: IData[];
 const filter = document.getElementById("filter") as HTMLInputElement;
 const canvasTable = new CanvasTable<IData>("canvas", column, data);
 canvasTable.addEvent("reCalcForScrollView", (a: any, width: number, height: number) => {
+    // tslint:disable-next-line: no-console
     console.log({width, height});
 });
 canvasTable.setAllowEdit(true);
@@ -138,8 +139,14 @@ canvasTable.setFilter((dbData: any, row: any, col: ICanvasTableColumnConf[]) => 
 });
 canvasTable.setSort([{ col: column[0], sort: Sort.descending }]);
 group();
-canvasTable.addEvent("click", (table, row, col) => { console.log(row, col); });
-canvasTable.addEvent("clickHeader", (table, col) => { console.log(col); });
+canvasTable.addEvent("click", (table, row, col) => {
+        // tslint:disable-next-line: no-console
+        console.log(row, col);
+});
+canvasTable.addEvent("clickHeader", (table, col) => {
+        // tslint:disable-next-line: no-console
+        console.log(col);
+});
 
 if (filter != null) {
     filter.addEventListener("keyup", () => {

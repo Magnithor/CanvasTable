@@ -455,6 +455,10 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
         this.askForReIndex();
     }
     public abstract resize(): void;
+    protected logError(value: string, value2?: any, value3?: any): void {
+        // tslint:disable-next-line: no-console
+        console.log(value, value2, value3);
+    }
     protected setOverRow(value: number | undefined) {
         if (value !== this.overRowValue) {
             const temp = this.overRowValue;
@@ -510,7 +514,7 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
             try {
                 this.eventDblClick[i](this, row, col === null ? null : col.orginalCol);
             } catch {
-                console.log("fireClick");
+                this.logError("fireDblClick");
             }
         }
     }
@@ -520,7 +524,7 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
             try {
                 this.eventClick[i](this, row, col === null ? null : col.orginalCol);
             } catch {
-                console.log("fireClick");
+                this.logError("fireClick");
             }
         }
     }
@@ -530,7 +534,7 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
             try {
                 this.eventClickHeader[i](this, col === null ? null : col.orginalCol);
             } catch {
-                console.log("fireClickHeader");
+                this.logError("fireClickHeader");
             }
         }
     }
@@ -542,7 +546,7 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
                 try {
                     this.eventReCalcForScrollView[i](this, width, height, scrollView);
                 } catch {
-                    console.log("fireReCalcForScrollView");
+                    this.logError("fireReCalcForScrollView");
                 }
             }
         }
@@ -687,20 +691,30 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
                 const index = this.selectRowValue.path[this.selectRowValue.path.length - 1];
                 if (index.type === ItemIndexType.Index) {
                     switch (keycode) {
-                case 40:
+                case 40: // up
                     if (this.selectRowValue.index === index.list.length - 1) { return; }
                     this.selectRowValue.index++;
                     this.selectRowValue.select = index.list[this.selectRowValue.index];
                     this.askForReDraw();
                     break;
-                case 38:
+                case 38: // down
                     if (this.selectRowValue.index === 0) { return; }
                     this.selectRowValue.index--;
                     this.selectRowValue.select = index.list[this.selectRowValue.index];
                     this.askForReDraw();
                     break;
+                case 37: // left
+                    if (this.selectColValue.index === 0) { return; }
+                    this.selectColValue =  this.column[this.selectColValue.index - 1];
+                    this.askForReDraw();
+                    break;
+                case 39: // right
+                    if (this.selectColValue.index === this.column.length - 1) { return; }
+                    this.selectColValue =  this.column[this.selectColValue.index + 1];
+                    this.askForReDraw();
+                    break;
                 default:
-                    console.log(keycode);
+                    // console.log(keycode);
                     break;
                 }
             }
@@ -1361,7 +1375,7 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
                         try {
                             g.list[i].aggregate = groupItem.aggregate(g.list[i]);
                         } catch {
-                            console.log("err2");
+                            this.logError("err2");
                         }
                     }
                 }
@@ -1372,7 +1386,7 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
                     try {
                         g.list[i].aggregate = groupItem.aggregate(g.list[i]);
                     } catch {
-                        console.log("err");
+                        this.logError("err");
                     }
                 }
             }
@@ -1456,7 +1470,7 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
                         renderer(groupItem, this, this.context,
                                 left, top, right, bottom, w, height, this.r);
                     } catch (e) {
-                        console.log("CanvasTable drawGroupItem renderer", this.groupByCol[level], e);
+                        this.logError("CanvasTable drawGroupItem renderer", this.groupByCol[level], e);
                     }
                     this.context.restore();
                 } else {
@@ -1576,7 +1590,7 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
                         left, top, left + width, top + h, width, h, this.r,
                         data, this.data[indexId], this.data);
                 } catch (e) {
-                    console.log("CanvasTable renderer", colItem.header, e);
+                    this.logError("CanvasTable renderer", colItem.header, e);
                 }
                 this.context.restore();
                 continue;
@@ -1588,7 +1602,7 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
                     customStyle = this.customRowColStyle(
                         this.data, this.data[indexId], colItem.orginalCol, isOver, isSepra, data);
                 } catch {
-                    console.log("Canvas Table customRowColStyle");
+                    this.logError("Canvas Table customRowColStyle");
                 }
             }
 

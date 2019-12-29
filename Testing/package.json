@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "tlint": "tslint -p tsconfig.json",
-    "lint": "tslint",
+    "lint": "tslint -p tsconfig.json",
     "build": "webpack",
     "start": "webpack-dev-server",
     "typedoc": "typedoc --out docs --excludePrivate --excludeNotExported --excludeProtected ..\\CanvasTable\\src ..\\OffscreenCanvasTable\\src ..\\OffscreenCanvasTableWorker\\src"

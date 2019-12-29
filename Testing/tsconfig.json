@@ -20,8 +20,7 @@
         "./../share/Drawable.ts",
         "./../share/EventManager.ts",
         "./../share/OffscreenCanvasTableMessage.ts",
-        "./../share/ScrollView.ts",
-        
+        "./../share/ScrollView.ts",        
         "./../CanvasTable/src/CanvasTable.ts",
         ]
 }
