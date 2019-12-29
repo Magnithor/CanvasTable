@@ -686,7 +686,8 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
     }
 
     protected keydown(keycode: number) {
-        if (this.selectColValue !== undefined &&
+        if (this.scrollView !== undefined &&
+            this.selectColValue !== undefined &&
             this.selectRowValue !== null && typeof this.selectRowValue.select === "number") {
                 const index = this.selectRowValue.path[this.selectRowValue.path.length - 1];
                 if (index.type === ItemIndexType.Index) {
@@ -706,11 +707,17 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
                 case 37: // left
                     if (this.selectColValue.index === 0) { return; }
                     this.selectColValue =  this.column[this.selectColValue.index - 1];
+                    if (this.selectColValue.leftPos < this.scrollView.getPosX()) {
+                        this.scrollView.setPosX(this.selectColValue.leftPos);
+                    }
                     this.askForReDraw();
                     break;
                 case 39: // right
                     if (this.selectColValue.index === this.column.length - 1) { return; }
                     this.selectColValue =  this.column[this.selectColValue.index + 1];
+                    if (this.selectColValue.rightPos > this.scrollView.getPosX() + this.canvasWidth) {
+                        this.scrollView.setPosX(this.selectColValue.rightPos - this.canvasWidth);
+                    }
                     this.askForReDraw();
                     break;
                 default:
@@ -1712,8 +1719,9 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
                     this.context.strokeStyle = this.config.selectLineColor;
                     this.context.lineWidth = 3;
                     this.context.beginPath();
-                    this.context.rect(this.selectColValue.leftPos + 2, pos + 4 * this.r - this.cellHeight * this.r + 2,
-                         this.selectColValue.width * this.r - 4, this.cellHeight * this.r - 4);
+                    this.context.rect(-this.scrollView.getPosX() + this.selectColValue.leftPos + 2,
+                        pos + 4 * this.r - this.cellHeight * this.r + 2,
+                        this.selectColValue.width * this.r - 4, this.cellHeight * this.r - 4);
                     this.context.stroke();
                     this.context.strokeStyle = lastStroke;
                     this.context.lineWidth = lastLineWidth;
