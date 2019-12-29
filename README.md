@@ -23,7 +23,7 @@ If you like to use offscreenCanvas and/or keep the data in webworker then you us
 
 [Demo website where you can see component in action with table with 23.000 records](https://magni.strumpur.net/CanvasTable)
 # TODO
-* Edit with commit and rollback
+* keyboard open close group
 
 # Supported
 * web worker
@@ -38,3 +38,5 @@ If you like to use offscreenCanvas and/or keep the data in webworker then you us
 * auto scroll X and Y
 * draw sort arrow on header 
 * sort when click on header
+* Edit with commit and rollback
+* keyboard select 

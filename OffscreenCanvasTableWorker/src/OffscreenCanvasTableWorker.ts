@@ -150,6 +150,8 @@ export class OffscreenCanvasTableWorker<T = any> extends CustomCanvasTable {
             return;
         }
 
+        const value = this.getUpdateDataOrData(row, col.field);
+
         const data: OffscreenCanvasMesssageFromWorker<T> = {
             cellHeight: this.cellHeight,
             col,
@@ -157,7 +159,7 @@ export class OffscreenCanvasTableWorker<T = any> extends CustomCanvasTable {
             rect,
             row,
             type: OffscreenCanvasMesssageType.updateForEdit,
-            value: (this.data[row] as any)[col.field],
+            value,
         };
 
         postMessage(data);

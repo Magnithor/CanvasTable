@@ -140,6 +140,15 @@ export class ScrollView {
     public getScrollBarPosMaxX(): number {
         return this.scrollBarPosMaxX;
     }
+    public getHasScrollBarY(): boolean {
+        return this.hasScrollBarY;
+    }
+    public getHasScrollBarX(): boolean {
+        return this.hasScrollBarX;
+    }
+    public getScrollbarSize(): number {
+        return this.scrollbarSize;
+    }
 
     public draw() {
         if (this.height === undefined || this.width === undefined) {

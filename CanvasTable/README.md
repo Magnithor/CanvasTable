@@ -11,7 +11,7 @@ CanvasTable is Typescript library who draws a table on canvas.
 | mthb-offscreen-canvas-table-worker | draw on webworker |
 
 # TODO
-* Edit with commit and rollback
+* keyboard open close group
 
 # Supported
 * web worker
@@ -26,3 +26,5 @@ CanvasTable is Typescript library who draws a table on canvas.
 * auto scroll X and Y
 * draw sort arrow on header 
 * sort when click on header
+* Edit with commit and rollback
+* keyboard select 

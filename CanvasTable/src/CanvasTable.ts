@@ -240,6 +240,8 @@ export class CanvasTable<T = any> extends CustomCanvasTable<T> {
                         }
                         break;
             }
+        } else {
+            this.canvas.focus();
         }
     }
     private updateEditLocation() {

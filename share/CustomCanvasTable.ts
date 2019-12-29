@@ -575,10 +575,10 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
             return;
         }
         const row =  this.findRowByPos(y);
-        if (this.allowEdit && typeof row === "number" && col !== null) {
+        if (this.allowEdit && row && typeof row.select === "number" && col !== null) {
             if (!col.allowEdit) { return; }
 
-            this.updateForEdit(col, row);
+            this.updateForEdit(col, row.select);
         }
 
         this.fireDblClick(row === null ? null : row.select, col);
@@ -691,45 +691,68 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
             this.selectRowValue !== null && typeof this.selectRowValue.select === "number") {
                 const index = this.selectRowValue.path[this.selectRowValue.path.length - 1];
                 if (index.type === ItemIndexType.Index) {
+                    let y;
                     switch (keycode) {
-                case 40: // up
-                    if (this.selectRowValue.index === index.list.length - 1) { return; }
-                    this.selectRowValue.index++;
-                    this.selectRowValue.select = index.list[this.selectRowValue.index];
-                    this.askForReDraw();
-                    break;
-                case 38: // down
-                    if (this.selectRowValue.index === 0) { return; }
-                    this.selectRowValue.index--;
-                    this.selectRowValue.select = index.list[this.selectRowValue.index];
-                    this.askForReDraw();
-                    break;
-                case 37: // left
-                    if (this.selectColValue.index === 0) { return; }
-                    this.selectColValue =  this.column[this.selectColValue.index - 1];
-                    if (this.selectColValue.leftPos < this.scrollView.getPosX()) {
-                        this.scrollView.setPosX(this.selectColValue.leftPos);
+                        case 40: // Down
+                            if (this.selectRowValue.index === index.list.length - 1) { return; }
+                            this.selectRowValue.index++;
+                            this.selectRowValue.select = index.list[this.selectRowValue.index];
+                            y = this.findTopPosByRow(this.selectRowValue);
+                            if (y !== undefined) {
+                                y = y - (this.canvasHeight -
+                                    ((this.headerHeight +
+                                        (this.scrollView.getHasScrollBarX() ? this.scrollView.getScrollbarSize() : 0))
+                                        * this.r));
+                                if (this.scrollView.getPosY() < y) {
+                                    this.scrollView.setPosY(y);
+                                }
+                            }
+                            this.askForReDraw();
+                            break;
+                        case 38: // Up
+                            if (this.selectRowValue.index === 0) { return; }
+                            this.selectRowValue.index--;
+                            this.selectRowValue.select = index.list[this.selectRowValue.index];
+                            y = this.findTopPosByRow(this.selectRowValue);
+                            if (y !== undefined) {
+                                y = y - this.headerHeight * this.r;
+                                if (this.scrollView.getPosY() > y) {
+                                    this.scrollView.setPosY(y);
+                                }
+                            }
+                            this.askForReDraw();
+                            break;
+                        case 37: // Left
+                            if (this.selectColValue.index === 0) { return; }
+                            this.selectColValue =  this.column[this.selectColValue.index - 1];
+                            if (this.selectColValue.leftPos < this.scrollView.getPosX()) {
+                                this.scrollView.setPosX(this.selectColValue.leftPos);
+                            }
+                            this.askForReDraw();
+                            break;
+                        case 39: // Right
+                            if (this.selectColValue.index === this.column.length - 1) { return; }
+                            this.selectColValue =  this.column[this.selectColValue.index + 1];
+                            if (this.selectColValue.rightPos > this.scrollView.getPosX() + this.canvasWidth) {
+                                this.scrollView.setPosX(this.selectColValue.rightPos - this.canvasWidth);
+                            }
+                            this.askForReDraw();
+                            break;
+                        case 13: // Enter
+                            if (this.allowEdit && typeof this.selectRowValue.select === "number") {
+                                if (!this.selectColValue.allowEdit) { return; }
+                                this.updateForEdit(this.selectColValue, this.selectRowValue.select);
+                            }
+                        default:
+                            // console.log(keycode);
+                            break;
                     }
-                    this.askForReDraw();
-                    break;
-                case 39: // right
-                    if (this.selectColValue.index === this.column.length - 1) { return; }
-                    this.selectColValue =  this.column[this.selectColValue.index + 1];
-                    if (this.selectColValue.rightPos > this.scrollView.getPosX() + this.canvasWidth) {
-                        this.scrollView.setPosX(this.selectColValue.rightPos - this.canvasWidth);
-                    }
-                    this.askForReDraw();
-                    break;
-                default:
-                    // console.log(keycode);
-                    break;
+                }
+            } else {
+                if (this.scrollView && this.scrollView.OnKeydown(keycode)) {
+                    this.setOverRow(undefined);
                 }
             }
-        } else {
-            if (this.scrollView && this.scrollView.OnKeydown(keycode)) {
-                this.setOverRow(undefined);
-            }
-        }
     }
 
     protected TouchStart(e: ICanvasTableTouchEvent, offsetLeft: number, offsetTop: number) {
@@ -907,23 +930,41 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
 
         return find(this.dataIndex);
     }
-    protected findTopPosByRow(row: number): number | undefined {
-        if (this.dataIndex === undefined || this.scrollView === undefined) { return undefined; }
+    protected findTopPosByRow(rowValue: number | RowItemSelect): number | undefined {
+        if (this.dataIndex === undefined || this.scrollView === undefined || rowValue === null) { return undefined; }
+        let row: number | undefined;
+        let rowGroup: IGroupItem | undefined;
+        if (typeof rowValue === "number") {
+            row = rowValue;
+        } else {
+            if (typeof rowValue.select === "number") {
+                row = rowValue.select;
+            } else {
+                rowGroup = rowValue.select;
+            }
+        }
         let pos = this.headerHeight * this.r;
         const cellHeight = this.cellHeight * this.r;
 
         const find = (items: IGroupItems | IIndex): number | undefined => {
             let i;
             if (items.type === ItemIndexType.Index) {
-                for (i = 0; i < items.list.length; i++) {
-                    if (items.list[i] === row) {
-                        return pos;
-                    }
+                if (row === undefined) {
+                    pos += cellHeight * items.list.length;
+                } else {
+                    for (i = 0; i < items.list.length; i++) {
+                        if (items.list[i] === row) {
+                            return pos;
+                        }
 
-                    pos += cellHeight;
+                        pos += cellHeight;
+                    }
                 }
             } else {
                 for (i = 0; i < items.list.length; i++) {
+                    if (items.list[i] === rowGroup) {
+                        return pos;
+                    }
                     pos += cellHeight;
                     if (!items.list[i].isExpended) { continue; }
                     const f = find(items.list[i].child);

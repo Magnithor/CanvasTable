@@ -259,6 +259,10 @@ export class OffscreenCanvasTable <T = any> {
             row,
             type: OffscreenCanvasMesssageType.onEditRemoveUpdateForEdit,
         });
+
+        if (action === undefined) {
+            this.canvas.focus();
+        }
     }
     private updateEditLocation(rect: IUpdateRect) {
         if (!this.canvasTableEdit) {
