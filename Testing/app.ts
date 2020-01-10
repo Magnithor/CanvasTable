@@ -1,5 +1,5 @@
 ﻿import { Align, ICanvasTableColumnConf, Sort } from "../share/CanvasTableColum";
-import { IGroupItem } from "../share/CustomCanvasIndex";
+import { CanvasTableMode } from "../share/CanvasTableMode";
 import { CanvasTable, ICanvasContext2D } from "./../CanvasTable/src/CanvasTable";
 import { CustomCanvasTable } from "./../share/CustomCanvasTable";
 
@@ -27,11 +27,11 @@ function customDraw(canvasTable1: CustomCanvasTable, context: CanvasRenderingCon
     context.stroke();
 }
 
-function g1(v: IGroupItem): string {
+function g1(v: any): string {
     return v.child.list.length.toString();
 }
 
-function g2(v: IGroupItem): string {
+function g2(v: any): string {
     return v.child.list.length.toString();
 }
 
@@ -118,6 +118,7 @@ declare let data: IData[];
 
 const filter = document.getElementById("filter") as HTMLInputElement;
 const canvasTable = new CanvasTable<IData>("canvas", column, data);
+canvasTable.setTableMode(CanvasTableMode.RowMode);
 canvasTable.addEvent("reCalcForScrollView", (a: any, width: number, height: number) => {
     // tslint:disable-next-line: no-console
     console.log({width, height});
@@ -137,7 +138,7 @@ canvasTable.setFilter((dbData: any, row: any, col: ICanvasTableColumnConf[]) => 
              (row.name || "").indexOf(filter.value) === -1 &&
              (row.subcountry || "").indexOf(filter.value) === -1);
 });
-canvasTable.setSort([{ col: column[0], sort: Sort.descending }]);
+canvasTable.setSort([{ col: column[0], sort: Sort.ascending }]);
 group();
 canvasTable.addEvent("click", (table, row, col) => {
         // tslint:disable-next-line: no-console
@@ -153,6 +154,8 @@ if (filter != null) {
         canvasTable.askForReIndex();
     });
 }
+
+canvasTable.setRowTableGroup("country");
 
 const w = window as any;
 w.canvasTable = canvasTable;

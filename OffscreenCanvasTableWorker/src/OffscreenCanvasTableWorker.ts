@@ -2,16 +2,17 @@ import { ICanvasContext2D } from "../../share/CanvasContext2D";
 import { Align, CustomFilter, CustomSort, ICanvasTableColumn, ICanvasTableColumnConf,
      ICanvasTableColumnSort, Sort } from "../../share/CanvasTableColum";
 import { CanvasTableEditAction } from "../../share/CanvasTableEditAction";
-import { IGroupItem } from "../../share/CustomCanvasIndex";
+import { CanvasTableMode } from "../../share/CanvasTableMode";
+import { CanvasTableRowItem } from "../../share/CustomCanvasIndex";
 import { CustomCanvasTable, ICanvasTableConfig, ICanvasTableGroup } from "../../share/CustomCanvasTable";
 import { OffscreenCanvasMesssageFromWorker, OffscreenCanvasMesssageToWorker, OffscreenCanvasMesssageType } from "../../share/OffscreenCanvasTableMessage";
 import { ScrollView } from "../../share/ScrollView";
 
 declare function postMessage(message: any): void;
 
-export { ICanvasTableColumnConf, Align, Sort, IGroupItem,
+export { ICanvasTableColumnConf, Align, Sort, CanvasTableRowItem,
     ICanvasTableGroup, ICanvasTableColumnSort, CustomSort, CustomFilter,
-    CustomCanvasTable, ICanvasContext2D };
+    CustomCanvasTable, ICanvasContext2D, CanvasTableMode };
 
 export class OffscreenCanvasTableWorker<T = any> extends CustomCanvasTable {
 
