@@ -7,7 +7,7 @@ import { ICanvasTableTouchEvent } from "./CanvasTableTouchEvent";
 import { CanvasTableIndex, CanvasTableIndexs, CanvasTableIndexType, CanvasTableRowItem,
          CanvasTableRowItemSelect, ICanvasTableGroupItemColMode, ICanvasTableGroupItemRowMode,
          ICanvasTableGroupItemRowsRowMode, ICanvasTableGroupItemsColMode, ICanvasTableGroupItemsRowMode,
-         ICanvasTableIndexsColMode, ICanvasTableIndexsRowMode, ICanvasTableRowItemSelectColMode, CanvasTableRowItemRowMode } from "./CustomCanvasIndex";
+         ICanvasTableIndexsColMode, ICanvasTableIndexsRowMode, ICanvasTableRowItemSelectColMode } from "./CustomCanvasIndex";
 import { IDrawable } from "./Drawable";
 import { EventManagerClick, EventManagerClickHeader, EventManagerReCalcForScrollView } from "./EventManager";
 import { IScrollViewConfig, ScrollView } from "./ScrollView";
@@ -342,6 +342,9 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
             this.tableMode = tableMode;
             this.askForReIndex();
         }
+    }
+    public getTableMode(): CanvasTableMode {
+        return this.tableMode;
     }
 
     /**
@@ -680,7 +683,6 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
             if (result === null) { return; }
 
             const { row, col } = result;
-            console.log(row, col);
             if (col === null) {
                 row.isExpended = !row.isExpended;
                 this.askForReDraw();
@@ -831,25 +833,37 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
             const y = e.changedTouches[0].pageY - offsetTop;
             const x = e.changedTouches[0].pageX - offsetLeft;
             this.touchClick = {timeout: setTimeout(() => {
-                const row = this.findRowByPos(y);
-                const col = this.findColByPos(x);
+                if (this.dataIndex === undefined) { return; }
+                if (this.dataIndex.mode === CanvasTableMode.ColMode) {
+                    const row = this.findRowByPos(y);
+                    const col = this.findColByPos(x);
 
-                if (y > this.headerHeight) {
-                    if (row !== null && typeof row.select === "object") {
-                        row.select.isExpended = !row.select.isExpended;
+                    if (y > this.headerHeight) {
+                        if (row !== null && typeof row.select === "object") {
+                            row.select.isExpended = !row.select.isExpended;
+                            this.askForReDraw();
+                            this.reCalcForScrollView();
+                        }
+                        this.fireClick(row === null ? null : row.select, col);
+                    } else {
+                        const colSplit = this.findColSplit(x);
+                        if (colSplit !== null) {
+                            this.columnResize = {x, col: this.column[colSplit]};
+                            return;
+                        }
+
+                        this.clickOnHeader(col);
+                        this.fireClickHeader(col);
+                    }
+                } else {
+                    const result =  this.findColAndRowInRowMode(x, y);
+                    if (result === null) { return; }
+                    const {col, row} = result;
+                    if (col === null) {
+                        row.isExpended = !row.isExpended;
                         this.askForReDraw();
                         this.reCalcForScrollView();
                     }
-                    this.fireClick(row === null ? null : row.select, col);
-                } else {
-                    const colSplit = this.findColSplit(x);
-                    if (colSplit !== null) {
-                        this.columnResize = {x, col: this.column[colSplit]};
-                        return;
-                    }
-
-                    this.clickOnHeader(col);
-                    this.fireClickHeader(col);
                 }
             }, 250), x, y};
         } else {
@@ -991,7 +1005,7 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
             }
 
             return null;
-        }
+        };
 
         return find(this.dataIndex.index);
 
@@ -1210,21 +1224,20 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
             }
         }
 
-        if (this.groupByCol && this.groupByCol.length > 0) {
-            const groupByCol = this.groupByCol;
-            const groupItems: ICanvasTableGroupItemsColMode = {type: CanvasTableIndexType.GroupItems, list: []};
-            let oldIndex: ICanvasTableGroupItemsColMode | undefined;
-            if (this.dataIndex && this.dataIndex.mode === CanvasTableMode.ColMode &&
-                this.dataIndex.index.type === CanvasTableIndexType.GroupItems) {
-                    oldIndex = this.dataIndex.index;
-            }
+        if (this.rowTableGroup && this.tableMode === CanvasTableMode.RowMode) {
+            if (this.groupByCol && this.groupByCol.length > 0) {
+                const groupItems: ICanvasTableGroupItemsRowMode = { type: CanvasTableIndexType.GroupItems, list: []};
+                this.groupRow(groupItems, index, 0, this.groupByCol, this.rowTableGroup,
+                    (this.dataIndex !== undefined && this.dataIndex.index.type === CanvasTableIndexType.GroupItems) ?
+                    this.dataIndex.index as ICanvasTableGroupItemsRowMode : undefined);
 
-            this.group(groupItems, index, 0, groupByCol, oldIndex);
-            this.dataIndex = { mode: CanvasTableMode.ColMode, index: groupItems };
-        } else {
-            if (this.rowTableGroup && this.tableMode === CanvasTableMode.RowMode) {
+                this.dataIndex = {
+                    index: groupItems,
+                    mode: CanvasTableMode.RowMode,
+                };
+            } else {
                 const groupItems: ICanvasTableGroupItemRowsRowMode = { type: CanvasTableIndexType.GroupRows, list: []};
-                this.groupRow(groupItems, index, this.rowTableGroup,
+                this.groupRowItem(groupItems, index, this.rowTableGroup,
                     (this.dataIndex !== undefined && this.dataIndex.index.type === CanvasTableIndexType.GroupRows) ?
                     this.dataIndex.index : undefined);
 
@@ -1232,7 +1245,20 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
                     index: groupItems,
                     mode: CanvasTableMode.RowMode,
                 };
-            } else {
+            }
+        } else {
+        if (this.groupByCol && this.groupByCol.length > 0) {
+            const groupByCol = this.groupByCol;
+            const groupItems: ICanvasTableGroupItemsColMode = {type: CanvasTableIndexType.GroupItems, list: []};
+            let oldIndex: ICanvasTableGroupItemsColMode | undefined;
+            if (this.dataIndex &&
+                this.dataIndex.index.type === CanvasTableIndexType.GroupItems) {
+                    oldIndex = this.dataIndex.index as ICanvasTableGroupItemsColMode;
+            }
+
+            this.group(groupItems, index, 0, groupByCol, oldIndex);
+            this.dataIndex = { mode: CanvasTableMode.ColMode, index: groupItems };
+        } else {
                 this.dataIndex =  {
                     index: { type: CanvasTableIndexType.Index, list: index },
                     mode: CanvasTableMode.ColMode,
@@ -1244,13 +1270,15 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
     protected reCalcForScrollView() {
         if (this.dataIndex === undefined) {return; }
         let w: number | undefined = 1;
-        if (this.column) {
-            let i;
-            for (i = 0; i < this.column.length; i++) {
-                w += this.column[i].width * this.r + 0;
+        if (this.dataIndex.mode === CanvasTableMode.ColMode) {
+            if (this.column) {
+                let i;
+                for (i = 0; i < this.column.length; i++) {
+                    w += this.column[i].width * this.r + 0;
+                }
+            } else {
+                w = undefined;
             }
-        } else {
-            w = undefined;
         }
 
         let h = 0;
@@ -1373,11 +1401,15 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
             case CanvasTableIndexType.GroupItems:
                 pos = -this.scrollView.getPosY();
                 maxPos = this.canvasHeight + this.cellHeight + 5 * this.r;
-                pos += 14 * this.r + height;
+                pos += (this.dataIndex.mode === CanvasTableMode.ColMode ? 14 : -4) * this.r + height;
                 i = 0;
+                const w = (this.dataIndex.mode === CanvasTableMode.ColMode) ? Math.min(
+                    -posX +
+                    this.column[this.column.length - 1].rightPos, this.canvasWidth)
+                    : this.canvasWidth;
                 while (pos < maxPos && index.list.length > i) {
                     const item = index.list[i];
-                    pos = this.drawGroupItem(this.context, 1, item, pos, posX, height, maxPos, offsetLeft,
+                    pos = this.drawGroupItem(this.context, 1, item, pos, posX, w, height, maxPos, offsetLeft,
                                              colStart, colEnd, drawConf);
                     i++;
                 }
@@ -1662,23 +1694,99 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
 
         }
     }
-    private groupRow(g: ICanvasTableGroupItemRowsRowMode, index: number[],
-                     rowTableGroup: ICanvasTableGroup, old: ICanvasTableGroupItemRowsRowMode | undefined) {
+
+    private groupRow(g: ICanvasTableGroupItemsRowMode,
+                     index: number[], level: number,
+                     groupByCol: ICanvasTableGroup[], rowTableGroup: ICanvasTableGroup,
+                     old: ICanvasTableGroupItemsRowMode | undefined) {
+        const r = new Map<string, number[]>();
+        let i;
+        const groupItem = groupByCol[level];
+        for (i = 0; i < index.length; i++) {
+            const id = index[i];
+            const c = String(this.getUpdateDataOrData(id, groupItem.field));
+            const d = r.get(c);
+            if (d !== undefined) {
+                d.push(id);
+            } else {
+                r.set(c, [id]);
+            }
+        }
+
+        level++;
+        const keys = r.keys();
+        let f = keys.next();
+        while (!f.done) {
+            const caption = f.value;
+            const ids = r.get(caption);
+            if (!ids) { break; }
+
+            let isExpended = false;
+            let oldItem: ICanvasTableGroupItemRowMode | undefined ;
+            if (old !== undefined) {
+                let oldIndex;
+                for (oldIndex = 0; oldIndex < old.list.length; oldIndex++) {
+                    oldItem = old.list[oldIndex];
+                    if (oldItem.caption === caption) {
+                        isExpended = oldItem.isExpended;
+                        break;
+                    }
+                }
+            }
+
+            if (level === groupByCol.length) {
+                const child: ICanvasTableGroupItemRowsRowMode = {
+                    list: [],
+                    type: CanvasTableIndexType.GroupRows,
+                };
+                this.groupRowItem(child, ids, rowTableGroup,
+                    (oldItem !== undefined && oldItem.child.type === CanvasTableIndexType.GroupRows)
+                    ? oldItem.child : undefined);
+                g.list.push({ caption: f.value, isExpended, child });
+            } else {
+                const child: ICanvasTableGroupItemsRowMode = {
+                    list: [],
+                    type: CanvasTableIndexType.GroupItems,
+                };
+                this.groupRow(child, ids, level, groupByCol, rowTableGroup,
+                    (oldItem !== undefined && oldItem.child.type === CanvasTableIndexType.GroupItems)
+                    ? oldItem.child : undefined);
+                g.list.push({ caption, isExpended, child });
+            }
+            f = keys.next();
+        }
+    }
+
+    private groupRowItem(g: ICanvasTableGroupItemRowsRowMode,
+                         index: number[], rowTableGroup: ICanvasTableGroup,
+                         old: ICanvasTableGroupItemRowsRowMode | undefined) {
         let i;
         for (i = 0; i < index.length; i++) {
             const id = index[i];
+            let isExpended = false;
+            if (old !== undefined && old.type === CanvasTableIndexType.GroupRows) {
+                let oldIndex;
+                for (oldIndex = 0; oldIndex < old.list.length; oldIndex++) {
+                    if (old.list[oldIndex].index === id) {
+                        isExpended = old.list[oldIndex].isExpended;
+                        break;
+                    }
+                }
+            }
+
             const c = String(this.getUpdateDataOrData(id, rowTableGroup.field));
-           // const oldGroupItem = this.tryFind(old, g.list[i].caption);
+        // const oldGroupItem = this.tryFind(old, g.list[i].caption);
             const groupRow = {
                 caption: c,
                 // aggregate?: string;
                 index: id,
-                isExpended: false, // oldGroupItem === undefined ? false : oldGroupItem.isExpended,
+                isExpended,
             };
 
             g.list.push(groupRow);
         }
     }
+
     private drawGroupRowsItem(context: ICanvasContext2D, level: number, groupRows: ICanvasTableGroupItemRowsRowMode,
                               pos: number, posX: number,
                               height: number, offsetLeft: number, drawConf: IDrawConfig | undefined): number {
@@ -1733,14 +1841,10 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
     }
     private drawGroupItem(context: ICanvasContext2D, level: number,
                           groupItem: ICanvasTableGroupItemRowMode | ICanvasTableGroupItemColMode,
-                          pos: number, posX: number,
+                          pos: number, posX: number, w: number,
                           height: number,  maxPos: number, offsetLeft: number, colStart: number, colEnd: number,
                           drawConf: IDrawConfig | undefined): number {
         if (pos > 0 && drawConf === undefined) {
-            const w = Math.min(
-                -posX +
-                this.column[this.column.length - 1].rightPos, this.canvasWidth);
-
             if (this.groupByCol && level <= this.groupByCol.length) {
                 const groupByColItem = this.groupByCol[level - 1];
                 if (groupByColItem.renderer) {
@@ -1823,7 +1927,7 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
                 case CanvasTableIndexType.GroupItems:
                     for (i = 0; i < child.list.length && pos < maxPos; i++) {
                         const item = child.list[i];
-                        pos = this.drawGroupItem(context, level + 1, item, pos, posX, height, maxPos,
+                        pos = this.drawGroupItem(context, level + 1, item, pos, posX, w, height, maxPos,
                                                  offsetLeft, colStart, colEnd, drawConf);
                     }
                     break;

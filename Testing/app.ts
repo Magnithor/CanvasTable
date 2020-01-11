@@ -157,6 +157,31 @@ if (filter != null) {
 
 canvasTable.setRowTableGroup("country");
 
+function getText(mode: CanvasTableMode) {
+    switch (mode) {
+        case CanvasTableMode.ColMode:
+            return "Col mode";
+        case CanvasTableMode.RowMode:
+            return "Row mode";
+    }
+}
+
+const modeButton = document.getElementById("mode");
+if (modeButton !== null) {
+
+   modeButton.addEventListener("click", () => {
+        if (canvasTable.getTableMode() === CanvasTableMode.ColMode) {
+            canvasTable.setTableMode(CanvasTableMode.RowMode);
+        } else {
+            canvasTable.setTableMode(CanvasTableMode.ColMode);
+        }
+
+        modeButton.innerHTML = getText(canvasTable.getTableMode());
+    });
+
+   modeButton.innerHTML = getText(canvasTable.getTableMode());
+}
+
 const w = window as any;
 w.canvasTable = canvasTable;
 w.onlyIceland = onlyIceland;
