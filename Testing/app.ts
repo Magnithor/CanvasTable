@@ -155,7 +155,9 @@ if (filter != null) {
     });
 }
 
-canvasTable.setRowTableGroup("country");
+canvasTable.setRowTableGroup({
+    field: "country",
+});
 
 function getText(mode: CanvasTableMode) {
     switch (mode) {

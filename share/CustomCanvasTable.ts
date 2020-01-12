@@ -102,6 +102,18 @@ export interface ICanvasTableConfig {
      */
     groupItemBackgroundColor?: CanvasColor;
     /**
+     * Row group item: font color
+     */
+    rowGroupItemFontColor?: CanvasColor;
+    /**
+     * Row group item: arrow color
+     */
+    rowGroupItemArrowColor?: CanvasColor;
+    /**
+     * Row group item: background color in group
+     */
+    rowGroupItemBackgroundColor?: CanvasColor;
+    /**
      * Background color
      */
     backgroundColor?: CanvasColor;
@@ -139,6 +151,9 @@ interface ICanvasTableConf {
     groupItemFontColor: CanvasColor;
     groupItemArrowColor: CanvasColor;
     groupItemBackgroundColor: CanvasColor;
+    rowGroupItemFontColor: CanvasColor;
+    rowGroupItemArrowColor: CanvasColor;
+    rowGroupItemBackgroundColor: CanvasColor;
     backgroundColor: CanvasColor;
     lineColor: CanvasColor;
     selectLineColor: CanvasColor;
@@ -169,6 +184,9 @@ const defaultConfig: ICanvasTableConf = {
     headerFontStyle: "bold",
     howerBackgroundColor: "#DCDCDC",
     lineColor: "black",
+    rowGroupItemArrowColor: "black",
+    rowGroupItemBackgroundColor: "#F9D3CB",
+    rowGroupItemFontColor: "black",
     selectLineColor: "green",
     sepraBackgroundColor: "#ECECEC",
 };
@@ -1592,11 +1610,11 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
 
     private drawGroupItemObject(context: ICanvasContext2D, pos: number, posX: number,
                                 isExpended: boolean, caption: string,
-                                level: number, w: number, height: number) {
-        context.fillStyle = this.config.groupItemBackgroundColor;
+                                level: number, w: number, height: number, rowMode: boolean) {
+        context.fillStyle = rowMode ? this.config.rowGroupItemBackgroundColor : this.config.groupItemBackgroundColor;
         context.fillRect(0 , pos - height + 4 * this.r + 1, w, height - 3);
 
-        context.fillStyle = this.config.groupItemArrowColor;
+        context.fillStyle = rowMode ? this.config.rowGroupItemArrowColor : this.config.groupItemArrowColor;
         context.beginPath();
         if (isExpended) {
             context.moveTo(-posX + (9 + 10 * (level - 1)) * this.r, pos - this.r * 10);
@@ -1610,7 +1628,7 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
 
         context.fill();
 
-        context.fillStyle = this.config.groupItemFontColor;
+        context.fillStyle = rowMode ? this.config.rowGroupItemFontColor : this.config.groupItemFontColor;
         context.textAlign = "left";
         context.fillText(caption, -posX + (20 + 10 * (level - 1)) * this.r, pos);
 
@@ -1810,8 +1828,12 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
 
         for (; i < groupRows.list.length; i++) {
             const item = groupRows.list[i];
-            this.drawGroupItemObject(context, pos, posX, item.isExpended, item.caption,
-                                     level, this.canvasWidth, height);
+            let caption =  item.caption;
+            if (item.aggregate) {
+                caption += " " + item.aggregate;
+            }
+            this.drawGroupItemObject(context, pos, posX, item.isExpended, caption,
+                                     level, this.canvasWidth, height, true);
             pos += height;
             if (item.isExpended) {
                 pos = this.drawGroupRowItem(context, i, item, pos, height);
@@ -1830,7 +1852,6 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
         for (i = 0; i < this.column.length; i++) {
             const col = this.column[i];
             const data = this.getDrawData(col, indexId, item.index);
-
             context.fillText(col.header, 5 * this.r, pos);
             context.fillText(data, 150 * this.r, pos);
 
@@ -1869,11 +1890,11 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
                     context.restore();
                 } else {
                     this.drawGroupItemObject(context, pos, posX, groupItem.isExpended, this.getGroupCaption(groupItem),
-                                             level, w, height);
+                                             level, w, height, false);
                 }
             } else {
                 this.drawGroupItemObject(context, pos, posX, groupItem.isExpended, this.getGroupCaption(groupItem),
-                                         level, w, height);
+                                         level, w, height, false);
             }
         }
 
