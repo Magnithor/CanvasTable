@@ -1229,7 +1229,7 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
                 const groupItems: ICanvasTableGroupItemsRowMode = { type: CanvasTableIndexType.GroupItems, list: []};
                 this.groupRow(groupItems, index, 0, this.groupByCol, this.rowTableGroup,
                     (this.dataIndex !== undefined && this.dataIndex.index.type === CanvasTableIndexType.GroupItems) ?
-                    this.dataIndex.index as ICanvasTableGroupItemsRowMode : undefined);
+                    this.dataIndex.index : undefined);
 
                 this.dataIndex = {
                     index: groupItems,
@@ -1250,10 +1250,10 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
         if (this.groupByCol && this.groupByCol.length > 0) {
             const groupByCol = this.groupByCol;
             const groupItems: ICanvasTableGroupItemsColMode = {type: CanvasTableIndexType.GroupItems, list: []};
-            let oldIndex: ICanvasTableGroupItemsColMode | undefined;
+            let oldIndex: ICanvasTableGroupItemsColMode | ICanvasTableGroupItemsRowMode| undefined;
             if (this.dataIndex &&
                 this.dataIndex.index.type === CanvasTableIndexType.GroupItems) {
-                    oldIndex = this.dataIndex.index as ICanvasTableGroupItemsColMode;
+                    oldIndex = this.dataIndex.index;
             }
 
             this.group(groupItems, index, 0, groupByCol, oldIndex);
@@ -1618,8 +1618,8 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
 
         return item.caption + " (" + item.child.list.length + ")";
     }
-    private tryFind(idx: ICanvasTableGroupItemsColMode | undefined, c: string):
-            ICanvasTableGroupItemColMode | undefined {
+    private tryFind(idx: ICanvasTableGroupItemsColMode | ICanvasTableGroupItemsRowMode | undefined, c: string):
+            ICanvasTableGroupItemColMode | ICanvasTableGroupItemRowMode| undefined {
         if (idx === undefined) {
             return undefined;
         }
@@ -1634,7 +1634,8 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
         return undefined;
     }
     private group(g: ICanvasTableGroupItemsColMode, index: number[], level: number,
-                  groupByCol: ICanvasTableGroup[], old: ICanvasTableGroupItemsColMode | undefined) {
+                  groupByCol: ICanvasTableGroup[],
+                  old: ICanvasTableGroupItemsColMode | ICanvasTableGroupItemsRowMode | undefined) {
         const r = new Map<string, number>();
         let i;
         const groupItem = groupByCol[level];
@@ -1666,7 +1667,7 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
                     const item: ICanvasTableGroupItemsColMode = { type: CanvasTableIndexType.GroupItems, list: [] };
                     const oldGroupItem = this.tryFind(old, g.list[i].caption);
                     if (oldGroupItem !== undefined &&
-                        "child" in oldGroupItem && oldGroupItem.child.type !== CanvasTableIndexType.Index) {
+                        "child" in oldGroupItem && oldGroupItem.child.type === CanvasTableIndexType.GroupItems) {
                         this.group(item, child.list, level, groupByCol, oldGroupItem.child);
                     } else {
                         this.group(item, child.list, level, groupByCol, undefined);
@@ -1698,7 +1699,7 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
     private groupRow(g: ICanvasTableGroupItemsRowMode,
                      index: number[], level: number,
                      groupByCol: ICanvasTableGroup[], rowTableGroup: ICanvasTableGroup,
-                     old: ICanvasTableGroupItemsRowMode | undefined) {
+                     old: ICanvasTableGroupItemsRowMode | ICanvasTableGroupItemsColMode | undefined) {
         const r = new Map<string, number[]>();
         let i;
         const groupItem = groupByCol[level];
@@ -1722,7 +1723,7 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
             if (!ids) { break; }
 
             let isExpended = false;
-            let oldItem: ICanvasTableGroupItemRowMode | undefined ;
+            let oldItem: ICanvasTableGroupItemRowMode | ICanvasTableGroupItemColMode | undefined ;
             if (old !== undefined) {
                 let oldIndex;
                 for (oldIndex = 0; oldIndex < old.list.length; oldIndex++) {
