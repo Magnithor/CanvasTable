@@ -741,8 +741,8 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
         } else {
             this.updateCursor();
             const result = this.findRowByPos(y);
-            if (typeof result === "number") {
-                this.setOverRow(result);
+            if (result && typeof result.select === "number") {
+                this.setOverRow(result.select);
                 return;
             }
             this.setOverRow(undefined);
@@ -1849,11 +1849,56 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
     private drawGroupRowItem(context: ICanvasContext2D, indexId: number, item: ICanvasTableIndexsRowMode,
                              pos: number, height: number): number {
         let i;
+        const isOver = this.overRowValue === indexId;
+        const isSepra =  indexId % 2 === 0;
         for (i = 0; i < this.column.length; i++) {
             const col = this.column[i];
-            const data = this.getDrawData(col, indexId, item.index);
+            const data = this.getDrawData(col, item.index, indexId);
+
+            let customStyle: ICanvasTableRowColStyle | undefined | null;
+            if (this.customRowColStyle) {
+                try {
+                    customStyle = this.customRowColStyle(
+                        this.data, this.data[indexId], col.orginalCol, isOver, isSepra, data);
+                } catch {
+                    this.logError("Canvas Table customRowColStyle");
+                }
+            }
+
+            if (!customStyle) {
+                customStyle = {};
+            }
+
+            if (customStyle.backgroundColor !== undefined) {
+                context.fillStyle = customStyle.backgroundColor;
+            } else {
+                if (isOver) {
+                    context.fillStyle = this.config.howerBackgroundColor;
+                } else {
+                    context.fillStyle = isSepra ?  this.config.sepraBackgroundColor : this.config.backgroundColor ;
+                }
+            }
+
+            let lastFont;
+            if (customStyle.font !== undefined || customStyle.fontSize !== undefined ||
+                customStyle.fontStyle !== undefined) {
+                lastFont = context.font;
+                context.font =
+                    (customStyle.fontStyle === undefined ? this.config.fontStyle : customStyle.fontStyle)
+                     + " " +
+                    (customStyle.fontSize === undefined ? this.config.fontSize : customStyle.fontSize)
+                     * this.r + "px " +
+                    (customStyle.font === undefined ? this.config.font : customStyle.font);
+            }
+
+            context.fillStyle = customStyle.fontColor === undefined ?
+                this.config.fontColor : customStyle.fontColor;
             context.fillText(col.header, 5 * this.r, pos);
             context.fillText(data, 150 * this.r, pos);
+
+            if (lastFont) {
+                context.font = lastFont;
+            }
 
             pos += height;
             if (this.canvasHeight < pos) {
@@ -1963,21 +2008,21 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
 
     }
 
-    private getDrawData(colItem: ICanvasTableColumn<T>, indexId: number, i: number): string {
+    private getDrawData(colItem: ICanvasTableColumn<T>, rowId: number, indexId: number): string {
         let data: string;
         switch (colItem.field) {
             case "__rownum__":
-                data = indexId.toString();
+                data = rowId.toString();
                 break;
             case "__idxnum__":
-                data = i.toString();
+                data = indexId.toString();
                 break;
             default:
-                data = String(this.getUpdateDataOrData(indexId, colItem.field));
+                data = String(this.getUpdateDataOrData(rowId, colItem.field));
         }
 
         if (colItem.customData) {
-            data = colItem.customData(this, data, this.data[indexId], this.data, indexId, colItem);
+            data = colItem.customData(this, data, this.data[rowId], this.data, rowId, colItem);
         }
 
         return data;
@@ -2098,7 +2143,6 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
                     (customStyle.fontSize === undefined ? this.config.fontSize : customStyle.fontSize)
                      * this.r + "px " +
                     (customStyle.font === undefined ? this.config.font : customStyle.font);
-
             }
 
             if (needClip) {
