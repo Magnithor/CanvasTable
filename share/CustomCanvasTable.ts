@@ -1891,6 +1891,9 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
                     (customStyle.font === undefined ? this.config.font : customStyle.font);
             }
 
+            context.fillRect(0, pos - height + 4 * this.r + 1,
+                this.canvasWidth, height - 3);
+
             context.fillStyle = customStyle.fontColor === undefined ?
                 this.config.fontColor : customStyle.fontColor;
             context.fillText(col.header, 5 * this.r, pos);
