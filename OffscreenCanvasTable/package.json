@@ -1,6 +1,6 @@
 {
   "name": "mthb-offscreen-canvas-table",
-  "version": "0.0.19",
+  "version": "0.0.21",
   "description": "Canvas Table Webworker offscreencanvas",
   "main": "lib/OffscreenCanvasTable/src/OffscreenCanvasTable.js",
   "types": "lib/OffscreenCanvasTable/src/OffscreenCanvasTable.d.ts",
@@ -31,7 +31,7 @@
   "license": "MIT",
   "homepage": "https://github.com/Magnithor/CanvasTable/blob/master/README.md",
   "devDependencies": {
-    "typescript": "^3.6.4"
+    "typescript": "^3.7.4"
   },
   "dependencies": {}
 }

@@ -1851,15 +1851,17 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
         let i;
         const isOver = this.overRowValue === indexId;
         const isSepra =  indexId % 2 === 0;
+        const startPos = pos;
+
         for (i = 0; i < this.column.length; i++) {
-            const col = this.column[i];
-            const data = this.getDrawData(col, item.index, indexId);
+            const colItem = this.column[i];
+            const data = this.getDrawData(colItem, item.index, indexId);
 
             let customStyle: ICanvasTableRowColStyle | undefined | null;
             if (this.customRowColStyle) {
                 try {
                     customStyle = this.customRowColStyle(
-                        this.data, this.data[indexId], col.orginalCol, isOver, isSepra, data);
+                        this.data, this.data[indexId], colItem.orginalCol, isOver, isSepra, data);
                 } catch {
                     this.logError("Canvas Table customRowColStyle");
                 }
@@ -1896,14 +1898,40 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
 
             context.fillStyle = customStyle.fontColor === undefined ?
                 this.config.fontColor : customStyle.fontColor;
-            context.fillText(col.header, 5 * this.r, pos);
-            context.fillText(data, 150 * this.r, pos);
+            context.fillText(colItem.header, 5 * this.r, pos);
+            if (colItem.renderer) {
+                const left =  150 * this.r;
+                const top = pos - height + 4 * this.r + 1;
+                const width = this.canvasWidth - 150 * this.r;
+                const h = height - 2;
+                context.save();
+                context.beginPath();
+                context.rect(left, top, width, h);
+                context.clip();
+                try {
+                    colItem.renderer(this, context, indexId, colItem.orginalCol,
+                        left, top, left + width, top + h, width, h, this.r,
+                        data, this.data[indexId], this.data);
+                } catch (e) {
+                    this.logError("CanvasTable renderer", colItem.header, e);
+                }
 
+                context.restore();
+            } else {
+                context.fillText(data, 150 * this.r, pos);
+            }
             if (lastFont) {
                 context.font = lastFont;
             }
 
+            context.beginPath();
+            context.moveTo(0, pos + 4 * this.r);
+            context.lineTo(this.canvasWidth, pos + 4 * this.r);
+            context.moveTo(1, startPos - height + 4 * this.r + 1);
+            context.lineTo(1, pos + 2);
+            context.stroke();
             pos += height;
+
             if (this.canvasHeight < pos) {
                 return pos;
             }
