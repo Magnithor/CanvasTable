@@ -9,7 +9,7 @@ import { CanvasTableIndex, CanvasTableIndexs, CanvasTableIndexType, CanvasTableR
          ICanvasTableGroupItemRowsRowMode, ICanvasTableGroupItemsColMode, ICanvasTableGroupItemsRowMode,
          ICanvasTableIndexsColMode, ICanvasTableIndexsRowMode, ICanvasTableRowItemSelectColMode } from "./CustomCanvasIndex";
 import { IDrawable } from "./Drawable";
-import { EventManagerClick, EventManagerClickHeader, EventManagerReCalcForScrollView } from "./EventManager";
+import { EventManagerClick, EventManagerClickHeader, EventManagerEdit, EventManagerReCalcForScrollView } from "./EventManager";
 import { IScrollViewConfig, ScrollView } from "./ScrollView";
 
 export interface IDrawConfig {
@@ -210,6 +210,7 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
     private eventClick: Array<EventManagerClick<T>> = [];
     private eventClickHeader: Array<EventManagerClickHeader<T>> = [];
     private eventReCalcForScrollView: EventManagerReCalcForScrollView[] = [];
+    private eventEdit: EventManagerEdit[] = [];
 
     private needToCalc: boolean = true;
     private needToCalcFont: boolean = true;
@@ -487,6 +488,7 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
         }
     }
 
+    public addEvent(EventName: "edit", event: EventManagerEdit): void;
     public addEvent(eventName: "clickHeader", event: EventManagerClickHeader<T>): void;
     public addEvent(eventName: "click" | "dblClick", event: EventManagerClick<T>): void;
     public addEvent(eventName: "reCalcForScrollView", event: EventManagerReCalcForScrollView): void;
@@ -494,6 +496,7 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
         this.getEvent(eventName).push(event);
     }
 
+    public removeEvent(EventName: "edit", event: EventManagerEdit): void;
     public removeEvent(eventName: "clickHeader", event: EventManagerClickHeader<T>): void;
     public removeEvent(eventName: "click" | "dblClick", event: EventManagerClick<T>): void;
     public removeEvent(eventName: "reCalcForScrollView", event: EventManagerReCalcForScrollView): void;
@@ -505,11 +508,13 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
         }
     }
     public setUpdateData(row: number, field: string, data: any) {
+        const oldData = this.getUpdateDataOrData(row, field);
         if (!this.editData[row]) {
             this.editData[row] = {};
         }
 
         this.editData[row][field] = data;
+        this.fireEdit(row, field, data, oldData);
     }
     public getUpdateData(row: number, field: string): {data: any} | undefined {
         const rowData = this.editData[row];
@@ -585,6 +590,16 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
             this.isFocus = isFocus;
             if (this.allowEdit) {
                 this.askForReDraw();
+            }
+        }
+    }
+    protected fireEdit(row: CanvasTableRowItem, col: string, newData: any, oldData: any) {
+        let i;
+        for (i = 0; i < this.eventEdit.length; i++) {
+            try {
+                this.eventEdit[i](this, row, col, newData, oldData);
+            } catch {
+                this.logError("eventEdit");
             }
         }
     }
@@ -1035,7 +1050,6 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
         };
 
         return find(this.dataIndex.index);
-
     }
 
     protected findColByPos(x: number): ICanvasTableColumn<T> | null {
@@ -1567,6 +1581,8 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
                 return this.eventClickHeader;
             case "reCalcForScrollView":
                 return this.eventReCalcForScrollView;
+            case "edit":
+                return this.eventEdit;
             default:
                 throw new Error("unknown;");
         }
