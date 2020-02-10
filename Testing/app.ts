@@ -184,6 +184,10 @@ if (modeButton !== null) {
    modeButton.innerHTML = getText(canvasTable.getTableMode());
 }
 
+canvasTable.addEvent("edit", (a, b, c, d) => { 
+    console.log(a, b, c, d);
+});
+
 const w = window as any;
 w.canvasTable = canvasTable;
 w.onlyIceland = onlyIceland;
