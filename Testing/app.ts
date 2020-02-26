@@ -1,6 +1,6 @@
 ﻿import { Align, ICanvasTableColumnConf, Sort } from "../share/CanvasTableColum";
 import { CanvasTableMode } from "../share/CanvasTableMode";
-import { CanvasTable, ICanvasContext2D } from "./../CanvasTable/src/CanvasTable";
+import { CanvasTable } from "./../CanvasTable/src/CanvasTable";
 import { CustomCanvasTable } from "./../share/CustomCanvasTable";
 
 interface IData {
@@ -184,7 +184,8 @@ if (modeButton !== null) {
    modeButton.innerHTML = getText(canvasTable.getTableMode());
 }
 
-canvasTable.addEvent("edit", (a, b, c, d) => { 
+canvasTable.addEvent("edit", (a, b, c, d) => {
+    // tslint:disable-next-line: no-console
     console.log(a, b, c, d);
 });
 

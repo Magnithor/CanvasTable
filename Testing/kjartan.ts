@@ -1,4 +1,4 @@
-import { Align, ICanvasTableColumnConf, Sort } from "../share/CanvasTableColum";
+import { Align, ICanvasTableColumnConf } from "../share/CanvasTableColum";
 import { CanvasTable } from "./../CanvasTable/src/CanvasTable";
 
 let isGroup = true;

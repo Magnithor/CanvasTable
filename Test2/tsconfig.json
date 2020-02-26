@@ -5,7 +5,13 @@
     "declaration": true,
     "outDir": "./lib",
     "strict": true,
-    "lib": ["dom", "es5", "es6", "webworker"]
+    "lib": ["dom", "es5", "es6", "webworker"],
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noImplicitThis": true,
+    "noImplicitAny": true,
+    "noEmitOnError": true,
+    "strictNullChecks": true
   },
   "include": ["src"],
   "exclude": ["node_modules", "**/__tests__/*"]

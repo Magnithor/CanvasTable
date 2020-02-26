@@ -5,12 +5,12 @@
       "declaration": true,
       "outDir": "./share",
       "strict": true,
-        "noImplicitReturns": true,
-        "noUnusedLocals": true,
-        "noImplicitThis": true,
-        "noImplicitAny": true,
-        "noEmitOnError": true,
-        "strictNullChecks": true
+      "noImplicitReturns": true,
+      "noUnusedLocals": true,
+      "noImplicitThis": true,
+      "noImplicitAny": true,
+      "noEmitOnError": true,
+      "strictNullChecks": true
     },
     "include": ["share"],
     "exclude": ["node_modules", "**/__tests__/*"]

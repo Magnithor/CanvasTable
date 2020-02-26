@@ -5,7 +5,13 @@
     "declaration": true,
     "outDir": "./lib",
     "strict": true,
-    "noUnusedLocals": true
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noImplicitThis": true,
+    "noImplicitAny": true,
+    "noEmitOnError": true,
+    "strictNullChecks": true
+
   },
   "files": ["src/CanvasTable.ts"]
 }

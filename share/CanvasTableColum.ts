@@ -85,7 +85,7 @@ export interface ICanvasTableRowColStyle {
 /**
  * Canvas Table Column Config
  */
-export interface ICanvasTableColumnConf<T = any> {
+export interface ICanvasTableColumnConf<T = any, LookupKey = number> {
     /**
      * Text in header
      */
@@ -114,6 +114,10 @@ export interface ICanvasTableColumnConf<T = any> {
      * function pointer to render string.
      */
     customData?: CustomData<T>;
+    /**
+     * lookup values
+     */
+    lookupData?: Map<LookupKey, T> | { [value: string]: T} | Array<{key: LookupKey, value: T}>;
 }
 
 export interface ICanvasTableColumnSort<T = any> {

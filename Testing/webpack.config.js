@@ -5,8 +5,7 @@ module.exports = {
 	mode: "development",
 	entry: {
 		app: "./app.ts",
-		appWithWorker: "./appWithWorker.ts",
-		CanvasTable : "./CanvasTable.ts",
+		appWithWorker: "./appWithWorker.ts",		
 		kjartan: "./kjartan.ts",
 		worker: "./worker.ts",
 	},

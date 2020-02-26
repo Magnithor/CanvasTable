@@ -1,15 +1,19 @@
 {
   "compilerOptions": {
-    "allowUnreachableCode": false,
-    "strictNullChecks": true,
-    "noImplicitAny": true,
     "target": "es2015",
     "module": "commonjs",
     "outDir": "./lib",
     "declaration": true,
     "strict": true,
     "sourceMap": true,
-    "lib": ["es5", "es6", "webworker"]
+    "lib": ["es5", "es6", "webworker"],
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noImplicitThis": true,
+    "noImplicitAny": true,
+    "noEmitOnError": true,
+    "strictNullChecks": true
+
   },
   "files": ["src/OffscreenCanvasTableWorker.ts"]
 }

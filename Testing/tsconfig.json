@@ -1,15 +1,19 @@
 ﻿{
     "compilerOptions": {
         "allowUnreachableCode": false,
-        "strictNullChecks": true,
         "outDir": "./dist/",
-        "noImplicitAny": true,
         "module": "commonjs",
         "target": "es2015",        
         "allowJs": true,
-        "sourceMap": true
+        "sourceMap": true,
+        "noImplicitReturns": true,
+        "noUnusedLocals": true,
+        "noImplicitThis": true,
+        "noImplicitAny": true,
+        "noEmitOnError": true,
+        "strictNullChecks": true  
     },
-    "files": ["app.ts", "appWithWorker.ts", "CanvasTable.ts", "kjartan.ts", "worker.ts", 
+    "files": ["app.ts", "appWithWorker.ts", "kjartan.ts", "worker.ts", 
         "./../share/CanvasContext2D.ts",
         "./../share/CanvasTableColum.ts",
         "./../share/CanvasTableEdit.ts",
