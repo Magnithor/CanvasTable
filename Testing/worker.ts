@@ -1,5 +1,5 @@
 import { OffscreenCanvasTableWorker } from "../OffscreenCanvasTableWorker/src/OffscreenCanvasTableWorker";
-import { Align, ICanvasTableColumnConf, Sort } from "../share/CanvasTableColum";
+import { Align, ICanvasTableColumnConf, IEditRowItem, Sort } from "../share/CanvasTableColum";
 import { CustomCanvasTable } from "../share/CustomCanvasTable";
 
 declare function postMessage(message: any): void;
@@ -70,9 +70,16 @@ offscreenCanvasTableWorker.setSort([
     { col: column[2], sort: Sort.ascending },
     { col: column[5], sort: Sort.ascending },
 ]);
-offscreenCanvasTableWorker.setFilter( (data: any, row: any, col: ICanvasTableColumnConf[]) => {
+offscreenCanvasTableWorker.setFilter(
+        (data: any, row: any, col: ICanvasTableColumnConf[], i: number, editRowItem: IEditRowItem) => {
     if (filter === null) { return true; }
-    return !((row.country || "").indexOf(filter) === -1 && (row.name || "").indexOf(filter) === -1 && (row.subcountry || "").indexOf(filter) === -1);
+    return !(
+        (row.country || "").indexOf(filter) === -1 &&
+        (row.name || "").indexOf(filter) === -1 &&
+        (row.subcountry || "").indexOf(filter) === -1 &&
+        (editRowItem.country || "").indexOf(filter) === -1 &&
+        (editRowItem.name || "").indexOf(filter) === -1 &&
+        (editRowItem.subcountry || "").indexOf(filter) === -1);
 });
 
 const httpRequest = new XMLHttpRequest();

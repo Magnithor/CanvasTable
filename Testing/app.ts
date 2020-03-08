@@ -1,4 +1,4 @@
-﻿import { Align, ICanvasTableColumnConf, Sort } from "../share/CanvasTableColum";
+﻿import { Align, ICanvasTableColumnConf, IEditRowItem, Sort } from "../share/CanvasTableColum";
 import { CanvasTableMode } from "../share/CanvasTableMode";
 import { CanvasTable } from "./../CanvasTable/src/CanvasTable";
 import { CustomCanvasTable } from "./../share/CustomCanvasTable";
@@ -132,11 +132,15 @@ canvasTable.setRowColStyle( (dbData: IData[], row: IData, col: ICanvasTableColum
 
     return null;
 });
-canvasTable.setFilter((dbData: any, row: any, col: ICanvasTableColumnConf[]) => {
+canvasTable.setFilter((dbData: any, row: any, col: ICanvasTableColumnConf[], i: number, editRowItem: IEditRowItem) => {
     if (filter === null) { return true; }
     return !((row.country || "").indexOf(filter.value) === -1 &&
              (row.name || "").indexOf(filter.value) === -1 &&
-             (row.subcountry || "").indexOf(filter.value) === -1);
+             (row.subcountry || "").indexOf(filter.value) === -1 &&
+             (editRowItem.country || "").indexOf(filter.value) === -1 &&
+             (editRowItem.name || "").indexOf(filter.value) === -1 &&
+             (editRowItem.subcountry || "").indexOf(filter.value) === -1
+             );
 });
 canvasTable.setSort([{ col: column[0], sort: Sort.ascending }]);
 group();

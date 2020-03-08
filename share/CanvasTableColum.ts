@@ -1,6 +1,8 @@
 import { CanvasColor, ICanvasContext2D } from "./CanvasContext2D";
 import { CustomCanvasTable } from "./CustomCanvasTable";
 
+export interface IEditRowItem { [field: string]: any; }
+
 export type CustomData<T = any> = (canvasTable: CustomCanvasTable, dataValue: string, row: T,
                                    data: T[], rowIndex: number, col: ICanvasTableColumnConf<T>) => string;
 export type RenderValue<T = any> = (
@@ -8,7 +10,7 @@ export type RenderValue<T = any> = (
     col: ICanvasTableColumnConf<T>, left: number, top: number, right: number, bottom: number,
     width: number, height: number, r: number, dataValue: string, row: T, data: T[]) => void;
 export type CustomFilter<T = any> = (
-    data: T[], row: T, col: Array<ICanvasTableColumnConf<T>>, index: number) => boolean;
+    data: T[], row: T, col: Array<ICanvasTableColumnConf<T>>, index: number, edit: IEditRowItem) => boolean;
 export type CustomRowColStyle<T = any> = (data: T[], row: T, col: ICanvasTableColumnConf<T>,
                                           isOver: boolean, isSepra: boolean, dataRowCol: string)
                                  => ICanvasTableRowColStyle | undefined | null;

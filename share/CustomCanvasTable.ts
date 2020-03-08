@@ -1,7 +1,7 @@
 import { CanvasColor, ICanvasContext2D } from "./CanvasContext2D";
 import { Align, CustomFilter, CustomRowColStyle, CustomSort,
          ICanvasTableColumn, ICanvasTableColumnConf, ICanvasTableColumnSort,
-         ICanvasTableRowColStyle, IUpdateRect, Sort } from "./CanvasTableColum";
+         ICanvasTableRowColStyle, IEditRowItem, IUpdateRect, Sort } from "./CanvasTableColum";
 import { CanvasTableMode } from "./CanvasTableMode";
 import { ICanvasTableTouchEvent } from "./CanvasTableTouchEvent";
 import { CanvasTableIndex, CanvasTableIndexs, CanvasTableIndexType, CanvasTableRowItem,
@@ -234,7 +234,7 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
     private lastCursor: string = "";
     private canvasHeight: number = 0;
     private canvasWidth: number = 0;
-    private editData: { [index: number]: { [field: string]: any } } = {};
+    private editData: { [index: number]: IEditRowItem } = {};
     private tableMode: CanvasTableMode = CanvasTableMode.ColMode;
 
     constructor(config: ICanvasTableConfig | undefined) {
@@ -1197,7 +1197,7 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
         let i;
         if (this.customFilter) {
             for (i = 0; i < this.data.length; i++) {
-                if (this.customFilter(this.data, this.data[i], this.orgColum, i)) {
+                if (this.customFilter(this.data, this.data[i], this.orgColum, i, this.editData[i] || {} )) {
                     index[index.length] = i;
                 }
             }
