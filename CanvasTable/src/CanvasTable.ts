@@ -111,7 +111,7 @@ export class CanvasTable<T = any> extends CustomCanvasTable<T> {
             this.canvasTableEdit.doRemove(true, undefined);
         }
 
-        this.canvasTableEdit = new CanvasTableEdit(col, i, (this.data[i] as any)[col.field],
+        this.canvasTableEdit = new CanvasTableEdit(col, i, this.getUpdateDataOrData(i, col.field),
             this.cellHeight, this.onEditRemove);
         this.updateEditLocation();
     }

@@ -87,6 +87,7 @@ const column: ICanvasTableColumnConf[] = [
     {
         field: "country",
         header: "Country",
+        lookupData: ["Lookup 1", "Lookup 2", "Lookup 2"],
         width: 100,
     },
     {

@@ -15,6 +15,9 @@ export type CustomRowColStyle<T = any> = (data: T[], row: T, col: ICanvasTableCo
                                           isOver: boolean, isSepra: boolean, dataRowCol: string)
                                  => ICanvasTableRowColStyle | undefined | null;
 
+export type GetLookup<T = any> = (row: number, data: string, col: ICanvasTableColumn<T>) => LookupValues;
+export type LookupValues = string[] | Array<{key: string, caption: string}>;
+
 export interface IUpdateRect {
     cellHeight: number;
     clipBottom: number | undefined;
@@ -40,6 +43,8 @@ export interface ICanvasTableColumn<T> {
     renderer?: RenderValue<T>;
     customData?: CustomData<T>;
     orginalCol: ICanvasTableColumnConf<T>;
+    lookupData?: LookupValues;
+    getLookup?: GetLookup<T>;
 }
 
 /**
@@ -119,7 +124,11 @@ export interface ICanvasTableColumnConf<T = any, LookupKey = number> {
     /**
      * lookup values
      */
-    lookupData?: Map<LookupKey, T> | { [value: string]: T} | Array<{key: LookupKey, value: T}>;
+    lookupData?: LookupValues;
+    /**
+     * Custom lookup value
+     */
+    getLookup?: GetLookup<T>;
 }
 
 export interface ICanvasTableColumnSort<T = any> {

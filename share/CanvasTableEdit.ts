@@ -1,11 +1,11 @@
-import { ICanvasTableColumn } from "./CanvasTableColum";
+import { ICanvasTableColumn, LookupValues } from "./CanvasTableColum";
 import { CanvasTableEditAction } from "./CanvasTableEditAction";
 
 export class CanvasTableEdit<T = any> {
     private hasBeenRemoved: boolean = false;
     private readonly column: ICanvasTableColumn<T>;
     private readonly row: number;
-    private readonly inputeElement: HTMLInputElement;
+    private readonly inputeElement: HTMLInputElement | HTMLSelectElement;
     private onRemove?: (cancel: boolean, newData: string, action: CanvasTableEditAction | undefined) => void;
 
     constructor(col: ICanvasTableColumn<T>, row: number, data: string, cellHeight: number,
@@ -13,13 +13,44 @@ export class CanvasTableEdit<T = any> {
         this.column = col;
         this.row = row;
         this.onRemove = onRemve;
-        this.inputeElement = document.createElement("input");
+        let lookup: LookupValues | undefined;
+        if (col.getLookup) {
+            lookup = col.getLookup(row, data, col);
+        }
+        if (!lookup) {
+            lookup = col.lookupData;
+        }
+        if (lookup !== undefined) {
+            const select = document.createElement("select");
+            this.inputeElement = select;
+            for (let i = 0, c = lookup.length; i < c; i++) {
+                const lookupItem = lookup[i];
+                const option = document.createElement("option");
+                if (typeof lookupItem === "string") {
+                    option.text = lookupItem;
+                    option.value = lookupItem;
+                } else {
+                    option.text = lookupItem.caption;
+                    option.value = lookupItem.key;
+                }
+                option.selected = option.value === data;
+                console.log(option.value, data, option.selected);
+                select.add(option);
+            }
+        } else {
+            this.inputeElement = document.createElement("input");
+            this.inputeElement.type = "text";
+            this.inputeElement.value = data;
+        }
+
         this.inputeElement.style.position = "absolute";
         this.inputeElement.style.border = "none";
-        this.inputeElement.type = "text";
-        this.inputeElement.value = data;
 
-        this.inputeElement.style.width = (col.width - 7) + "px";
+        if (this.inputeElement instanceof HTMLInputElement) {
+            this.inputeElement.style.width = (col.width - 7) + "px";
+        } else  {
+            this.inputeElement.style.width = col.width + "px";
+        }
         this.inputeElement.style.height = cellHeight + "px";
         this.inputeElement.style.padding = "0px 3px";
 
@@ -28,7 +59,12 @@ export class CanvasTableEdit<T = any> {
         this.inputeElement.focus();
 
         this.inputeElement.addEventListener("blur", this.onBlur);
-        this.inputeElement.addEventListener("keydown", this.onKeydown);
+        if (this.inputeElement instanceof  HTMLSelectElement) {
+            this.inputeElement.addEventListener("keydown", this.onKeydown);
+        } else {
+            this.inputeElement.addEventListener("keydown", this.onKeydown);
+        }
+
     }
     public getRow() { return this.row; }
     public getColumn() {return this.column; }
@@ -37,7 +73,11 @@ export class CanvasTableEdit<T = any> {
                               clipTop?: number, clipRight?: number, clipBottom?: number, clipLeft?: number) {
         this.inputeElement.style.top = top + "px";
         this.inputeElement.style.left = left + "px";
-        this.inputeElement.style.width = (width - 7) + "px";
+        if (this.inputeElement instanceof HTMLInputElement) {
+            this.inputeElement.style.width = (width - 7) + "px";
+        } else {
+            this.inputeElement.style.width = width + "px";
+        }
         this.inputeElement.style.height = height + "px";
         if (clipTop === undefined && clipRight === undefined && clipBottom === undefined && clipLeft === undefined) {
             this.inputeElement.style.clip = "";
@@ -64,7 +104,11 @@ export class CanvasTableEdit<T = any> {
         this.onRemove = undefined;
 
         this.inputeElement.removeEventListener("blur", this.onBlur);
-        this.inputeElement.removeEventListener("keydown", this.onKeydown);
+        if (this.inputeElement instanceof  HTMLSelectElement) {
+            this.inputeElement.removeEventListener("keydown", this.onKeydown);
+        } else {
+            this.inputeElement.removeEventListener("keydown", this.onKeydown);
+        }
         if (!this.hasBeenRemoved) {
             document.body.removeChild(this.inputeElement);
             this.hasBeenRemoved = true;
@@ -97,7 +141,6 @@ export class CanvasTableEdit<T = any> {
                 this.doRemove(cancelArg, action);
             }, 1);
         }
-
     }
 
     private onBlur = () => {
