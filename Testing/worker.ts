@@ -104,7 +104,5 @@ addEventListener("message", (message) => {
         offscreenCanvasTableWorker.askForReIndex();
     }
 
-    // tslint:disable-next-line: no-console
-    console.log("in webworker", message);
     postMessage("this is the response " + message.data);
 });

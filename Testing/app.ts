@@ -120,10 +120,6 @@ declare let data: IData[];
 const filter = document.getElementById("filter") as HTMLInputElement;
 const canvasTable = new CanvasTable<IData>("canvas", column, data);
 canvasTable.setTableMode(CanvasTableMode.RowMode);
-canvasTable.addEvent("reCalcForScrollView", (a: any, width: number, height: number) => {
-    // tslint:disable-next-line: no-console
-    console.log({width, height});
-});
 canvasTable.setAllowEdit(true);
 canvasTable.setRowColStyle( (dbData: IData[], row: IData, col: ICanvasTableColumnConf, isOver: boolean,
                              isSepra: boolean, dataRowCol: string) => {
@@ -145,14 +141,6 @@ canvasTable.setFilter((dbData: any, row: any, col: ICanvasTableColumnConf[], i: 
 });
 canvasTable.setSort([{ col: column[0], sort: Sort.ascending }]);
 group();
-canvasTable.addEvent("click", (table, row, col) => {
-        // tslint:disable-next-line: no-console
-        console.log(row, col);
-});
-canvasTable.addEvent("clickHeader", (table, col) => {
-        // tslint:disable-next-line: no-console
-        console.log(col);
-});
 
 if (filter != null) {
     filter.addEventListener("keyup", () => {
@@ -188,11 +176,6 @@ if (modeButton !== null) {
 
    modeButton.innerHTML = getText(canvasTable.getTableMode());
 }
-
-canvasTable.addEvent("edit", (a, b, c, d) => {
-    // tslint:disable-next-line: no-console
-    console.log(a, b, c, d);
-});
 
 const w = window as any;
 w.canvasTable = canvasTable;

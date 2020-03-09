@@ -34,7 +34,6 @@ export class CanvasTableEdit<T = any> {
                     option.value = lookupItem.key;
                 }
                 option.selected = option.value === data;
-                console.log(option.value, data, option.selected);
                 select.add(option);
             }
         } else {

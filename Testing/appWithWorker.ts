@@ -4,11 +4,6 @@ const worker = new Worker("dist/worker.js");
 const filter = document.getElementById("filter") as HTMLInputElement;
 const canvasTable = new OffscreenCanvasTable(1, worker, "canvas");
 
-worker.addEventListener("message", (message) => {
-    // tslint:disable-next-line: no-console
-    console.log(message);
-});
-
 worker.postMessage("this is a test message to the worker");
 let isGroup = true;
 const group = () => {

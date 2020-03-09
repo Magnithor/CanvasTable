@@ -915,10 +915,9 @@ export abstract class CustomCanvasTable<T = any> implements IDrawable {
     protected TouchMove(e: ICanvasTableTouchEvent, offsetLeft: number, offsetTop: number) {
         const x = e.changedTouches[0].pageX - offsetLeft;
         if (this.resizeColIfNeed(x)) {
-        //    console.log('R');
             return;
         }
-//        console.log('-');
+
         if (this.scrollView) {
             this.scrollView.OnTouchMove(e, offsetLeft, offsetTop);
         }
