@@ -1,7 +1,6 @@
 ﻿{
     "compilerOptions": {
         "allowUnreachableCode": false,
-        "outDir": "./dist/",
         "module": "commonjs",
         "target": "es2015",        
         "allowJs": true,
@@ -12,19 +11,5 @@
         "noImplicitAny": true,
         "noEmitOnError": true,
         "strictNullChecks": true  
-    },
-    "files": ["app.ts", "appWithWorker.ts", "kjartan.ts", "worker.ts", 
-        "./../share/CanvasContext2D.ts",
-        "./../share/CanvasTableColum.ts",
-        "./../share/CanvasTableEdit.ts",
-        "./../share/CanvasTableTouchEvent.ts",
-        "./../share/CircularBuffer.ts",
-        "./../share/CustomCanvasIndex.ts",
-        "./../share/CustomCanvasTable.ts",
-        "./../share/Drawable.ts",
-        "./../share/EventManager.ts",
-        "./../share/OffscreenCanvasTableMessage.ts",
-        "./../share/ScrollView.ts",        
-        "./../CanvasTable/src/CanvasTable.ts",
-        ]
+    }
 }

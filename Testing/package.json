@@ -4,7 +4,8 @@
   "description": "Canvas Table Webworker offscreencanvas",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "karma",
+    "test2": "jasmine",
     "lint": "tslint -p tsconfig.json",
     "build": "webpack",
     "start": "webpack-dev-server",
@@ -27,6 +28,14 @@
   "license": "MIT",
   "homepage": "https://github.com/Magnithor/CanvasTable/blob/master/README.md",
   "devDependencies": {
+    "jasmine-core": "^3.5.0",
+    "jasmine-spec-reporter": "~4.2.1",
+    "karma": "^4.4.1",
+    "karma-chrome-launcher": "~3.1.0",
+    "karma-coverage-istanbul-reporter": "^2.1.1",
+    "karma-jasmine": "^3.1.1",
+    "karma-jasmine-html-reporter": "^1.5.2",
+    "karma-typescript-preprocessor": "^0.4.0",
     "ts-loader": "^6.2.1",
     "tslint": "^5.20.1",
     "tslint-config-prettier": "^1.18.0",
@@ -37,6 +46,9 @@
     "webpack-dev-server": "^3.10.1"
   },
   "dependencies": {
+    "@types/node": "^13.11.0",
+    "@types/jasmine": "^3.5.9",
+    "@types/jest": "^25.2.1",
     "mthb-circular-buffer": "0.0.45"
   }
 }
