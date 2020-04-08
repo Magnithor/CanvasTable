@@ -4,8 +4,7 @@
   "description": "Canvas Table Webworker offscreencanvas",
   "main": "index.js",
   "scripts": {
-    "test": "karma",
-    "test2": "jasmine",
+    "test": "karma start",
     "lint": "tslint -p tsconfig.json",
     "build": "webpack",
     "start": "webpack-dev-server",
@@ -32,7 +31,6 @@
     "jasmine-spec-reporter": "~4.2.1",
     "karma": "^4.4.1",
     "karma-chrome-launcher": "~3.1.0",
-    "karma-coverage-istanbul-reporter": "^2.1.1",
     "karma-jasmine": "^3.1.1",
     "karma-jasmine-html-reporter": "^1.5.2",
     "karma-typescript-preprocessor": "^0.4.0",
@@ -48,7 +46,6 @@
   "dependencies": {
     "@types/node": "^13.11.0",
     "@types/jasmine": "^3.5.9",
-    "@types/jest": "^25.2.1",
     "mthb-circular-buffer": "0.0.45"
   }
 }

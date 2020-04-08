@@ -3,7 +3,6 @@
         "allowUnreachableCode": false,
         "module": "commonjs",
         "target": "es2015",        
-        "allowJs": true,
         "sourceMap": true,
         "noImplicitReturns": true,
         "noUnusedLocals": true,

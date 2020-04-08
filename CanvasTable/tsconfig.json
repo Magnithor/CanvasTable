@@ -12,6 +12,5 @@
     "noEmitOnError": true,
     "strictNullChecks": true
 
-  },
-  "files": ["src/CanvasTable.ts"]
+  }
 }

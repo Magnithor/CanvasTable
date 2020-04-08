@@ -3,6 +3,6 @@ describe("A suite", () => {
     expect(true).toBe(true);
   });
   it("contains spec with an expectation 2", () => {
-    expect(true).toBe(!false);
+    expect(true).toBe(false);
   });
 });

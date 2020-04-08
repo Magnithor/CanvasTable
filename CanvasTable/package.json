@@ -31,5 +31,7 @@
   "devDependencies": {
     "typescript": "^3.7.4"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@types/jasmine": "^3.5.9"
+  }
 }
