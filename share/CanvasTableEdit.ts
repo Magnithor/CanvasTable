@@ -55,7 +55,7 @@ export class CanvasTableEdit<T = any> {
 
         document.body.appendChild(this.inputeElement);
 
-        this.inputeElement.focus();
+        this.inputeElement.focus(false);
 
         this.inputeElement.addEventListener("blur", this.onBlur);
         if (this.inputeElement instanceof  HTMLSelectElement) {
@@ -124,6 +124,7 @@ export class CanvasTableEdit<T = any> {
             case "Escape":
                 cancel = true;
                 break;
+            case "NumpadEnter":
             case "Enter":
                 cancel = false;
                 break;
