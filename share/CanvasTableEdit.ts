@@ -55,7 +55,7 @@ export class CanvasTableEdit<T = any> {
 
         document.body.appendChild(this.inputeElement);
 
-        this.inputeElement.focus(false);
+        this.inputeElement.focus({preventScroll: true});
 
         this.inputeElement.addEventListener("blur", this.onBlur);
         if (this.inputeElement instanceof  HTMLSelectElement) {
