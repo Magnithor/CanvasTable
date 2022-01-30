@@ -87,6 +87,7 @@ export class CanvasTable<T = any> extends CustomCanvasTable<T> {
         this.canvas.addEventListener("touchmove", this.canvasTouchMove);
         this.canvas.addEventListener("touchend", this.canvasTouchEnd);
         this.canvas.addEventListener("keydown", this.canvasKeydown);
+        this.canvas.addEventListener("resize", () => this.resize);
         this.updateColumns(col);
         window.addEventListener("resize", () => {
             this.resize();

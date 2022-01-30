@@ -30,10 +30,13 @@ module.exports = {
 	},
 	devServer: {
 		host: "127.0.0.1",
-		hot: false,
-		inline: false,
+		hot: false,		
 		open: true,
 		port: 9000,
+		static: "./",
+		historyApiFallback: {
+			index: 'index.html',
+		  },
 	},
 
 	resolve: {

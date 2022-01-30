@@ -119,7 +119,7 @@ declare let data: IData[];
 
 const filter = document.getElementById("filter") as HTMLInputElement;
 const canvasTable = new CanvasTable<IData>("canvas", column, data);
-canvasTable.setTableMode(CanvasTableMode.RowMode);
+// canvasTable.setTableMode(CanvasTableMode.RowMode);
 canvasTable.setAllowEdit(true);
 canvasTable.setRowColStyle( (dbData: IData[], row: IData, col: ICanvasTableColumnConf, isOver: boolean,
                              isSepra: boolean, dataRowCol: string) => {
@@ -176,6 +176,23 @@ if (modeButton !== null) {
 
    modeButton.innerHTML = getText(canvasTable.getTableMode());
 }
+
+const doResize = () => {
+    const canvas = document.getElementById("canvas");
+    if (canvas === null) { return; }
+    canvas.style.width = Math.trunc(document.body.clientWidth - 20) + "px";
+    canvas.style.height = Math.trunc(document.body.clientHeight - canvas.offsetTop - 20) + "px";
+    canvasTable.resize();
+};
+doResize();
+
+window.addEventListener("resize", () => {
+    doResize();
+});
+
+document.addEventListener("resize", () => {
+    doResize();
+});
 
 const w = window as any;
 w.canvasTable = canvasTable;
